@@ -1,0 +1,89 @@
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+
+# -----------------------------------------------------------------------------
+# Set patches to be applied
+# -----------------------------------------------------------------------------
+
+# dm-robotics wheels declare GUI-oriented opencv and optional graph deps in
+# wheel metadata. In this repo we standardize on opencv-python-headless and do
+# not require graphviz tooling for the exercised paths.
+pip.override(
+    file = "dm_robotics_agentflow-0.5.0-py3-none-any.whl",
+    patch_strip = 1,
+    patches = ["//build_support/python/patches:dm_robotics_agentflow_0.5.0_metadata.patch"],
+)
+pip.override(
+    file = "dm_robotics_moma-0.5.0-py3-none-any.whl",
+    patch_strip = 1,
+    patches = ["//build_support/python/patches:dm_robotics_moma_0.5.0_metadata.patch"],
+)
+
+# MuJoCo scans the plugin tree and dlopens every file; Bazel runfiles can contain
+# helper files like `__init__.py` there, which are not shared libraries.
+# This patch filters plugin loading to native library extensions only.
+pip.override(
+    file = "mujoco-2.3.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+    patch_strip = 1,
+    patches = ["//build_support/python/patches:mujoco_2.3.2_plugin_loader.patch"],
+)
+
+# isaacsim 6 (RoboLab env): the isaacsim 4.5 realpath + omni.__path__ fixes above, adapted to the
+# 6.0 kernel wheel layout.
+pip.override(
+    file = "isaacsim_kernel-6.0.0.1-cp312-none-manylinux_2_35_x86_64.whl",
+    patch_strip = 1,
+    patches = ["//build_support/python/patches:isaacsim_6.0.0.1_bazel_paths.patch"],
+)
+
+# `rerun-sdk` relies on `.pth` indirection that rules_python does not honor today.
+# This patch adds a thin `rerun/__init__.py` shim that re-exports `rerun_sdk.rerun`
+# so plain `import rerun` continues to work inside Bazel.
+# https://github.com/bazel-contrib/rules_python/issues/2071
+pip.override(
+    file = "rerun_sdk-0.23.1-cp39-abi3-manylinux_2_31_x86_64.whl",
+    patch_strip = 1,
+    patches = ["//build_support/python/patches:rerun_0.23.1_init.patch"],
+)
+
+# LeRobot declares optional desktop input tooling in wheel metadata. The raw to
+# compat path exercised here does not use it, and leaving it in metadata causes
+# rules_python to fetch and build `evdev` from source during analysis.
+pip.override(
+    file = "lerobot-0.4.4-py3-none-any.whl",
+    patch_strip = 1,
+    patches = ["//build_support/python/patches:lerobot_0.4.4_metadata.patch"],
+)
+
+# Torch 2.5.1+cu118 preloads nvjitlink from wheel metadata; in Bazel that can resolve
+# to an incompatible library path and break `import torch`. This patch removes that
+# preload entry and lets the regular dynamic loader resolution proceed.
+# pip.override(
+#     file = "torch-2.5.1+cu118-cp310-cp310-linux_x86_64.whl",
+#     patch_strip = 1,
+#     patches = ["//build_support/python/patches:torch_2.5.1_init.patch"],
+# )
+
+# Torch 2.6.0 CUDA wheels assume a runtime layout that differs under Bazel runfiles.
+# This patch normalizes cusparseLt lookup paths and bypasses the problematic global
+# dependency preload path so `import torch` is reliable in hermetic executions.
+# pip.override(
+#     file = "torch-2.6.0+cu124-cp310-cp310-linux_x86_64.whl",
+#     patch_strip = 1,
+#     patches = ["//build_support/python/patches:torch_2.6.0_init.patch"],
+# )
+
+# torch's cpp_extension imports setuptools at module scope, and rules_python leaves setuptools out
+# of the venv even when the lock pins it, so the JIT path that builds pointnet2's _ext dies on the
+# import alone. Only the module-scope imports are made tolerant; the real users are untouched.
+pip.override(
+    file = "torch-2.7.1+cu128-cp312-cp312-manylinux_2_28_x86_64.whl",
+    patch_strip = 1,
+    patches = ["//build_support/python/patches:torch_2_7_1_cu128_setuptools_import.patch"],
+)
+
+# Upstream fix: https://github.com/pylint-dev/astroid/pull/3239 - drop this patch once it ships.
+pip.override(
+    file = "astroid-4.3.1-py3-none-any.whl",
+    patch_strip = 1,
+    patches = ["//build_support/python/patches:astroid_4.3.1_compare_parens.patch"],
+)

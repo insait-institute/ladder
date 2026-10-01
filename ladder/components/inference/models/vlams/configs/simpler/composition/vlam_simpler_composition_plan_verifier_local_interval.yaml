@@ -1,0 +1,17 @@
+import: vlam_simpler_composition_plan_verifier_local.yaml
+
+# SimplerEnv composition -- the in-process verifier advancing on a step clock instead of the gripper
+# cycle, so a subtask the policy never acts on is still re-checked. Imports this benchmark's
+# _plan_verifier_local rather than the shared plan_verifier_interval so the served-VLM block is not
+# repeated; the two keys below are exactly what that shared file adds.
+#
+# Completes the switching design: blind-on-gripper (_plan_gripper), blind-on-clock (_plan_periodic)
+# and verified-on-gripper (_plan_verifier_local) all exist, and this is the fourth corner -- the only
+# one that says whether a verifier's value depends on WHEN it is asked.
+runner_config:
+  hlc_config:
+    advancer:
+      gripper_trigger: False
+      verify_interval: 30  # the shared clock: ~one check per subtask at this benchmark's median of 27
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/simpler_composition_plan_verifier_local_interval/$CKPT_NAME/$ENV_NAME

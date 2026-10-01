@@ -1,0 +1,33 @@
+policy_config:
+  autoclass: ladder.components.inference.models.tiptop.policy.TiptopPolicy
+  vlm:
+    import: ../../../../../api/client/hlc/configs/vlm.yaml
+    max_rps: 1.0
+    rate_limit_burst: 8
+  robot: widowx
+  arm_dof: 6
+  execution: end_effector
+  control_hz: 5.0
+  waypoint_spacing: 0.05
+  approach_refine: 3.0
+  gripper_hold_steps: 5
+  m2t2_tool_rotation_deg: [180.0, 0.0, 0.0]
+  plan_ee_rotation_deg: [0.0, 0.0, 180.0]
+  arrive_tolerance_m: 0.005
+  arrive_tolerance_rad: 0.20
+  arrive_budget_steps: 20
+
+runner_config:
+  autoclass: ladder.components.inference.api.client.simpler_episode_runner.SimplerEpisodeRunner
+  env_config:
+    ip: localhost
+    port: 5556
+    raise_on_server_error: True
+    min_period: 0.0
+    recv_timeout_ms: 180000
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/simpler_composition_tiptop/$CKPT_NAME/$ENV_NAME
+    fps: 5
+    rerun_enabled: False
+
+seed: 987654321

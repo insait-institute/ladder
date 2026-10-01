@@ -1,0 +1,38 @@
+import: vlam_robolab_composition.yaml
+
+# RoboLab composition -- no plan at all: each gripper cycle generates the next subtask from the current
+# frame. The arm that isolates planning ahead from reacting to what is actually on the table.
+runner_config:
+  hlc_config:
+    advancer:
+      # A release only counts as a finished attempt if the object actually came UP: min_hold_steps 3
+      # (a 5 Hz default = 0.2 s here) with no lift check fired on 6.51 closures an episode where a
+      # real grasp-and-lift happens 2.17 times, and 63.7% of this arm's plan advances (311 of 488)
+      # were failed clenches. 21 is the 7x RoboLab rescale advance_cooldown_steps already uses
+      # (8 -> 57); 0.03 m is what the verifier calls a real lift in provisional_lift_m.
+      min_hold_steps: 21
+      lift_threshold_m: 0.03
+      # REQUIRED with the gate above, not optional: this advancer has no other escape, and the gate
+      # alone stranded it -- advances/episode 6.08 -> 0.92, 50% of episodes never advancing at all
+      # and 8% reaching the last subtask, against 100% before. Gate alone scored -6.0 vs the direct
+      # instruction; gate + this backstop scores +1.8, against the shipped gate's -3.0. 300 matches
+      # plan_verifier and sits just above RoboLab's 243-step median per achieved goal.
+      attempt_stall_steps: 300
+    import: ../../../../../api/client/hlc/configs/stepwise_gripper.yaml
+    source:
+      # The subtask FORM now comes from the shared generator prompt, which covers both "in" for a
+      # container and "on" for a flat surface. What stays RoboLab's own is the object register: its
+      # plans name each object by colour and type, so a look-alike (the lemon for the orange) is not
+      # what the policy reaches for, and the live arm must speak the same way its cache does.
+      system_prompt: "You choose the NEXT subtask for a tabletop robot. You see the current camera \
+frame, the overall task, and the subtasks you already issued. Output ONE subtask and nothing else, \
+EXACTLY in the form: \"put the <object> in the <container>.\" when the destination is a container \
+(bin, bowl, mug, pot, crate, basket), or \"put the <object> on the <receptacle>.\" when it is a \
+flat surface (plate, shelf, towel, table). Use no other form: this is the wording every benchmark's \
+own plan uses, and a subtask phrased any other way matches no goal. One \
+subtask moves exactly ONE object to ONE destination. Never output a motion primitive, a gripper \
+command or a coordinate: the policy is trained only on the forms above and ignores anything else. \
+Look at the image to decide which object still needs moving. Name each object by colour and type, the way its plan does. If a previously issued subtask clearly did not succeed, issue it again. Output ONLY \
+the single subtask line, nothing else."
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_stepwise_gripper/$CKPT_NAME/$ENV_NAME

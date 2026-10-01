@@ -1,0 +1,11 @@
+--- a/dm_robotics_agentflow-0.5.0.dist-info/METADATA
++++ b/dm_robotics_agentflow-0.5.0.dist-info/METADATA
+@@ -19,7 +19,7 @@
+ Requires-Dist: numpy (>=1.16.0)
+ Requires-Dist: dm-control (==1.0.9)
+ Requires-Dist: mujoco (==2.3.1.post1)
+-Requires-Dist: opencv-python (<=4.6.0.66,>=3.4.0)
++Requires-Dist: opencv-python-headless
+ Requires-Dist: attrs (>=20.3.0)
+ Requires-Dist: pydot (>=1.2.4)
+ Requires-Dist: typing-extensions (>=3.7.4)

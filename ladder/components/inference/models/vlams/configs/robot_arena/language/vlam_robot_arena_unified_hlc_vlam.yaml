@@ -1,0 +1,20 @@
+# Hierarchical pi0.5 RA eval: the checkpoint's own VLM backbone generates a subtask per env over
+# the shared inference server, conditioning the LL action expert. The advancer re-plans every 10
+# steps and the moment the gripper toggles. Subtasks log to the viewer overlay.
+import: vlam_robot_arena_unified.yaml
+
+runner_config:
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robot_arena_unified_hlc_vlam/$CKPT_NAME/$ENV_NAME
+  hlc_config:
+    autoclass: ladder.components.inference.api.client.hlc.controller.SubtaskController
+    source:
+      autoclass: ladder.components.inference.models.vlams.vlam_subtask_source.VLAMSubtaskSource
+      dataset_name: bridge
+      image_camera: main
+      # Subtasks are <=10 words; 32 caps the HL KV-cache (decode early-stops on EOS).
+      max_new_tokens: 32
+    advancer:
+      autoclass: ladder.components.inference.api.client.hlc.advancers.periodic.PeriodicAdvancer
+      interval: 10   # re-plan every N env-steps (cache-miss envs batch into one forward)
+      on_gripper_toggle: true   # force-advance on grasp/release (fresh post-grasp frame)

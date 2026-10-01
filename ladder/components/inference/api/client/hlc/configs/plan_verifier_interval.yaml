@@ -1,0 +1,4 @@
+import: plan_verifier.yaml
+advancer:
+  gripper_trigger: False  # verify on a clock instead of on the gripper cycle
+  verify_interval: 30  # steps between checks

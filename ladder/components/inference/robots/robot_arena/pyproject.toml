@@ -1,0 +1,34 @@
+[project]
+name = "ladder-components-inference-robots-robot-arena"
+version = "0.0.0"
+requires-python = ">=3.10"
+dependencies = [
+    "ladder-components-inference-api-server",
+    "genesis-world>=0.4.0",
+    "gymnasium",
+    "numpy",
+    "opencv-python-headless",
+    "scipy",
+    "PyYAML",
+    # NOTE: Deliberately NOT on the repo-wide torch version. This env's override-dependencies
+    # (needed by genesis-world) make uv stamp an environment marker on every resolved dependency,
+    # and torch 2.12's unsuffixed nvidia-* CUDA 13 deps then never reach the venv, so torch fails
+    # at import with "libcudart.so.13: cannot open shared object file". Unpinning the overrides
+    # makes genesis-world unresolvable, so this env stays on cu128 2.7.0 until that is fixed.
+    "torch @ https://download.pytorch.org/whl/cu128/torch-2.7.0%2Bcu128-cp310-cp310-manylinux_2_28_x86_64.whl",
+]
+
+[tool.uv]
+package = false
+override-dependencies = [
+    "coverage>=7.6.0",
+    "pillow==11.0.0",
+    "setuptools>=77.0.0",
+]
+
+environments = [
+    "sys_platform == 'linux' and platform_machine == 'x86_64'"
+]
+
+[tool.uv.sources]
+ladder-components-inference-api-server = { path = "../../../../../ladder/components/inference/api/server", package = false }

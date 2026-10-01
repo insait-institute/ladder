@@ -1,0 +1,9 @@
+outer:
+  import: 'c.yaml'
+  a_nullable_value: null
+  inner:
+    b: 1
+  inner_list: [8]
+
+root_value_1: 10
+root_value_2: 2

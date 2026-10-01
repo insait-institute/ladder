@@ -1,0 +1,26 @@
+autoclass: ladder.components.inference.api.client.hlc.controller.SubtaskController
+# plan_verifier with every VLM role answered by the run's OWN batch inference server instead of the API
+# gateway, so the arm needs no credentials and no network. The server holds one copy of the model for
+# every lane sharing it; start it with api/client/batch_inference/configs/vlm_server.yaml, or
+# VLM_COMPLETE comes back as "server has no vlm_config".
+#
+# Written out rather than importing plan_verifier.yaml, and it has to be: a config that imports it and
+# swaps only the vlm autoclass does not parse, because replace_with_auto_config merges the PARENT's
+# fields into the new type and OpenAIVLM's base_url is not a key of the replacement
+# (UnexpectedConfigAttributeError). That holds for ServedVLM, whose config is empty, as much as for
+# LocalVLM.
+source:
+  autoclass: ladder.components.inference.api.client.hlc.sources.decomposers.Decomposer
+  cache_path: ""  # the benchmark points this at its tracked plans; unset = decompose at reset
+  vlm:
+    import: vlm_served.yaml
+advancer:
+  autoclass: ladder.components.inference.api.client.hlc.advancers.verified.VerifiedAdvancer
+  verifier:
+    autoclass: ladder.components.inference.api.client.hlc.verifiers.Verifier
+    vlm:
+      import: vlm_served.yaml
+    # The default 2048 buys Gemini's hidden thinking tokens, which a local model does not emit; the
+    # prompt asks for one short line plus strict JSON. Generation is serialized under a lock, so this
+    # bound is paid on every check and is the difference between a usable arm and an unusable one.
+    max_tokens: 256

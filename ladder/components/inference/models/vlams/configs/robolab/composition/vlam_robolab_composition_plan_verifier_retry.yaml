@@ -1,0 +1,17 @@
+import: vlam_robolab_composition_plan_verifier.yaml
+
+# Unordered multi-goal: auto_schedule picks skip-and-return, which round-robins between incomplete
+# goals on mid-approach gripper releases (each RoboLab placement is ~250 steps, longer than the
+# release cadence), so neither goal gets a sustained attempt and the episode times out oscillating
+# (RedDishes ~25pct vs oracle ~69pct). retry_in_place keeps commanding the current goal until the
+# verifier confirms it done, giving each goal a full attempt before moving on.
+runner_config:
+  hlc_config:
+    advancer:
+      retry_in_place: true
+      # The parent sets auto_schedule, which decides retry-vs-skip from the plan's distinctness and
+      # OVERWRITES retry_in_place. Left on, this config would be a no-op on distinct plans and would
+      # do the opposite of its name on the duplicate-object scenes it was written for.
+      auto_schedule: false
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_plan_verifier_retry/$CKPT_NAME/$ENV_NAME

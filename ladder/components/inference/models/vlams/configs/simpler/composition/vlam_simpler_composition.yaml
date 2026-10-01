@@ -1,0 +1,11 @@
+import: ../../vlam_simpler_remote.yaml
+
+# Flat (no HLC) SimplerEnv composition eval -- the model sees only the composed multi-goal
+# instruction. Base for the oracle / plan_gripper / plan_verifier composition configs, which import this
+# and add their hierarchical system. Mirrors vlam_robot_arena_composition.yaml on the RA side.
+#
+# Pair it with the composition SERVER config, which selects the scene:
+#   SIM_CONFIG=ladder/components/inference/robots/simpler/configs/widowx_composition.yaml
+runner_config:
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/simpler_composition/$CKPT_NAME/$ENV_NAME

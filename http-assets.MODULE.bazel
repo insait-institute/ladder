@@ -1,0 +1,445 @@
+# Hermetic sim/robot-benchmark archives: asset tarballs, benchmark code drops, and vendored
+# sources. Split out of MODULE.bazel (include()d from there) to keep the module file readable
+# as these pins grew; same pattern as the pip-*.MODULE.bazel segments.
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
+
+# For the multi-GB asset archives: one connection per URL caps at ~14 MB/s, chunked parallel ranges
+# reach ~105 MB/s. See build_support/repo/parallel_http_archive.bzl.
+parallel_http_archive = use_repo_rule("//build_support/repo:parallel_http_archive.bzl", "parallel_http_archive")
+
+# ManiSkill3 bridge digital twins + widowx robot assets, bundled hermetically (see
+# robots/simpler/BUILD).
+http_archive(
+    name = "simpler_maniskill3_assets_archive",
+    build_file_content = """
+filegroup(
+    name = "maniskill3_files",
+    srcs = glob(["data/**/*"]),
+    visibility = ["//visibility:public"],
+)
+""",
+    integrity = "sha256-06OUwcbZJES+djY8uDkshu1sDVNOOtBnQwTI5gUwyHc=",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/simpler_maniskill3_assets.tar.gz",
+)
+
+# SAPIEN's precompiled PhysX GPU library. SAPIEN downloads this to ~/.sapien/physx/<version> on the
+# first physx.enable_gpu(); vendoring it here (bazel fetches at build time, when network is allowed)
+# lets env_builder seed that cache so hermetic GPU tests/evals need no runtime download. Pinned to the
+# sapien version in requirements (105.1-physx-5.3.1.patch0); bump both together on a sapien upgrade.
+http_archive(
+    name = "sapien_physx_precompiled",
+    build_file_content = """
+filegroup(
+    name = "physx_so",
+    srcs = ["libPhysXGpu_64.so"],
+    visibility = ["//visibility:public"],
+)
+""",
+    integrity = "sha256-FnoBqtc4Gv75Y7iRaZaMKJ57ZTiAp6gjwRbYfuXAD8Y=",
+    url = "https://github.com/sapien-sim/physx-precompiled/releases/download/105.1-physx-5.3.1.patch0/linux-so.zip",
+)
+
+parallel_http_archive(
+    name = "robot_arena_archive",
+    build_file_content = """
+filegroup(
+    name = "robot_arena_data",
+    srcs = glob([
+        "examples/data/**/*",
+        "configs/**/*",
+        "utils/assets/**/*",
+    ]),
+    visibility = ["//visibility:public"],
+)
+""",
+    integrity = "sha256-DT158kVcK9aUhfEmZDTU3KMevkdFEuwXS85vnvw7O5s=",
+    size_bytes = "241166646",
+    strip_prefix = "robot_arena_data",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/robot_arena_ladder_data.tar.gz",
+)
+
+# RoboTwin 2.0 benchmark code. Assets are NOT in the repo — they ship as the three zips below and are
+# staged into robots/robotwin/ by copy_to_directory in that package's BUILD.
+http_archive(
+    name = "robotwin_repo",
+    build_file_content = """
+load("@rules_python//python:py_library.bzl", "py_library")
+
+py_library(
+    name = "robotwin",
+    srcs = glob([
+        "envs/**/*.py",
+        "description/**/*.py",
+        "code_gen/**/*.py",
+    ]),
+    data = glob(
+        [
+            "task_config/**",
+            "description/**",
+            "assets/**",
+        ],
+        allow_empty = True,
+    ),
+    imports = ["."],
+    visibility = ["//visibility:public"],
+)
+""",
+    integrity = "sha256-AGNhTYDqz3HG6FVtNc3PdSTnim1WEa7EWrg40URruGU=",
+    strip_prefix = "RoboTwin-c3ddfa8b97d5519efa828b075999bd0006778e5e",
+    url = "https://github.com/robotwin-Platform/RoboTwin/archive/c3ddfa8b97d5519efa828b075999bd0006778e5e.tar.gz",
+)
+
+parallel_http_archive(
+    name = "robotwin_objects_archive",
+    build_file_content = 'filegroup(name = "files", srcs = glob(["**/*"], exclude = ["BUILD.bazel", "WORKSPACE", "WORKSPACE.bazel", "REPO.bazel", "MODULE.bazel"]), visibility = ["//visibility:public"])',
+    integrity = "sha256-aqVrPPHhBk98gJMIFE2jawCBX4sTf+8tfk3oVvi+zyc=",
+    size_bytes = "3737778549",
+    url = "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/resolve/9dc9299c163db059931898a9f0852098a61155a1/objects.zip",
+)
+
+parallel_http_archive(
+    name = "robotwin_background_texture_archive",
+    build_file_content = 'filegroup(name = "files", srcs = glob(["**/*"], exclude = ["BUILD.bazel", "WORKSPACE", "WORKSPACE.bazel", "REPO.bazel", "MODULE.bazel"]), visibility = ["//visibility:public"])',
+    integrity = "sha256-VO3g+1t4Pg+qK8mHINOv/Wyju5KAsiW0jBqvrzFHMHA=",
+    size_bytes = "10970687027",
+    url = "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/resolve/9dc9299c163db059931898a9f0852098a61155a1/background_texture.zip",
+)
+
+parallel_http_archive(
+    name = "robotwin_embodiments_archive",
+    build_file_content = 'filegroup(name = "files", srcs = glob(["**/*"], exclude = ["BUILD.bazel", "WORKSPACE", "WORKSPACE.bazel", "REPO.bazel", "MODULE.bazel"]), visibility = ["//visibility:public"])',
+    integrity = "sha256-a4fX1V4QbY/yWRfgU46x4Xf8VJKA6KdCqM7Dy5+VP8Y=",
+    size_bytes = "219859313",
+    url = "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/resolve/9dc9299c163db059931898a9f0852098a61155a1/embodiments.zip",
+)
+
+# RoboLab benchmark code (no LFS assets — those ship via @robolab_assets_archive). The patch makes
+# robolab resolve assets from ROBOLAB_ASSET_DIR (the staged tree) instead of its repo-root assets/.
+http_archive(
+    name = "robolab_repo",
+    build_file_content = """
+load("@rules_python//python:py_library.bzl", "py_library")
+
+py_library(
+    name = "robolab_src",
+    srcs = glob([
+        "robolab/**/*.py",
+        "policies/**/*.py",
+        "dashboard/**/*.py",
+    ]),
+    imports = ["."],
+    visibility = ["//visibility:public"],
+)
+""",
+    patch_args = ["-p1"],
+    patches = [
+        "//build_support/python/patches:robolab_constants_asset_dir.patch",
+    ],
+    sha256 = "ffcd150871ead600dd84b9302459a66b9a1e59f4ed2cc7a07a44ac6c0b27b4a5",
+    strip_prefix = "RoboLab-27b6212df31799f72883bd79c8629607d89782de",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/robolab_src.tar.gz",
+)
+
+# SAM3, the segmenter CaP-X prompts with the object's name, vendored from the same fork upstream
+# pins as a submodule.
+http_archive(
+    name = "sam3_repo",
+    build_file_content = """
+load("@rules_python//python:py_library.bzl", "py_library")
+
+py_library(
+    name = "sam3_src",
+    srcs = glob(["sam3/**/*.py"]),
+    data = glob(["sam3/assets/**"]),
+    imports = ["."],
+    visibility = ["//visibility:public"],
+)
+""",
+    patch_args = ["-p1"],
+    patches = [
+        "//build_support/python/patches:sam3_lazy_dataset_import.patch",
+    ],
+    sha256 = "4dfd0ea7601ce65129f81b50b7202afd0e68b774d1045ba7d39907e0b0815023",
+    strip_prefix = "sam3-6fe87d64a5beb9084923d7a9e002741178635b09",
+    url = "https://github.com/Max-Fu/sam3/archive/6fe87d64a5beb9084923d7a9e002741178635b09.tar.gz",
+)
+
+# Full RoboLab ~6 GB asset tree, hosted as one HuggingFace tarball; staged into robots/robolab/assets/
+# by copy_to_directory in that package's BUILD.
+parallel_http_archive(
+    name = "robolab_assets_archive",
+    build_file_content = """
+filegroup(
+    name = "assets_files",
+    srcs = glob(["assets/**"], exclude = ["assets/**/README.md"]),
+    visibility = ["//visibility:public"],
+)
+""",
+    integrity = "sha256-Z8Yyp0uMhRoordbs8/OCB8/3gw4jdnP6IHV0QpU+0KA=",
+    size_bytes = "1032428686",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/robolab_ladder_assets.tar.gz",
+)
+
+# openpi, vendored as source rather than installed as a package: its own dependency set pulls the
+# LeRobot training stack and a CUDA torch that conflicts with our jax, and we only need inference.
+# openpi_client is the wire protocol and image tools; openpi_src is the full model library.
+http_archive(
+    name = "openpi_client_repo",
+    build_file_content = """
+load("@rules_python//python:py_library.bzl", "py_library")
+
+py_library(
+    name = "openpi_client",
+    srcs = glob(
+        ["packages/openpi-client/src/openpi_client/**/*.py"],
+        exclude = ["**/*_test.py"],
+    ),
+    imports = ["packages/openpi-client/src"],
+    visibility = ["//visibility:public"],
+)
+
+py_library(
+    name = "openpi_src",
+    srcs = glob(
+        ["src/openpi/**/*.py"],
+        exclude = ["**/*_test.py"],
+    ),
+    imports = ["src"],
+    visibility = ["//visibility:public"],
+    deps = [":openpi_client"],
+)
+""",
+    sha256 = "2e36927c2c77ffaf111a16e5533d6d4ac26ea00fb47c1650f95a96e5d9f078de",
+    strip_prefix = "openpi-aa6420561529593114160d05e5ad155792b272f3",
+    url = "https://github.com/xuningy/openpi/archive/aa6420561529593114160d05e5ad155792b272f3.tar.gz",
+)
+
+# VoLo (NVlabs/VoLoAgent), vendored as source so the strategy that decides is upstream's own.
+http_archive(
+    name = "volo_agent_repo",
+    build_file_content = """
+load("@rules_python//python:py_library.bzl", "py_library")
+
+py_library(
+    name = "vlm_orchestrator",
+    srcs = glob(["vlm_orchestrator/**/*.py"]),
+    imports = ["."],
+    visibility = ["//visibility:public"],
+)
+""",
+    sha256 = "829c6570f4511cc2a713f771ab1fa8014e34cb266be08cec84db1ea83d6c3704",
+    strip_prefix = "VoLoAgent-b4e623079ca8498a16bcd5016920d71f76c44d30",
+    url = "https://github.com/NVlabs/VoLoAgent/archive/b4e623079ca8498a16bcd5016920d71f76c44d30.tar.gz",
+)
+
+# cuTAMP, our fork of upstream e206ab8: the widowx robot, the incumbent-plan recovery and the
+# per-axis shrink clamp. One tarball because the meshes and gripper spheres are binary.
+http_archive(
+    name = "cutamp_src",
+    build_file_content = """
+load("@rules_python//python:py_library.bzl", "py_library")
+
+py_library(
+    name = "cutamp",
+    srcs = glob(["cutamp/**/*.py"], exclude = ["**/test*/**"]),
+    data = glob(
+        [
+            "cutamp/**/*.urdf",
+            "cutamp/**/*.yml",
+            "cutamp/**/*.yaml",
+            "cutamp/**/*.json",
+            "cutamp/**/*.pt",
+            "cutamp/**/*.stl",
+            "cutamp/**/*.obj",
+            "cutamp/**/*.mtl",
+        ],
+        exclude = ["**/test*/**"],
+    ),
+    imports = ["."],
+    visibility = ["//visibility:public"],
+)
+""",
+    integrity = "sha256-xSn1Uh7ODAQUvTAW2sdcHMkMQVcR6Wpqpcq8nJWT9jM=",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/cutamp_fork.tar.gz",
+)
+
+# curobo, pristine upstream (our tree is byte-identical to it): vendored as source so the
+# planner's collision stack is reviewable and pinned next to the patch that uses it.
+http_archive(
+    name = "curobo_src",
+    build_file_content = """
+load("@rules_python//python:py_library.bzl", "py_library")
+
+py_library(
+    name = "curobo",
+    srcs = glob(["src/curobo/**/*.py"]),
+    # The package's own content tree (robot/world/task configs) and the curobolib cpp/kernel
+    # sources the fused ops JIT-compile from at server startup, which resolve beside the package.
+    data = glob(
+        [
+            "src/curobo/content/**/*",
+            "src/curobo/curobolib/cpp/**/*",
+            "src/curobo/curobolib/lib/**/*",
+        ],
+        exclude = ["**/__pycache__/**"],
+    ),
+    imports = ["src"],
+    visibility = ["//visibility:public"],
+)
+""",
+    strip_prefix = "curobo-b5fad1df2a3ac4d3e33e369918b7d62d0e59ebd1",
+    url = "https://github.com/williamshen-nz/curobo/archive/b5fad1df2a3ac4d3e33e369918b7d62d0e59ebd1.tar.gz",
+)
+
+# M2T2 grasp proposer, pristine upstream. pointnet2_ops builds against nvcc at server
+# startup off the toolchain in the models/tiptop environment, like curobo above.
+http_archive(
+    name = "m2t2_src",
+    build_file_content = """
+load("@rules_python//python:py_library.bzl", "py_library")
+
+py_library(
+    name = "m2t2",
+    srcs = glob(
+        [
+            "m2t2/**/*.py",
+            "pointnet2_ops/**/*.py",
+        ],
+        exclude = ["**/test*/**"],
+    ),
+    # pointnet2's cpp/cu extension JIT-compiles at server startup against the nvcc tree in
+    # the models/tiptop environment; those sources ride as data.
+    data = glob(
+        [
+            "pointnet2_ops/pointnet2_ops/_ext-src/**/*",
+        ],
+        exclude = ["**/test*/**"],
+    ),
+    imports = ["."],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "m2t2_data",
+    srcs = glob(
+        [
+            "m2t2/**/*.yaml",
+            "*.yaml",
+        ],
+        exclude = ["**/test*/**"],
+    ),
+    visibility = ["//visibility:public"],
+)
+""",
+    patch_args = ["-p1"],
+    patches = [
+        "//build_support/python/patches:m2t2_pointnet2_ext_src.patch",
+    ],
+    strip_prefix = "M2T2-96201acdb77baa1bc9d01bdf4d6f870d79b4b696",
+    url = "https://github.com/williamshen-nz/M2T2/archive/96201acdb77baa1bc9d01bdf4d6f870d79b4b696.tar.gz",
+)
+
+# SAM-2, pristine upstream, pure Python.
+http_archive(
+    name = "sam2_src",
+    build_file_content = """
+load("@rules_python//python:py_library.bzl", "py_library")
+
+py_library(
+    name = "sam2",
+    srcs = glob(
+        ["sam2/**/*.py"],
+        exclude = ["**/test*/**"],
+    ),
+    imports = ["."],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "sam2_configs",
+    srcs = glob(["sam2/**/*.yaml"]),
+    visibility = ["//visibility:public"],
+)
+""",
+    strip_prefix = "sam2-2b90b9f5ceec907a1c18123530e92e794ad901a4",
+    url = "https://github.com/facebookresearch/segment-anything-2/archive/2b90b9f5ceec907a1c18123530e92e794ad901a4.tar.gz",
+)
+
+# The M2T2 grasp weights and the SAM-2 checkpoint download at server startup into the
+# session's cache dir, like openpi checkpoints and SAM-3 weights: no build-time fetch.
+
+# The one directory torch's extension compiler wants: NVIDIA's nvcc and cudart redist
+# tarballs merged into bin/, include/, lib/ (with lib as lib64) and nvvm/. curobo compiles
+# its fused ops at server startup against it, with the pip nvcc wheel carrying only ptxas.
+http_archive(
+    name = "cuda_home_archive",
+    build_file_content = """
+filegroup(
+    name = "files",
+    srcs = glob([
+        "cuda_home/**/*",
+    ]),
+    visibility = ["//visibility:public"],
+)
+""",
+    integrity = "sha256-gZhLQ2T8pyy5eYLMJecQ1xpw0TKNfM7hhx/kIRb6ngY=",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/cuda_home.tar.gz",
+)
+
+# TiPToP's two pretrained checkpoints. Fetched here rather than downloaded on first use so that a
+# run needs no network, every node shares one copy through the bazel repository cache, and the
+# bytes are integrity-checked instead of trusted.
+http_file(
+    name = "sam2_hiera_large_weights",
+    downloaded_file_path = "sam2.1_hiera_large.pt",
+    integrity = "sha256-JkeHjV36UJjy+GSYJXOKk0VXK64tQ1CiRoWH7OR90xg=",
+    url = "https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_large.pt",
+)
+
+http_file(
+    name = "m2t2_weights",
+    downloaded_file_path = "m2t2.pth",
+    integrity = "sha256-41w8sR4G9GxdQGvfx1a8BvSLJW3W1jhAjZpf8T3rl/s=",
+    url = "https://huggingface.co/wentao-yuan/m2t2/resolve/main/m2t2.pth",
+)
+
+http_archive(
+    name = "gpt_policy_repo",
+    build_file_content = """
+load("@rules_python//python:py_library.bzl", "py_library")
+
+py_library(
+    name = "gpt_policy",
+    srcs = [
+        "src/gpt_policy/__init__.py",
+        "src/gpt_policy/interrupts.py",
+        "src/gpt_policy/settings.py",
+    ] + glob([
+        "src/gpt_policy/geometry/**/*.py",
+        "src/gpt_policy/harness/*.py",
+        "src/gpt_policy/runtime/*.py",
+        "src/gpt_policy/tools/*.py",
+    ]) + [
+        "src/gpt_policy/hardware/__init__.py",
+        "src/gpt_policy/hardware/motion_control.py",
+        "src/gpt_policy/input/__init__.py",
+        "src/gpt_policy/input/manifest.py",
+        "src/gpt_policy/input/request.py",
+        "src/gpt_policy/motion/__init__.py",
+        "src/gpt_policy/motion/coordination.py",
+    ],
+    data = ["configs/tools.json"],
+    imports = ["src"],
+    visibility = ["//visibility:public"],
+)
+""",
+    patch_cmds = [
+        "sed -i 's/^from .console import RunConsole$/RunConsole = None/' src/gpt_policy/runtime/runner.py",
+        ": > src/gpt_policy/motion/__init__.py",
+    ],
+    sha256 = "ddb774201cd3f2cfeab070b6fecb677e3573d7f77335f8d9723c4e73231fd271",
+    strip_prefix = "GPT-Policy-ae455319966b45acd8795949e0ea9f6f1c64aa6e",
+    url = "https://github.com/cheng-haha/GPT-Policy/archive/ae455319966b45acd8795949e0ea9f6f1c64aa6e.tar.gz",
+)

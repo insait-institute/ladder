@@ -1,0 +1,21 @@
+import: ../vlam_simpler.yaml
+
+# Batched RobotArena eval: K parallel object-variation episodes per scene.
+# The runner is the unified SimplerEpisodeRunner (inherited from vlam_simpler.yaml);
+# K is determined by the server-side ``batch_size_per_scene`` config.
+runner_config:
+  # RobotArena runs full episodes (no early-success termination), so every env records to the batch
+  # end exactly as before the finished-lane skip — that optimization is SimplerEnv-only for now.
+  terminate_on_success: False
+  env_config:
+    ip: localhost
+    port: 5556
+    raise_on_server_error: True
+    # Scene build (convex decomp + Genesis kernel compile) can be slow — 10 min budget.
+    recv_timeout_ms: 600000
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robot_arena_batched/$CKPT_NAME/$ENV_NAME
+    fps: 5
+    video_enabled: True
+
+seed: 987654321

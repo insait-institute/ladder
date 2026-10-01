@@ -1,0 +1,5 @@
+autoclass: ladder.components.inference.api.client.hlc.controller.SubtaskController
+source:
+  autoclass: ladder.components.inference.api.client.hlc.sources.decomposers.PrivilegedDecomposer
+advancer:
+  autoclass: ladder.components.inference.api.client.hlc.advancers.privileged.PrivilegedAdvancer

@@ -1,0 +1,35 @@
+[project]
+name = "ladder-core"
+version = "0.0.0"
+requires-python = ">=3.10"
+dependencies = [
+    "build-support-python",
+    "av==15.0.0",
+    "ladder-core-databib",
+    "gitpython==3.1.40",
+    "numpy>=1.26.4",
+    "pillow==10.2.0",
+    "psutil==5.9.7",
+    "PyYAML==6.0.1",
+    "tqdm==4.66.5",
+    "xxhash==3.5.0",
+]
+
+[project.optional-dependencies]
+ladder-core-optional = [
+    # NOTE: Keep torch optional so downstream packages are not forced to install it at all.
+    "torch==2.12.1",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+"build-support-python" = { path = "../../build_support/python", package = false }
+"ladder-core-databib" = { path = "databib", package = false }
+torch = { index = "pytorch-cu130" }
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true

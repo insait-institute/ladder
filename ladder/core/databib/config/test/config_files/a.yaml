@@ -1,0 +1,8 @@
+root_value_1: 0
+import: 'b.yaml'
+outer:
+  inner:
+    a: 1
+  inner_list: [9]
+
+root_value_2: 8

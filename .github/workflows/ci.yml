@@ -1,0 +1,66 @@
+# Checks on every push and pull request.
+#
+# - repo: fast checks without Bazel (citation metadata, YAML syntax, shell syntax, README links).
+# - tests: the CPU test suite, `bazel test //ladder/... --test_tag_filters=-needs-gpu` (the command
+#   CONTRIBUTING.md asks for). Its first run fetches every suite's Python environment (tens of GB),
+#   so the runner's preinstalled toolchains are removed first and Bazel's repository cache is kept
+#   between runs.
+# GPU tests (tag needs-gpu) and full evaluations need a GPU runner and are not run here.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  repo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install cffconvert==2.0.0 pyyaml==6.0.2
+      - name: CITATION.cff
+        run: cffconvert --validate
+      - name: YAML files parse
+        run: tools/ci/check_repo.py yaml
+      - name: Shell scripts parse
+        run: tools/ci/check_repo.py shell
+      - name: Relative links in Markdown files exist
+        run: tools/ci/check_repo.py links
+
+  tests:
+    # The build downloads its pinned simulation assets anonymously (the repository's asset release,
+    # Hugging Face). They are downloadable once the repository is public; until then this job skips.
+    if: ${{ !github.event.repository.private }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL \
+                      /usr/local/share/boost "$AGENT_TOOLSDIRECTORY"
+          sudo docker image prune --all --force >/dev/null || true
+          df -h /
+      - uses: actions/checkout@v7
+      - uses: bazel-contrib/setup-bazel@0.19.0
+        with:
+          bazelisk-cache: true
+          repository-cache: true
+      - name: bazel test
+        run: |
+          bazel test //ladder/... --test_tag_filters=-needs-gpu --keep_going \
+            --local_resources=memory=HOST_RAM*.7 --local_test_jobs=2
+      - name: Disk left
+        if: always()
+        run: df -h /

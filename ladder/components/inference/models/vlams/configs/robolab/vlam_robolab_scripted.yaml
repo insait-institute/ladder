@@ -1,0 +1,69 @@
+import: vlam_robolab.yaml
+
+# RoboLab composition -- the SCRIPTED privileged-state policy, run as the completability gate: it
+# solves from ground truth, so a task it cannot finish cannot be finished by any learned policy.
+# Needs env_server --expose-privileged (EXPOSE_PRIVILEGED=1 in vlam_robolab.sh), which publishes
+# that ground truth in the observation metadata.
+policy_config: !overwrite
+  autoclass: ladder.components.inference.api.client.scripted.scripted_policy.ScriptedPolicy
+  # RoboLab's forward kinematics reports panda_link8 -- the flange -- while every phase target names
+  # a place the finger PADS have to reach. Without this the arm stops a whole gripper short and
+  # closes on air above the object.
+  tool_offset_m: 0.168
+  # A Franka needs a much larger joint sweep for a lateral move than a vertical one, so a step big
+  # enough to be quick in z arrives in xy late -- and the tool covers the remainder sliding along the
+  # surface, sweeping the target away before the fingers close.
+  max_translation_per_step_m: 0.02
+  approach_height_m: 0.12
+  # Transit height is what makes a multi-goal task finish: carried too low, the gripper clips the
+  # objects it has already delivered and knocks them off, which pins a task at N-1 goals whatever
+  # budget it is given. Measured on RobotArena, where raising these solved two scenes outright.
+  lift_height_m: 0.18
+  # Bins publish their rim height (release_z_m) and transit is measured from it: 22 cm on top put the
+  # flange near 0.9 m, where the arm oscillated and scattered the bin.
+  carry_height_m: 0.08
+  place_clearance_m: 0.035
+  xy_tol_m: 0.012
+  max_grasp_steps: 60
+  max_phase_steps: 50
+  # A banana is long: grip it across its short axis, and on its body, since it curves round an
+  # empty AABB centre.
+  align_grasp_yaw: True
+  grasp_body_offset: True
+  # RoboLab flags "grasped" on any gripper contact: lift only once the jaws have stopped on the object.
+  grasp_confirm_steps: 1000
+  jaw_stall_steps: 3
+  grasp_lost_steps: 3
+  # Climb straight out of a bin before the next object instead of sweeping the open jaws through it.
+  climb_out_after_delivery: True
+  # Keep the fingers off the bin walls at an off-centre goal slot.
+  container_jaw_margin_m: 0.05
+  # An approach that timed out far from its target descends onto whatever is below (the plate).
+  approach_timeout_max_xy_m: 0.05
+  # Released at the floor of a 16 cm bin at long reach, the wrist stays trapped inside.
+  max_container_insertion_m: 0.06
+  # The Franka's top-down reach: the flange stays within 0.8 m of a point 0.196 m above the base.
+  # Past it the IK straightens the elbow onto its limit, the shoulder pitches forward instead and the
+  # gripper sinks to the table, where it stays for the rest of the episode.
+  reach_center_m: [0.0, 0.0, 0.196]
+  reach_radius_m: 0.80
+  wrist_offset_m: 0.0
+  # Objects knocked off the table, or out past the arm's reach, are not worth the rest of the budget.
+  fallen_z_m: -0.1
+  max_reach_radius_m: 0.74
+  joint_rehome_drift_rad: 1.0
+  # Relay, revisit and ordered tasks are scored as a sequence.
+  respect_order: True
+  # A released lemon can stay wedged in the open gripper: pulse the jaws to shake it loose.
+  shed_pulses: 2
+  # A pomegranate is wider than the open jaws except near its top: grip it there.
+  wide_grasp_depth_m: 0.04
+  wide_object_min_m: 0.11
+  wide_object_min_height_m: 0.10
+
+runner_config:
+  # No hlc_config: the policy drives from the task's own goals, not from a decomposition.
+  recorder_config:
+    output_path: $SCRIPTED_OUT/$ENV_NAME
+    # Run with RENDER_IMAGES=False, which renders no images.
+    video_enabled: False

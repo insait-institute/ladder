@@ -1,0 +1,25 @@
+import: ../../../../vlams/configs/robolab/composition/vlam_robolab_composition.yaml
+
+policy_config: !overwrite
+  autoclass: ladder.components.inference.models.capx.policy.CapxPolicy
+  vlm:
+    import: ../../../../../api/client/hlc/configs/vlm.yaml
+    rate_limit_attempts: 16
+  robot: Franka Emika robot
+  scene: camera
+  depth_camera: scene
+  box_fit: upright
+  reachability_clamp: True
+  depth_range_m: null
+  workspace_min_m: [-0.1, -0.5, 0.005]
+  workspace_max_m: [0.75, 0.5, 0.9]
+  tool_offset_m: 0.168
+  max_translation_per_step_m: 0.02
+  move_steps: 75
+  blocking_waypoint: False
+  open_gripper_steps: 30
+  close_gripper_steps: 45
+
+runner_config:
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_capx/$CKPT_NAME/$ENV_NAME

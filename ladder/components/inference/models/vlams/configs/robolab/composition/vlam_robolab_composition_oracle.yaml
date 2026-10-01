@@ -1,0 +1,43 @@
+import: vlam_robolab_composition.yaml
+
+# RoboLab composition -- privileged oracle (reference ceiling). Needs no plans: env_server publishes
+# the ground-truth subtasks and per-goal achieved flags in metadata["oracle"], synthesized from the
+# task's own subtask spec (verb + instruction-grounded nouns) paired with each goal's spec condition.
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/oracle.yaml
+    advancer:
+      # 10 steps ~ 5 s: fruit teetering on a bin rim / plate edge flickers the achieved flag faster
+      # than 3 steps and thrashed the retarget (w2 ClearOrganic/FruitsOnPlate 0<->1 oscillation).
+      # 120, not the shipped 10. The shared default is 3, tuned on SimplerEnv at 5 Hz, and RoboLab's
+      # 7x rescale was never applied here. Measured over 470 ground-truth advances at 10: the arm
+      # left at a hold of exactly 9 steps EVERY time (p10 = p90 = 9) while the median placement
+      # survives 7. A/B on comp_relay_3 / comp_route_4 / comp_split_plate_4, 12 episodes each:
+      # 10 -> +1.2, 45 -> +9.5, 120 -> +23.2 (p=0.0007), 240 -> +6.5 against the direct instruction,
+      # i.e. a PEAK, not an endpoint. Controls (comp_bin_6 / comp_ordered_bin_4 / comp_identical_4)
+      # came in at +0.0, so the gain does not cost anything where the flat instruction already works.
+      # Both tails fail the same way: too short and the arm abandons goals it nearly finished, too
+      # long and it waits for a settle that never arrives -- either way it burns
+      # stuck_patience_steps 600, and abandoned_goal is U-shaped at 32 / 29 / 25 / 32%.
+      advance_settle_steps: 120
+      # Skip-and-return. With patience 0 the advancer returns unachieved[0] forever, so the FIRST
+      # goal the policy cannot finish blocks the whole plan -- measured 2.6 advances/episode on
+      # bin_10 (needs 9) and 1.2 on split_4 (needs 3), i.e. the privileged oracle degenerating into
+      # a single-object flat policy. Non-zero patience also switches completion to round-robin
+      # (_next_after) instead of snapping back to unachieved[0].
+      #
+      # Must EXCEED one placement. The earlier 300 came from "~250 steps", which was read off 2-goal
+      # successes -- the FASTEST cases -- and it reproduced the very metronome the 150 setting was
+      # meant to cure, just at a longer period. Measured over 120 oracle episodes on 2026-08-02: the
+      # median AND the 25th percentile of the gap between consecutive advances were both exactly 300,
+      # i.e. the advancer was rotating on the patience clock rather than on achievement, and 387 of
+      # its 480 advances left an unachieved goal (351 of those never completed at all).
+      #
+      # 600 comes from the placement distribution rather than its fast tail: across successful
+      # placements the median is 275 steps but p75 is 562 and p90 is 1005, so 300 abandons a large
+      # share of placements that were about to land. 600 also matches the per-goal budget -- each task
+      # allows ~675-900 steps per goal (comp_relay_2 is 2700 steps over 4 subtasks) -- so a goal gets
+      # roughly its fair share before the advancer rotates, instead of the ~40% that 300 gave it.
+      stuck_patience_steps: 600
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_oracle/$CKPT_NAME/$ENV_NAME

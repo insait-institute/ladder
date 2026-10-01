@@ -1,0 +1,11 @@
+import: ../vlam_simpler_remote.yaml
+
+runner_config:
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/simpler_volo/$CKPT_NAME/$ENV_NAME
+  hlc_config:
+    import: ../../../../api/client/hlc/configs/volo.yaml
+    # The bridge rig renders one camera; episodes are 60-120 steps, so upstream's 80 would leave
+    # the shortest with no check at all.
+    extra_cameras: []
+    check_interval: 20

@@ -1,0 +1,9 @@
+import: plan_verifier.yaml
+
+# plan_verifier, but a not-done verdict does not withhold advancement: the verifier still runs and
+# every verdict is still logged, the controller just moves on regardless. Paired with
+# plan_verifier this isolates the value of TESTING completion from the value of REFUSING to
+# advance, which are confounded in every other configuration because only a verifying rule
+# produces the judgement that withholds.
+advancer:
+  withhold_on_not_done: False

@@ -1,0 +1,6 @@
+# The Anthropic models on that endpoint, which answer 400 "`temperature` is deprecated for this
+# model" to every value but 1.0. Dropping it costs determinism: repeated identical calls differ,
+# where every other model here is scored at temperature 0.
+import: vlm_nvidia.yaml
+model: azure/anthropic/claude-opus-5
+send_temperature: false

@@ -1,0 +1,41 @@
+# Imports the merged paraphrase corpus (the per-scene `instruction_override`
+# map used by envs [16..136] of each scene). That file is intentionally NOT
+# committed because it's ~2k lines of inlined natural-language data
+import: vlam_robot_arena_merged_all_perturbations.yaml
+
+# Unified RobotArena eval client config — pairs with the unified server config
+# (ladder/components/inference/robots/robot_arena/configs/widowx_batched_unified.yaml,
+# batch_size_per_scene=137) and the vlam_robot_arena.sh launcher (which spawns
+# one shared BatchPolicyServer per checkpoint and connects LANES_PER_GPU
+# lanes to it via ZMQ).
+#
+# Per-scene batch layout (n_envs=137):
+#   envs [0..15]    default-block:      16 K=4 grid offsets, scene-default instruction
+#                                       → contributes 16 episodes per scene
+#   envs [16..136]  perturbation-block: 121 K=11 grid offsets, instruction is
+#                                       round-robinned over the 27 paraphrases
+#                                       supplied by the merged config above
+#                                       → contributes 121 episodes per scene
+
+policy_config:
+  # !overwrite replaces the whole inherited inference_config subtree (which
+  # carries a VLAMInference-style ckpt_path from vlam_simpler.yaml) with the
+  # remote-client config below. Without it, databib deep-merge keeps the
+  # inherited ckpt_path and passes it to RemoteInferenceClientConfig, which
+  # rejects unknown keys. The remote client has no checkpoint of its own — the
+  # batch inference server holds the model.
+  inference_config: !overwrite
+    autoclass: ladder.components.inference.api.client.batch_inference.remote_inference_client.RemoteInferenceClient
+    client_config:
+      autoclass: ladder.components.inference.api.core.request_reply.ZmqRequestReplyClient
+      ip: localhost
+      port: 0                      # overridden at runtime by vlam_robot_arena.sh
+      recv_timeout_ms: 120000      # 2 min — covers ONE request->reply round-trip
+      propagate_timeout: True      # fail loud on a real timeout instead of silently returning None
+
+runner_config:
+  default_block_size: 16
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robot_arena_unified/$CKPT_NAME/$ENV_NAME
+    fps: 5
+    rerun_enabled: False

@@ -1,0 +1,56 @@
+cff-version: 1.2.0
+message: "If you use LADDER, please cite the paper below."
+title: "LADDER: A Long-Horizon Robot Manipulation Benchmark"
+type: software
+version: "1.0.0"
+date-released: "2026-10-01"
+license: MIT
+repository-code: "https://github.com/insait-institute/ladder"
+url: "https://musical-garbanzo-5w422vy.pages.github.io"
+authors:
+  - family-names: "Petkov"
+    given-names: "Petko"
+    affiliation: "Institute for Computer Science, Artificial Intelligence and Technology"
+  - family-names: "Albanese"
+    given-names: "Giuliano"
+    affiliation: "Institute for Computer Science, Artificial Intelligence and Technology"
+  - family-names: "Nikolov"
+    given-names: "Nikolay"
+    affiliation: "Institute for Computer Science, Artificial Intelligence and Technology"
+  - family-names: "Van Gool"
+    given-names: "Luc"
+    affiliation: "Institute for Computer Science, Artificial Intelligence and Technology"
+  - family-names: "Tremblay"
+    given-names: "Jonathan"
+    affiliation: "NVIDIA"
+  - family-names: "Paudel"
+    given-names: "Danda Pani"
+    affiliation: "Institute for Computer Science, Artificial Intelligence and Technology"
+preferred-citation:
+  type: article
+  title: "LADDER: A Long-Horizon Robot Manipulation Benchmark"
+  journal: "arXiv preprint arXiv:XXXX.XXXXX"
+  year: 2026
+  url: "https://arxiv.org/abs/XXXX.XXXXX"
+  identifiers:
+    - type: url
+      value: "https://arxiv.org/abs/XXXX.XXXXX"
+  authors:
+    - family-names: "Petkov"
+      given-names: "Petko"
+      affiliation: "Institute for Computer Science, Artificial Intelligence and Technology"
+    - family-names: "Albanese"
+      given-names: "Giuliano"
+      affiliation: "Institute for Computer Science, Artificial Intelligence and Technology"
+    - family-names: "Nikolov"
+      given-names: "Nikolay"
+      affiliation: "Institute for Computer Science, Artificial Intelligence and Technology"
+    - family-names: "Van Gool"
+      given-names: "Luc"
+      affiliation: "Institute for Computer Science, Artificial Intelligence and Technology"
+    - family-names: "Tremblay"
+      given-names: "Jonathan"
+      affiliation: "NVIDIA"
+    - family-names: "Paudel"
+      given-names: "Danda Pani"
+      affiliation: "Institute for Computer Science, Artificial Intelligence and Technology"

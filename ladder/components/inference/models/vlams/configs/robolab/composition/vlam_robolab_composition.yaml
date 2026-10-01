@@ -1,0 +1,11 @@
+import: ../vlam_robolab.yaml
+
+# Flat (no HLC) RoboLab composition eval -- the model sees only the composed multi-goal instruction.
+# Base for the oracle / plan_* / stepwise_* composition configs, which import this and add their
+# hierarchical system. Mirrors vlam_simpler_composition.yaml and vlam_robot_arena_composition.yaml.
+#
+# Pair it with the composition TASKS, which the launcher selects by name:
+#   TASKS="comp_bin_4 comp_split_6"  (see robots/robolab/composition/README.md)
+runner_config:
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition/$CKPT_NAME/$ENV_NAME

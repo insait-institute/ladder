@@ -1,0 +1,12 @@
+import: vlam_simpler_composition.yaml
+
+# SimplerEnv composition -- verifier-advanced over the tracked plans, with the VLM running in-process
+# rather than against the API gateway. Same system as _plan_verifier, so the two are directly
+# comparable and the difference between them is the verifier's judgement alone.
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/plan_verifier_local.yaml
+    source:
+      cache_path: ladder/components/inference/robots/simpler/composition/decomp_cache.json
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/simpler_composition_plan_verifier_local/$CKPT_NAME/$ENV_NAME

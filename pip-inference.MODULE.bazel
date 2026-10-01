@@ -1,0 +1,242 @@
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip_env = use_extension("//build_support/python:pip_env_ext.bzl", "pip_env")
+
+# -----------------------------------------------------------------------------
+# Set up pip-inference-core environment
+# -----------------------------------------------------------------------------
+
+pip_env.env(
+    name = "inference-core",
+    deps = ["core"],
+    paths = ["ladder/components/inference/api/core"],
+    pyproject = "//ladder/components/inference/api/core:pyproject.toml",
+)
+
+pip.parse(
+    hub_name = "pip-inference-core",
+    python_version = "3.10",
+    requirements_lock = "//:ladder/components/inference/api/core/requirements.txt.lock",
+)
+
+use_repo(pip, "pip-inference-core")
+
+# -----------------------------------------------------------------------------
+# Set up pip-inference-server environment
+# -----------------------------------------------------------------------------
+
+pip_env.env(
+    name = "inference-server",
+    deps = ["inference-core"],
+    paths = ["ladder/components/inference/api/server"],
+    pyproject = "//ladder/components/inference/api/server:pyproject.toml",
+)
+
+pip.parse(
+    hub_name = "pip-inference-server",
+    python_version = "3.10",
+    requirements_lock = "//:ladder/components/inference/api/server/requirements.txt.lock",
+)
+
+use_repo(pip, "pip-inference-server")
+
+# -----------------------------------------------------------------------------
+# Set up pip-inference-client environment
+# -----------------------------------------------------------------------------
+
+pip_env.env(
+    name = "inference-client",
+    deps = ["inference-core"],
+    paths = [
+        "ladder/components/inference/api/client",
+        "ladder/components/inference/models/external",
+        "ladder/components/inference/models/gpt_policy",
+        "ladder/components/inference/models/harness",
+    ],
+    pyproject = "//ladder/components/inference/api/client:pyproject.toml",
+)
+
+pip.parse(
+    hub_name = "pip-inference-client",
+    python_version = "3.10",
+    requirements_lock = "//:ladder/components/inference/api/client/requirements.txt.lock",
+)
+
+use_repo(pip, "pip-inference-client")
+
+# -----------------------------------------------------------------------------
+# Set up pip-inference-models-vlams-v0 environment
+# -----------------------------------------------------------------------------
+
+pip_env.env(
+    name = "inference-models-vlams-v0",
+    deps = ["inference-client"],
+    paths = [
+        "ladder/components/inference/models/vlams/envs/v0",
+        "ladder/components/inference/models/vlams",
+    ],
+    pyproject = "//ladder/components/inference/models/vlams/envs/v0:pyproject.toml",
+)
+
+pip.parse(
+    hub_name = "pip-inference-models-vlams-v0",
+    python_version = "3.10",
+    requirements_lock = "//:ladder/components/inference/models/vlams/envs/v0/requirements.txt.lock",
+)
+
+use_repo(pip, "pip-inference-models-vlams-v0")
+
+# -----------------------------------------------------------------------------
+# Set up pip-inference-robots-simpler environment
+# -----------------------------------------------------------------------------
+
+pip_env.env(
+    name = "inference-robots-simpler",
+    deps = ["inference-server"],
+    paths = ["ladder/components/inference/robots/simpler"],
+    pyproject = "//ladder/components/inference/robots/simpler:pyproject.toml",
+)
+
+pip.parse(
+    # Index ("pipstar") mode: PyPI for everything, torch/torchvision routed deterministically to the
+    # PyTorch cu130 index so the +cu130 wheels resolve. Required for the range-pinned torch to fetch.
+    experimental_index_url = "https://pypi.org/simple",
+    experimental_index_url_overrides = {
+        "torch": "https://download.pytorch.org/whl/cu130",
+        "torchvision": "https://download.pytorch.org/whl/cu130",
+    },
+    hub_name = "pip-inference-robots-simpler",
+    python_version = "3.10",
+    requirements_lock = "//:ladder/components/inference/robots/simpler/requirements.txt.lock",
+    target_platforms = ["linux_x86_64"],
+)
+
+use_repo(pip, "pip-inference-robots-simpler")
+
+# -----------------------------------------------------------------------------
+# Set up pip-inference-robots-robot-arena environment
+# -----------------------------------------------------------------------------
+
+pip_env.env(
+    name = "inference-robots-robot-arena",
+    deps = ["inference-server"],
+    paths = ["ladder/components/inference/robots/robot_arena"],
+    pyproject = "//ladder/components/inference/robots/robot_arena:pyproject.toml",
+)
+
+pip.parse(
+    hub_name = "pip-inference-robots-robot-arena",
+    python_version = "3.10",
+    requirements_lock = "//:ladder/components/inference/robots/robot_arena/requirements.txt.lock",
+)
+
+use_repo(pip, "pip-inference-robots-robot-arena")
+
+# -----------------------------------------------------------------------------
+# Set up pip-inference-robots-robolab environment
+# -----------------------------------------------------------------------------
+
+# Unlike the other robot envs, robolab derives from inference-core (not inference-server):
+# its pyproject depends on api-core, deliberately NOT api-server, which pins pyrealsense2/pyudev
+# (no cp312 wheels for robolab's Isaac Sim 6 / py3.12 env). Deriving from inference-server makes
+# api/server:server's pip_deps select() emit a robolab branch referencing
+# @pip-inference-robots-robolab//{pyrealsense2,pyudev}, absent from robolab's lock, which breaks
+# `bazel query` (e.g. make test-deps) even though the build selects only the active branch.
+pip_env.env(
+    name = "inference-robots-robolab",
+    deps = ["inference-core"],
+    paths = ["ladder/components/inference/robots/robolab"],
+    pyproject = "//ladder/components/inference/robots/robolab:pyproject.toml",
+    # isaacsim 6 ships cp312-only wheels; pip_defs makes every target in this env
+    # target_compatible_with py3.12 (must match this env's pip.parse python_version below).
+    python_version = "3.12",
+)
+
+pip.parse(
+    # isaacsim's transitive subpackages live only on pypi.nvidia.com.
+    extra_pip_args = ["--extra-index-url=https://pypi.nvidia.com/"],
+    hub_name = "pip-inference-robots-robolab",
+    python_version = "3.12",
+    requirements_lock = "//:ladder/components/inference/robots/robolab/requirements.txt.lock",
+    timeout = 3600,  # multi-GB isaacsim wheels exceed the default 600s on a cold cache
+)
+
+use_repo(pip, "pip-inference-robots-robolab")
+
+# -----------------------------------------------------------------------------
+# Set up pip-inference-models-capx environment
+# -----------------------------------------------------------------------------
+# CaP-X brings its own perception and motion stack: a segmenter and a grasp sampler on torch, plus
+# an inverse kinematics solver. The episode runner runs here too, so the environment depends on
+# inference-client.
+
+pip_env.env(
+    name = "inference-models-capx",
+    deps = ["inference-client"],
+    paths = ["ladder/components/inference/models/capx"],
+    pyproject = "//ladder/components/inference/models/capx:pyproject.toml",
+)
+
+pip.parse(
+    # Index mode, so the range-pinned torch resolves from the PyTorch cu128 index and not PyPI.
+    experimental_index_url = "https://pypi.org/simple",
+    experimental_index_url_overrides = {
+        "torch": "https://download.pytorch.org/whl/cu128",
+        "torchvision": "https://download.pytorch.org/whl/cu128",
+    },
+    hub_name = "pip-inference-models-capx",
+    python_version = "3.10",
+    requirements_lock = "//:ladder/components/inference/models/capx/requirements.txt.lock",
+    target_platforms = ["linux_x86_64"],
+)
+
+use_repo(pip, "pip-inference-models-capx")
+
+# Set up pip-inference-models-external-openpi environment
+# -----------------------------------------------------------------------------
+# The openpi model library and the JAX stack, which need Python 3.12 while the rest of inference is
+# on 3.10. The episode runner runs here too -- openpi's policy loads the model in-process -- so the
+# environment depends on inference-client.
+
+pip_env.env(
+    name = "inference-models-external-openpi",
+    deps = ["inference-client"],
+    paths = ["ladder/components/inference/models/external/openpi"],
+    pyproject = "//ladder/components/inference/models/external/openpi:pyproject.toml",
+    python_version = "3.12",
+)
+
+pip.parse(
+    hub_name = "pip-inference-models-external-openpi",
+    python_version = "3.12",
+    requirements_lock = "//:ladder/components/inference/models/external/openpi/requirements.txt.lock",
+)
+
+use_repo(pip, "pip-inference-models-external-openpi")
+
+# -----------------------------------------------------------------------------
+# Set up pip-inference-models-tiptop environment
+# -----------------------------------------------------------------------------
+# The TiPToP planning stack: torch/CUDA and the client/runner chain on Python 3.12, since the
+# whole planning stack (grounding, SAM-2, M2T2, cuTAMP over cuRobo) runs inside the policy
+# process together with the benchmark's episode runner.
+
+pip_env.env(
+    name = "inference-models-tiptop",
+    deps = ["inference-client"],
+    paths = ["ladder/components/inference/models/tiptop"],
+    pyproject = "//ladder/components/inference/models/tiptop:pyproject.toml",
+    python_version = "3.12",
+)
+
+pip.parse(
+    experimental_index_url = "https://pypi.org/simple",
+    experimental_index_url_overrides = {
+        "torch": "https://download.pytorch.org/whl/cu130",
+    },
+    hub_name = "pip-inference-models-tiptop",
+    python_version = "3.12",
+    requirements_lock = "//:ladder/components/inference/models/tiptop/requirements.txt.lock",
+    target_platforms = ["linux_x86_64"],
+)
+
+use_repo(pip, "pip-inference-models-tiptop")

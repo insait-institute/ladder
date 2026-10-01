@@ -1,0 +1,11 @@
+untouched:
+  key1: value1
+  key2: value2
+
+overwritten:
+  key1:
+    a: 1
+    b: 2
+    c: 3
+
+import: import_overwrite_chain_1.yaml

@@ -1,0 +1,6 @@
+# a_nullable_value:
+#   a: 55
+#   c: 12
+inner:
+  c: 1
+inner_list: [7]

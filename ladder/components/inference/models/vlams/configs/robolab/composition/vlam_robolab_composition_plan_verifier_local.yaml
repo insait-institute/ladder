@@ -1,0 +1,37 @@
+import: vlam_robolab_composition.yaml
+
+# RoboLab composition -- _plan_verifier with every VLM role served in-process (Qwen3-VL) instead of by
+# the API gateway. The gateway allowlists source IPs, so from gcp every verification returned 403 and
+# the advancer fell through to its non-verified path: a "verified" cell that never verified.
+#
+# This imports the shared plan_verifier_local.yaml rather than the RoboLab _plan_verifier for the same
+# reason that shared file is written out instead of importing plan_verifier: replace_with_auto_config
+# merges the PARENT's fields into the new type, so OpenAIVLM's base_url / default_headers would follow
+# the swap and LocalVLMConfig rejects them. The advancer block below therefore duplicates
+# _plan_verifier's -- keep the two in step.
+#
+# VRAM: this arm's VLM roles resolve to vlm_served.yaml, i.e. ServedVLM, which asks the run's OWN
+# batch inference server -- ONE copy of the model for every lane sharing it. So the cost is
+# server(6.7G) + VLM(~17G) + LANES * sim(14G), and an H200 holds 6 lanes at ~108G of 140.
+# This previously read as LocalVLM's cost -- server + LANES * (sim + model ~17G), which caps a 98 GB
+# card at 2 lanes. That is the vlm_local.yaml arm, NOT this one; sizing this config by it gives up
+# two thirds of the card for no reason.
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/plan_verifier_local.yaml
+    source:
+      cache_path: ladder/components/inference/robots/robolab/composition/decomp_cache.json
+    advancer:
+      attempt_stall_steps: 300
+      ordered_provisional: true
+      auto_schedule: true
+      verifier:
+        # BOTH views. RoboLab's "main" is an over-shoulder camera in which the bin is a ~15 px box at
+        # the frame edge, routinely occluded by the arm: measured 2026-08-02, this verifier scored 4%
+        # recall here (15 true positives against 362 false negatives, on a 34% base rate) while the
+        # same model and prompt score 68%/56% on RobotArena and SimplerEnv, whose tabletop views show
+        # the goal location plainly. The wrist camera looks into the bin, and inspection of the missed
+        # frames shows the placement is obvious there and unreadable in main.
+        image_cameras: [main, wrist]
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_plan_verifier_local/$CKPT_NAME/$ENV_NAME

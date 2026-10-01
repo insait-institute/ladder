@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="145 long-horizon manipulation tasks across three simulators, from 1 to 10 subgoals per instruction. We evaluate ten systems, from end-to-end policies to VLM orchestrators and tool selection agents, and confirm the ranking on two real robots.">
+  <title>LADDER: A Long-Horizon Robot Manipulation Benchmark</title>
+  <link rel="stylesheet" href="./static/fonts/fonts.css">
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="stylesheet" href="./static/css/site.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script defer src="./static/js/site.js"></script>
+</head>
+<body>
+
+<nav class="topnav"><div class="topnav-inner"><a class="brand" href="#top">LADDER</a><div class="topnav-links"><a href="#benchmark">Benchmark</a><a href="#results">Results</a><a href="#real-world">Real world</a><a href="#rollouts">Rollouts</a><a href="leaderboard.html">Leaderboard</a></div></div></nav>
+
+<section class="hero" id="top">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="has-text-centered">
+        <h1 class="title is-1 publication-title">LADDER: A Long-Horizon Robot Manipulation Benchmark</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Petko Petkov<sup>1</sup></span>,
+            <span class="author-block">Giuliano Albanese<sup>1</sup></span>,
+            <span class="author-block">Nikolay Nikolov<sup>1</sup></span>,
+            <span class="author-block">Luc Van Gool<sup>1</sup></span>,
+            <span class="author-block">Jonathan Tremblay<sup>2</sup></span>,
+            <span class="author-block">Danda Pani Paudel<sup>1</sup></span>
+          </div>
+          <div class="is-size-6 publication-authors">
+            <span class="author-block"><sup>1</sup><a href="https://insait.ai">Institute for Computer Science, Artificial Intelligence and Technology</a></span>
+            <span class="author-block"><sup>2</sup><a href="https://www.nvidia.com">NVIDIA</a></span>
+          </div>
+          <div class="affiliation-logos">
+            <a href="https://insait.ai"><img src="static/images/logos/insait.svg" alt="INSAIT"></a>
+            <a href="https://www.nvidia.com"><img src="static/images/logos/nvidia.svg" alt="NVIDIA"></a>
+          </div>
+        <div class="publication-links">
+          <span class="link-block"><a class="button is-normal is-rounded is-dark" disabled>
+                <span class="icon"><i class="fas fa-file-pdf"></i></span><span>Paper (coming soon)</span></a></span>
+              <span class="link-block"><a href="https://github.com/insait-institute/ladder" class="external-link button is-normal is-rounded is-dark">
+                <span class="icon"><i class="fab fa-github"></i></span><span>Code</span></a></span>
+              <span class="link-block"><a href="https://huggingface.co/collections/INSAIT-Institute/ladder-6abbbddc46691080f5d954c8" class="external-link button is-normal is-rounded is-dark">
+                <span class="icon"><img class="hf-logo" src="static/images/logos/huggingface.svg" alt=""></span><span>Hugging Face</span></a></span>
+              <span class="link-block"><a href="leaderboard.html" class="external-link button is-normal is-rounded is-dark">
+                <span class="icon"><i class="fas fa-trophy"></i></span><span>Leaderboard</span></a></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section teaser-videos">
+  <div class="container is-max-widescreen">
+    <div class="columns">
+        <div class="column is-one-third">
+          <div class="vid"><video class="teaser-clip" src="static/videos/gallery/simplerenv_1_1dd07061ca.mp4" poster="static/videos/gallery/simplerenv_1_1dd07061ca.jpg" style="aspect-ratio: 640 / 480" autoplay muted loop playsinline></video><span class="speed-badge">2&times; speed</span></div>
+          <p class="teaser-label"><b>SimplerEnv-Long</b> &middot; GPT-Policy &middot;
+          10 subgoals in one instruction</p>
+        </div>
+        <div class="column is-one-third">
+          <div class="vid"><video class="teaser-clip" src="static/videos/gallery/robotarena_1_d6794cbcbb.mp4" poster="static/videos/gallery/robotarena_1_d6794cbcbb.jpg" style="aspect-ratio: 640 / 480" autoplay muted loop playsinline></video><span class="speed-badge">2&times; speed</span></div>
+          <p class="teaser-label"><b>RobotArena-&infin;-Long</b> &middot; GPT-Policy &middot;
+          8 subgoals in one instruction</p>
+        </div>
+        <div class="column is-one-third">
+          <div class="vid"><video class="teaser-clip" src="static/videos/gallery/robolab_1_5cdd352346.mp4" poster="static/videos/gallery/robolab_1_5cdd352346.jpg" style="aspect-ratio: 640 / 360" autoplay muted loop playsinline></video><span class="speed-badge">2&times; speed</span></div>
+          <p class="teaser-label"><b>RoboLab-Long</b> &middot; GPT-Policy &middot;
+          7 subgoals in one instruction</p>
+        </div>
+    </div>
+    <p class="tagline">145 long-horizon manipulation tasks across three simulators, from 1 to 10 subgoals per instruction. We evaluate ten systems, from end-to-end policies to VLM orchestrators and tool selection agents, and confirm the ranking on two real robots.</p>
+    <div class="findings">
+      <div class="finding">
+        <span class="finding-value">85.4% &rarr; 0.0%</span>
+        <p class="finding-head">Long horizons break end-to-end policies</p>
+        <p class="finding-text">The low-level policy alone succeeds on 85.4% of single-subgoal tasks, 26.9% at 2 subgoals and 0.0% at 5.</p>
+      </div>
+      <div class="finding">
+        <span class="finding-value">43.4% &rarr; 3.4%</span>
+        <p class="finding-head">Orchestrators need verification</p>
+        <p class="finding-text">Without a verifier, an orchestrator moves on before a subgoal is done and loses up to 43.4% of subgoals this way. A verifier cuts this to 3.4%.</p>
+      </div>
+      <div class="finding">
+        <span class="finding-value">40.1%</span>
+        <p class="finding-head">PSP-Agent beats the privileged reference</p>
+        <p class="finding-text">With the same VLM as the orchestrators, PSP-Agent succeeds on 40.1% of episodes, above the privileged verifier's 29.6%. GPT-Policy leads with 62.0%.</p>
+      </div>
+      <div class="finding">
+        <span class="finding-value">Same ranking</span>
+        <p class="finding-head">Simulation predicts the real world</p>
+        <p class="finding-text">On a physical WidowX 250 and Franka FR3, the three systems we test rank exactly as in simulation.</p>
+      </div></div>
+  </div>
+</section>
+
+<section class="section shade" id="overview">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Overview</h2>
+    
+    <img class="figure" src="static/images/teaser.png" alt="Overview of our benchmark and key findings">
+    <p class="figure-caption"><b>Overview of our benchmark and key findings.</b> Across all suites, orchestrating policy execution with sequential subgoal decomposition and visual verification substantially outperforms issuing the full instruction directly to the policy (bottom right). See Tables&nbsp;1 and&nbsp;3.</p>
+    <h3 class="title is-5 has-text-centered abstract-title">Abstract</h3>
+    <div class="content has-text-justified abstract"><p>General-purpose robot manipulation policies learn short-horizon skills effectively, but degrade rapidly on long-horizon tasks. Existing benchmarks cannot isolate failures because task horizon is either too short or entangled with scene and object variations. We propose LADDER, a long-horizon robot manipulation benchmark scaling from 1 to 10 subgoals within the same environment over three suites (SimplerEnv-Long, RobotArena-&infin;-Long, and RoboLab-Long), 145 tasks, eight categories, two embodiments, and 2,024 simulated episodes per system. We evaluate two orchestration paradigms: text subgoals for learned low-level policies (VoLo) and tool selection orchestration (CaP-X, GPT-Policy, PSP-Agent, TiPToP). Given the full instruction directly, low-level policies achieve 85.4% on single-subgoal tasks, but drop to near zero on extended tasks. While orchestration remedies this, it remains bounded by physical execution errors of the low-level policy rather than high-level planning and achieves only &sim;25%. Tool selection orchestration with GPT-Policy on GPT-6 Astra significantly outperforms learned-policy methods, but incurs significant time and cost budget and succeeds only &sim;62%. Real-world experiments across two embodiments confirm the collapse of the low-level policy and the gain from orchestration. Project website: <a href="https://musical-garbanzo-5w422vy.pages.github.io">musical-garbanzo-5w422vy.pages.github.io</a></p></div>
+  </div>
+</section>
+
+<section class="section" id="benchmark">
+  <div class="container is-max-widescreen">
+    <h2 class="title is-3 has-text-centered">The benchmark</h2><p class="section-subtitle">Three suites that extend established simulation benchmarks to long horizons. Each longer task adds one subgoal to a shorter one in the same scene.</p>
+    
+    <div class="stats"><div class="stat"><span class="stat-value">145</span><span class="stat-label">tasks</span></div><div class="stat"><span class="stat-value">3</span><span class="stat-label">simulators</span></div><div class="stat"><span class="stat-value">8</span><span class="stat-label">task categories</span></div><div class="stat"><span class="stat-value">1&ndash;10</span><span class="stat-label">subgoals per task</span></div><div class="stat"><span class="stat-value">10</span><span class="stat-label">systems evaluated</span></div><div class="stat"><span class="stat-value">2</span><span class="stat-label">real robots</span></div></div>
+    <div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="suite-card">
+            <div class="vid"><img src="static/readme/simpler.gif" alt="SimplerEnv-Long" loading="lazy">
+            <span class="speed-badge">4&times; speed</span></div>
+            <div class="suite-body">
+              <p class="suite-name">SimplerEnv-Long</p>
+              <p class="suite-facts"><b>54</b> tasks &middot; SAPIEN &middot; WidowX 250</p>
+              <p class="suite-facts">low-level policy: Bridge policy</p>
+            </div>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="suite-card">
+            <div class="vid"><img src="static/readme/robot_arena.gif" alt="RobotArena--Long" loading="lazy">
+            <span class="speed-badge">4&times; speed</span></div>
+            <div class="suite-body">
+              <p class="suite-name">RobotArena-&infin;-Long</p>
+              <p class="suite-facts"><b>47</b> tasks &middot; Genesis &middot; WidowX 250</p>
+              <p class="suite-facts">low-level policy: Bridge policy</p>
+            </div>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="suite-card">
+            <div class="vid"><img src="static/readme/robolab.gif" alt="RoboLab-Long" loading="lazy">
+            <span class="speed-badge">4&times; speed</span></div>
+            <div class="suite-body">
+              <p class="suite-name">RoboLab-Long</p>
+              <p class="suite-facts"><b>44</b> tasks &middot; Isaac Sim &middot; Franka FR3</p>
+              <p class="suite-facts">low-level policy: &pi;<sub>0.5</sub> (DROID)</p>
+            </div>
+          </div>
+        </div>
+    </div>
+    <h3 class="title is-4 has-text-centered subhead">Eight task categories</h3><p class="subhead-note">What one instruction must express. Every subgoal is checked by a predicate on the simulator state.</p>
+    <div class="columns is-multiline">
+        <div class="column is-one-quarter-desktop is-half-tablet">
+          <div class="cat-card">
+            <img src="static/images/categories/single.jpg" alt="Single destination" loading="lazy">
+            <div class="cat-body">
+              <p class="cat-name">Single destination <span class="cat-count">44 tasks</span></p>
+              <p class="cat-req">Every object goes to the same destination.</p>
+              <p class="cat-example">&ldquo;put both carrots, the spoon and the eggplant on the plate&rdquo;</p>
+            </div>
+          </div>
+        </div>
+        <div class="column is-one-quarter-desktop is-half-tablet">
+          <div class="cat-card">
+            <img src="static/images/categories/transfer.jpg" alt="Transfer" loading="lazy">
+            <div class="cat-body">
+              <p class="cat-name">Transfer <span class="cat-count">8 tasks</span></p>
+              <p class="cat-req">Every object starts on one destination and must be moved to another.</p>
+              <p class="cat-example">&ldquo;move the carrot and the spoon from the plate to the blue towel&rdquo;</p>
+            </div>
+          </div>
+        </div>
+        <div class="column is-one-quarter-desktop is-half-tablet">
+          <div class="cat-card">
+            <img src="static/images/categories/split.jpg" alt="Split destination" loading="lazy">
+            <div class="cat-body">
+              <p class="cat-name">Split destination <span class="cat-count">25 tasks</span></p>
+              <p class="cat-req">Different objects go to different destinations.</p>
+              <p class="cat-example">&ldquo;put the lemon on the plate and put the orange in the bin&rdquo;</p>
+            </div>
+          </div>
+        </div>
+        <div class="column is-one-quarter-desktop is-half-tablet">
+          <div class="cat-card">
+            <img src="static/images/categories/relay.jpg" alt="Relay" loading="lazy">
+            <div class="cat-body">
+              <p class="cat-name">Relay <span class="cat-count">20 tasks</span></p>
+              <p class="cat-req">Objects pass through an intermediate destination.</p>
+              <p class="cat-example">&ldquo;first put the carrot on the plate, then put the carrot on the blue towel&rdquo;</p>
+            </div>
+          </div>
+        </div>
+        <div class="column is-one-quarter-desktop is-half-tablet">
+          <div class="cat-card">
+            <img src="static/images/categories/revisit.jpg" alt="Revisit" loading="lazy">
+            <div class="cat-body">
+              <p class="cat-name">Revisit <span class="cat-count">13 tasks</span></p>
+              <p class="cat-req">Objects return to a destination they have already left.</p>
+              <p class="cat-example">&ldquo;first put the spoon on the cloth, then put the spoon in the pot, then put the spoon on the cloth&rdquo;</p>
+            </div>
+          </div>
+        </div>
+        <div class="column is-one-quarter-desktop is-half-tablet">
+          <div class="cat-card">
+            <img src="static/images/categories/exclusion.jpg" alt="Exclusion" loading="lazy">
+            <div class="cat-body">
+              <p class="cat-name">Exclusion <span class="cat-count">13 tasks</span></p>
+              <p class="cat-req">Some objects must be left where they are.</p>
+              <p class="cat-example">&ldquo;put everything except the eggplant on the plate&rdquo;</p>
+            </div>
+          </div>
+        </div>
+        <div class="column is-one-quarter-desktop is-half-tablet">
+          <div class="cat-card">
+            <img src="static/images/categories/ordered.jpg" alt="Ordered" loading="lazy">
+            <div class="cat-body">
+              <p class="cat-name">Ordered <span class="cat-count">14 tasks</span></p>
+              <p class="cat-req">The placements must occur in a stated order.</p>
+              <p class="cat-example">&ldquo;first put the banana in the bin, then put the orange in the bin&rdquo;</p>
+            </div>
+          </div>
+        </div>
+        <div class="column is-one-quarter-desktop is-half-tablet">
+          <div class="cat-card">
+            <img src="static/images/categories/duplicates.jpg" alt="Duplicates" loading="lazy">
+            <div class="cat-body">
+              <p class="cat-name">Duplicates <span class="cat-count">8 tasks</span></p>
+              <p class="cat-req">Identical objects cannot be told apart in language.</p>
+              <p class="cat-example">&ldquo;put both corn cobs on the cloth&rdquo;</p>
+            </div>
+          </div>
+        </div>
+    </div>
+  </div>
+</section>
+
+<section class="section shade" id="results">
+  <div class="container is-max-widescreen">
+    <h2 class="title is-3 has-text-centered">Results</h2><p class="section-subtitle">Success rates of all ten systems on every suite, task category and horizon.</p>
+    <div class="findings">
+      <div class="finding">
+        <span class="finding-value">58.4%</span>
+        <p class="finding-head">Orchestration keeps policies on track</p>
+        <p class="finding-text">At 2 subgoals the Proprioceptive verifier succeeds on 58.4% of episodes, against 26.9% for the same low-level policy alone.</p>
+      </div>
+      <div class="finding">
+        <span class="finding-value">18.6 &rarr; 4.3</span>
+        <p class="finding-head">Most of the gap to the privileged verifier closes</p>
+        <p class="finding-text">The best orchestrators cut the low-level policy's gap to the privileged reference from 18.6 to 4.3&ndash;4.6 points.</p>
+      </div>
+      <div class="finding">
+        <span class="finding-value">27.3%</span>
+        <p class="finding-head">Tool selection scales furthest</p>
+        <p class="finding-text">On 5-subgoal tasks PSP-Agent still succeeds on 27.3% of episodes, against 11.1% for the privileged verifier.</p>
+      </div></div><div class="tabs is-centered is-boxed"><ul><li class="is-active"><a data-tabs="res" data-pane="res-suite">By suite</a></li><li class=""><a data-tabs="res" data-pane="res-category">By task category</a></li><li class=""><a data-tabs="res" data-pane="res-horizon">By horizon</a></li></ul></div><div class="tab-pane" data-tabs="res" id="res-suite"><div class="table-wrap"><table class="results"><thead><tr><th>System</th><th>SimplerEnv-Long</th><th>RobotArena-&infin;-Long</th><th>RoboLab-Long</th><th>Overall</th></tr></thead><tbody><tr class="group"><td colspan="5">End-to-end</td></tr><tr><th>Low-level policy</th><td>8.7 <span class="pm">&plusmn;1.7</span></td><td>10.9 <span class="pm">&plusmn;3.6</span></td><td>19.6 <span class="pm">&plusmn;4.5</span></td><td>11.0 <span class="pm">&plusmn;1.4</span></td></tr><tr class="group"><td colspan="5">Orchestrated low-level policy</td></tr><tr><th>Periodic trigger</th><td>17.4 <span class="pm">&plusmn;2.2</span></td><td>15.2 <span class="pm">&plusmn;4.0</span></td><td>25.6 <span class="pm">&plusmn;4.8</span></td><td>18.4 <span class="pm">&plusmn;1.7</span></td></tr><tr><th>Proprioceptive trigger</th><td>21.5 <span class="pm">&plusmn;2.3</span></td><td>16.2 <span class="pm">&plusmn;4.1</span></td><td>28.1 <span class="pm">&plusmn;4.9</span></td><td>21.7 <span class="pm">&plusmn;1.8</span></td></tr><tr><th>Proprioceptive verifier</th><td>25.2 <span class="pm">&plusmn;2.4</span></td><td><span class="best-learned">24.2 <span class="pm">&plusmn;4.6</span></span></td><td>25.6 <span class="pm">&plusmn;4.8</span></td><td>25.0 <span class="pm">&plusmn;1.9</span></td></tr><tr><th>VoLo</th><td><span class="best-learned">25.5 <span class="pm">&plusmn;2.4</span></span></td><td>21.3 <span class="pm">&plusmn;4.4</span></td><td><span class="best-learned">29.0 <span class="pm">&plusmn;4.9</span></span></td><td><span class="best-learned">25.3 <span class="pm">&plusmn;1.9</span></span></td></tr><tr class="group"><td colspan="5">Tool selection</td></tr><tr><th>CaP-X</th><td>28.7 <span class="pm">&plusmn;2.5</span></td><td>16.2 <span class="pm">&plusmn;4.1</span></td><td>20.7 <span class="pm">&plusmn;4.5</span></td><td>25.0 <span class="pm">&plusmn;1.9</span></td></tr><tr><th>TiPToP</th><td>6.7 <span class="pm">&plusmn;1.5</span></td><td>11.2 <span class="pm">&plusmn;3.6</span></td><td>17.3 <span class="pm">&plusmn;4.3</span></td><td>9.4 <span class="pm">&plusmn;1.3</span></td></tr><tr class="ours"><th>PSP-Agent</th><td>37.1 <span class="pm">&plusmn;2.7</span></td><td>39.9 <span class="pm">&plusmn;5.0</span></td><td>51.4 <span class="pm">&plusmn;5.2</span></td><td>40.1 <span class="pm">&plusmn;2.2</span></td></tr><tr><th>GPT-Policy</th><td><span class="best-tool"><b>60.3 <span class="pm">&plusmn;2.7</span></b></span></td><td><span class="best-tool"><b>66.8 <span class="pm">&plusmn;4.9</span></b></span></td><td><span class="best-tool"><b>62.8 <span class="pm">&plusmn;5.2</span></b></span></td><td><span class="best-tool"><b>62.0 <span class="pm">&plusmn;2.1</span></b></span></td></tr><tr class="group"><td colspan="5">Privileged reference</td></tr><tr><th>Privileged verifier</th><td>29.5 <span class="pm">&plusmn;2.5</span></td><td>25.5 <span class="pm">&plusmn;4.6</span></td><td>34.4 <span class="pm">&plusmn;5.1</span></td><td>29.6 <span class="pm">&plusmn;2.0</span></td></tr><tr class="foot"><th><i>Episodes per configuration</i></th><td>1,296</td><td>376</td><td>352</td><td>2,024</td></tr></tbody></table></div><p class="table-note">Task success rate (%) with 95% Wilson intervals. <span class="best-learned">Green</span>: best orchestrated low-level policy. <span class="best-tool">Blue</span>: best tool selection system.</p></div><div class="tab-pane is-hidden" data-tabs="res" id="res-category"><div class="table-wrap"><table class="results"><thead><tr><th>System</th><th>Single destination</th><th>Transfer</th><th>Split destination</th><th>Relay</th><th>Revisit</th><th>Exclusion</th><th>Ordered</th><th>Duplicates</th><th>Overall</th></tr></thead><tbody><tr class="group"><td colspan="10">End-to-end</td></tr><tr><th>Low-level policy</th><td>14.9 <span class="pm">&plusmn;2.9</span></td><td>16.7 <span class="pm">&plusmn;6.9</span></td><td>7.1 <span class="pm">&plusmn;3.5</span></td><td>2.3 <span class="pm">&plusmn;2.4</span></td><td>0.0 <span class="pm">&plusmn;2.2</span></td><td>0.6 <span class="pm">&plusmn;2.7</span></td><td>22.2 <span class="pm">&plusmn;7.5</span></td><td>29.7 <span class="pm">&plusmn;8.4</span></td><td>11.0 <span class="pm">&plusmn;1.4</span></td></tr><tr class="group"><td colspan="10">Orchestrated low-level policy</td></tr><tr><th>Periodic trigger</th><td>23.5 <span class="pm">&plusmn;3.4</span></td><td>14.6 <span class="pm">&plusmn;6.7</span></td><td>11.5 <span class="pm">&plusmn;4.1</span></td><td>10.9 <span class="pm">&plusmn;4.0</span></td><td>1.2 <span class="pm">&plusmn;3.0</span></td><td>31.0 <span class="pm">&plusmn;7.4</span></td><td>28.5 <span class="pm">&plusmn;7.9</span></td><td>24.2 <span class="pm">&plusmn;8.1</span></td><td>18.4 <span class="pm">&plusmn;1.7</span></td></tr><tr><th>Proprioceptive trigger</th><td>25.0 <span class="pm">&plusmn;3.4</span></td><td>14.6 <span class="pm">&plusmn;6.7</span></td><td>17.6 <span class="pm">&plusmn;4.7</span></td><td>15.5 <span class="pm">&plusmn;4.5</span></td><td>1.2 <span class="pm">&plusmn;3.0</span></td><td><span class="best-learned">39.9 <span class="pm">&plusmn;7.6</span></span></td><td>29.2 <span class="pm">&plusmn;7.9</span></td><td><span class="best-learned">31.2 <span class="pm">&plusmn;8.5</span></span></td><td>21.7 <span class="pm">&plusmn;1.8</span></td></tr><tr><th>Proprioceptive verifier</th><td><span class="best-learned">31.0 <span class="pm">&plusmn;3.6</span></span></td><td>15.3 <span class="pm">&plusmn;6.8</span></td><td>17.2 <span class="pm">&plusmn;4.7</span></td><td><span class="best-learned">21.4 <span class="pm">&plusmn;5.0</span></span></td><td>3.0 <span class="pm">&plusmn;3.8</span></td><td>39.3 <span class="pm">&plusmn;7.5</span></td><td>35.4 <span class="pm">&plusmn;8.1</span></td><td>30.5 <span class="pm">&plusmn;8.4</span></td><td>25.0 <span class="pm">&plusmn;1.9</span></td></tr><tr><th>VoLo</th><td><span class="best-learned">31.0 <span class="pm">&plusmn;3.6</span></span></td><td><span class="best-learned">27.1 <span class="pm">&plusmn;7.8</span></span></td><td><span class="best-learned">20.6 <span class="pm">&plusmn;5.0</span></span></td><td>16.1 <span class="pm">&plusmn;4.6</span></td><td><span class="best-learned">3.6 <span class="pm">&plusmn;4.0</span></span></td><td>32.7 <span class="pm">&plusmn;7.4</span></td><td><span class="best-learned">38.2 <span class="pm">&plusmn;8.1</span></span></td><td><span class="best-learned">31.2 <span class="pm">&plusmn;8.5</span></span></td><td><span class="best-learned">25.3 <span class="pm">&plusmn;1.9</span></span></td></tr><tr class="group"><td colspan="10">Tool selection</td></tr><tr><th>CaP-X</th><td>23.5 <span class="pm">&plusmn;3.4</span></td><td>43.8 <span class="pm">&plusmn;8.2</span></td><td>16.2 <span class="pm">&plusmn;4.6</span></td><td>32.2 <span class="pm">&plusmn;5.4</span></td><td>8.9 <span class="pm">&plusmn;5.3</span></td><td>31.0 <span class="pm">&plusmn;7.4</span></td><td>27.1 <span class="pm">&plusmn;7.8</span></td><td>25.8 <span class="pm">&plusmn;8.2</span></td><td>25.0 <span class="pm">&plusmn;1.9</span></td></tr><tr><th>TiPToP</th><td>12.9 <span class="pm">&plusmn;2.8</span></td><td>10.4 <span class="pm">&plusmn;6.1</span></td><td>12.2 <span class="pm">&plusmn;4.2</span></td><td>0.3 <span class="pm">&plusmn;1.5</span></td><td>0.0 <span class="pm">&plusmn;2.2</span></td><td>10.7 <span class="pm">&plusmn;5.6</span></td><td>12.5 <span class="pm">&plusmn;6.4</span></td><td>11.7 <span class="pm">&plusmn;6.7</span></td><td>9.4 <span class="pm">&plusmn;1.3</span></td></tr><tr class="ours"><th>PSP-Agent</th><td>44.0 <span class="pm">&plusmn;3.8</span></td><td>36.1 <span class="pm">&plusmn;8.1</span></td><td>50.7 <span class="pm">&plusmn;5.7</span></td><td>24.3 <span class="pm">&plusmn;5.1</span></td><td>6.0 <span class="pm">&plusmn;4.7</span></td><td>48.8 <span class="pm">&plusmn;7.5</span></td><td>56.2 <span class="pm">&plusmn;8.2</span></td><td>52.3 <span class="pm">&plusmn;8.6</span></td><td>40.1 <span class="pm">&plusmn;2.2</span></td></tr><tr><th>GPT-Policy</th><td><span class="best-tool"><b>61.8 <span class="pm">&plusmn;3.7</span></b></span></td><td><span class="best-tool"><b>68.8 <span class="pm">&plusmn;8.0</span></b></span></td><td><span class="best-tool"><b>60.5 <span class="pm">&plusmn;5.7</span></b></span></td><td><span class="best-tool"><b>71.7 <span class="pm">&plusmn;5.3</span></b></span></td><td><span class="best-tool"><b>43.5 <span class="pm">&plusmn;7.6</span></b></span></td><td><span class="best-tool"><b>60.1 <span class="pm">&plusmn;7.6</span></b></span></td><td><span class="best-tool"><b>65.3 <span class="pm">&plusmn;8.1</span></b></span></td><td><span class="best-tool"><b>58.6 <span class="pm">&plusmn;8.7</span></b></span></td><td><span class="best-tool"><b>62.0 <span class="pm">&plusmn;2.1</span></b></span></td></tr><tr class="group"><td colspan="10">Privileged reference</td></tr><tr><th>Privileged verifier</th><td>33.8 <span class="pm">&plusmn;3.7</span></td><td>26.4 <span class="pm">&plusmn;7.7</span></td><td>24.3 <span class="pm">&plusmn;5.2</span></td><td>27.3 <span class="pm">&plusmn;5.3</span></td><td>4.8 <span class="pm">&plusmn;4.4</span></td><td>42.3 <span class="pm">&plusmn;7.6</span></td><td>39.6 <span class="pm">&plusmn;8.2</span></td><td>33.6 <span class="pm">&plusmn;8.6</span></td><td>29.6 <span class="pm">&plusmn;2.0</span></td></tr></tbody></table></div><p class="table-note">Task success rate (%) with 95% Wilson intervals. <span class="best-learned">Green</span>: best orchestrated low-level policy. <span class="best-tool">Blue</span>: best tool selection system.</p></div><div class="tab-pane is-hidden" data-tabs="res" id="res-horizon"><img class="figure" src="static/images/length_ladder.png" alt="Performance scaling across task horizon" loading="lazy"><p class="figure-caption"><b>Performance scaling across task horizon.</b> Task success rate (top) and subgoal progress (bottom) as the horizon increases from 1 to 10 subgoals across all three benchmark suites (all ten systems: Tables&nbsp;11 and&nbsp;13).</p></div><p class="has-text-centered lb-link"><a class="button is-rounded is-link is-light" href="leaderboard.html">Open the interactive leaderboard &rarr;</a></p>
+  </div>
+</section>
+
+<section class="section" id="efficiency">
+  <div class="container is-max-widescreen">
+    <h2 class="title is-3 has-text-centered">Efficiency</h2><p class="section-subtitle">Robot time and VLM compute of every system.</p>
+    <div class="findings">
+      <div class="finding">
+        <span class="finding-value">42.1% / 49.5%</span>
+        <p class="finding-head">Most progress happens early</p>
+        <p class="finding-text">The Proprioceptive verifier completes 42.1% of all subgoals in the first half of the budget and 49.5% by its end. A longer budget would help little.</p>
+      </div>
+      <div class="finding">
+        <span class="finding-value">36&ndash;45%</span>
+        <p class="finding-head">Successes finish with time to spare</p>
+        <p class="finding-text">Successful episodes of the learned-policy systems end after 36&ndash;45% of their time budget on average.</p>
+      </div>
+      <div class="finding">
+        <span class="finding-value">$0.33 vs $6.49</span>
+        <p class="finding-head">Success has a price</p>
+        <p class="finding-text">API cost per successful episode: PSP-Agent $0.33, GPT-Policy $6.49. The Proprioceptive verifier costs $0.045 per episode.</p>
+      </div></div><img class="figure" src="static/images/efficiency.png" alt="Robot time and compute" loading="lazy"><p class="figure-caption"><b>Robot time and compute.</b> (a) Share of all subgoals completed as the simulated time budget elapses. (b) Task success against VLM calls per episode. Both combine all suites (per suite: Table&nbsp;15; tokens and API cost: Appendix&nbsp;G).</p>
+    <details class="more"><summary>Per-suite VLM calls, tokens, cost and progress</summary>
+    <div class="table-wrap"><table class="results compact"><thead><tr><th></th><th>Low-level policy</th><th>Periodic trigger</th><th>Proprioceptive trigger</th><th>Proprioceptive verifier</th><th>VoLo</th><th>CaP-X</th><th>TiPToP</th><th>PSP-Agent</th><th>GPT-Policy</th><th>Privileged verifier</th></tr></thead><tbody><tr class="group"><td colspan="11"><i>VLM calls per episode</i></td></tr><tr><th>SimplerEnv-Long</th><td>0.0</td><td>0.0</td><td>0.0</td><td>12.7</td><td>24.8</td><td>3.8</td><td>1.0</td><td>18.0</td><td>50.1</td><td>0.0</td></tr><tr><th>RobotArena-&infin;-Long</th><td>0.0</td><td>0.0</td><td>0.0</td><td>9.3</td><td>26.4</td><td>5.6</td><td>1.0</td><td>20.2</td><td>41.7</td><td>0.0</td></tr><tr><th>RoboLab-Long</th><td>0.0</td><td>0.0</td><td>0.0</td><td>9.3</td><td>19.2</td><td>6.3</td><td>1.0</td><td>31.8</td><td>70.8</td><td>0.0</td></tr><tr class="group"><td colspan="11"><i>VLM calls per completed subgoal</i></td></tr><tr><th>SimplerEnv-Long</th><td>0.0</td><td>0.0</td><td>0.0</td><td>4.9</td><td>10.1</td><td>1.6</td><td>2.8</td><td>6.1</td><td>11.8</td><td>0.0</td></tr><tr><th>RobotArena-&infin;-Long</th><td>0.0</td><td>0.0</td><td>0.0</td><td>7.3</td><td>22.2</td><td>5.1</td><td>2.1</td><td>10.7</td><td>13.3</td><td>0.0</td></tr><tr><th>RoboLab-Long</th><td>0.0</td><td>0.0</td><td>0.0</td><td>3.2</td><td>6.0</td><td>2.9</td><td>0.9</td><td>7.5</td><td>17.4</td><td>0.0</td></tr><tr class="group"><td colspan="11"><i>Input tokens per episode (thousands)</i></td></tr><tr><th>SimplerEnv-Long</th><td>0.0</td><td>0.0</td><td>0.0</td><td>17.2</td><td>70.5</td><td>7.5</td><td>2.0</td><td>27.3</td><td>357.8</td><td>0.0</td></tr><tr><th>RobotArena-&infin;-Long</th><td>0.0</td><td>0.0</td><td>0.0</td><td>12.6</td><td>75.0</td><td>12.9</td><td>2.0</td><td>31.2</td><td>293.5</td><td>0.0</td></tr><tr><th>RoboLab-Long</th><td>0.0</td><td>0.0</td><td>0.0</td><td>23.6</td><td>91.6</td><td>15.3</td><td>2.1</td><td>48.5</td><td>508.8</td><td>0.0</td></tr><tr class="group"><td colspan="11"><i>Generated tokens per episode (thousands)</i></td></tr><tr><th>SimplerEnv-Long</th><td>0.0</td><td>0.0</td><td>0.0</td><td>2.7</td><td>7.4</td><td>3.1</td><td>0.5</td><td>10.4</td><td>5.7</td><td>0.0</td></tr><tr><th>RobotArena-&infin;-Long</th><td>0.0</td><td>0.0</td><td>0.0</td><td>1.8</td><td>6.6</td><td>4.6</td><td>0.4</td><td>10.1</td><td>4.9</td><td>0.0</td></tr><tr><th>RoboLab-Long</th><td>0.0</td><td>0.0</td><td>0.0</td><td>2.5</td><td>7.2</td><td>5.1</td><td>0.4</td><td>16.4</td><td>8.3</td><td>0.0</td></tr><tr class="group"><td colspan="11"><i>API cost per episode (USD)</i></td></tr><tr><th>SimplerEnv-Long</th><td>0.000</td><td>0.000</td><td>0.000</td><td>0.046</td><td>0.161</td><td>0.034</td><td>0.007</td><td>0.119</td><td>3.861</td><td>0.000</td></tr><tr><th>RobotArena-&infin;-Long</th><td>0.000</td><td>0.000</td><td>0.000</td><td>0.032</td><td>0.162</td><td>0.054</td><td>0.006</td><td>0.123</td><td>3.177</td><td>0.000</td></tr><tr><th>RoboLab-Long</th><td>0.000</td><td>0.000</td><td>0.000</td><td>0.054</td><td>0.191</td><td>0.061</td><td>0.006</td><td>0.196</td><td>5.501</td><td>0.000</td></tr><tr class="group"><td colspan="11"><i>API cost per successful episode (USD)</i></td></tr><tr><th>SimplerEnv-Long</th><td>0.00</td><td>0.00</td><td>0.00</td><td>0.18</td><td>0.63</td><td>0.12</td><td>0.10</td><td>0.32</td><td>6.40</td><td>0.00</td></tr><tr><th>RobotArena-&infin;-Long</th><td>0.00</td><td>0.00</td><td>0.00</td><td>0.13</td><td>0.76</td><td>0.33</td><td>0.05</td><td>0.31</td><td>4.76</td><td>0.00</td></tr><tr><th>RoboLab-Long</th><td>0.00</td><td>0.00</td><td>0.00</td><td>0.21</td><td>0.66</td><td>0.30</td><td>0.04</td><td>0.38</td><td>8.76</td><td>0.00</td></tr><tr class="group"><td colspan="11"><i>Subgoals completed by half of the time budget (%)</i></td></tr><tr><th>SimplerEnv-Long</th><td>21.3</td><td>37.8</td><td>42.3</td><td>44.1</td><td>40.3</td><td>38.4</td><td>6.0</td><td>42.9</td><td>60.9</td><td>47.8</td></tr><tr><th>RobotArena-&infin;-Long</th><td>10.5</td><td>25.4</td><td>24.4</td><td>24.6</td><td>26.7</td><td>19.4</td><td>12.6</td><td>37.9</td><td>60.2</td><td>24.4</td></tr><tr><th>RoboLab-Long</th><td>53.1</td><td>52.6</td><td>50.2</td><td>48.4</td><td>53.6</td><td>41.6</td><td>22.3</td><td>78.4</td><td>78.1</td><td>55.9</td></tr><tr class="group"><td colspan="11"><i>Subgoals completed by the end of the budget (%)</i></td></tr><tr><th>SimplerEnv-Long</th><td>25.3</td><td>39.9</td><td>45.8</td><td>51.0</td><td>48.3</td><td>45.9</td><td>7.1</td><td>58.2</td><td>83.3</td><td>52.4</td></tr><tr><th>RobotArena-&infin;-Long</th><td>13.5</td><td>28.3</td><td>28.9</td><td>33.7</td><td>31.8</td><td>29.5</td><td>12.6</td><td>50.2</td><td>83.4</td><td>32.7</td></tr><tr><th>RoboLab-Long</th><td>56.6</td><td>57.1</td><td>58.9</td><td>56.1</td><td>62.0</td><td>42.4</td><td>22.4</td><td>81.6</td><td>78.7</td><td>63.3</td></tr></tbody></table></div>
+    <p class="table-note">API cost at list prices; it covers only the hosted VLM.</p>
+    </details>
+  </div>
+</section>
+
+<section class="section shade" id="failures">
+  <div class="container is-max-widescreen">
+    <h2 class="title is-3 has-text-centered">Failure analysis</h2><p class="section-subtitle">Why subgoals fail, and whether the orchestrator or the low-level policy is to blame.</p>
+    <div class="findings">
+      <div class="finding">
+        <span class="finding-value">7.1%</span>
+        <p class="finding-head">With verification, the policy is the bottleneck</p>
+        <p class="finding-text">Only 7.1% of the Proprioceptive verifier's subgoals are lost to orchestrator decisions (13.8% for VoLo). Most failures come from never reaching the target object.</p>
+      </div>
+      <div class="finding">
+        <span class="finding-value">28%</span>
+        <p class="finding-head">Long tasks fail because progress stalls</p>
+        <p class="finding-text">Half of the failed episodes complete no subgoal after the first 28% of the budget.</p>
+      </div>
+      <div class="finding">
+        <span class="finding-value">16.2%</span>
+        <p class="finding-head">Agents also declare success too early</p>
+        <p class="finding-text">PSP-Agent marks 16.2% of its subgoals as done when they are not, and TiPToP finds no plan for 50.9% of its subgoals.</p>
+      </div></div><div class="tabs is-centered is-boxed"><ul><li class="is-active"><a data-tabs="fail" data-pane="fail-avg">Averaged over suites</a></li><li class=""><a data-tabs="fail" data-pane="fail-suite">Per suite</a></li></ul></div><div class="tab-pane" data-tabs="fail" id="fail-avg"><img class="figure" src="static/images/failure_horizon.png" alt="Why subgoals fail" loading="lazy"><p class="figure-caption"><b>Why subgoals fail.</b> Share of subgoals not completed at the end of the episode, by cause (Appendix&nbsp;H). A loss that an orchestrator decision made final is drawn as an orchestrator cause (grey; CaP-X and GPT-Policy log no decisions), every other loss by what happened to the object. (a) One bar per system, over all its episodes. (b) One point per task length, over all ten systems. Every value is computed within each suite and then averaged over the three suites (per suite: Figure&nbsp;8).</p></div><div class="tab-pane is-hidden" data-tabs="fail" id="fail-suite"><img class="figure" src="static/images/failure_suites.png" alt="Why subgoals fail, per benchmark" loading="lazy"><p class="figure-caption"><b>Why subgoals fail, per benchmark.</b> Share of each suite's subgoals not completed, split by cause. Top: one bar per system, over all tasks of the suite. Bottom: all ten systems together, by number of subgoals in the task; on RobotArena-&infin;-Long each length from 7 up rests on one or two tasks. Systems keep the same order in every panel.</p></div><h3 class="title is-4 has-text-centered subhead">Which VLM should orchestrate?</h3><p class="subhead-note">Offline scores on 145 scenes and 562 labelled frames, without execution noise. Gemini 3.7 Flash, our default, has the best mean over the four capabilities (80.8%).</p><div class="table-wrap"><table class="results"><thead><tr><th>Model</th><th>Planning<br><small>exact match</small></th><th>Completion<br><small>TP rate</small></th><th>Completion<br><small>TN rate</small></th><th>State tracking<br><small>all correct</small></th><th>Next subgoal<br><small>valid</small></th><th>Tokens<br><small>per query</small></th></tr></thead><tbody><tr><th>Qwen3-VL-2B</th><td>75.2 <span class="pm">&plusmn;7.6</span></td><td>68.2 <span class="pm">&plusmn;7.0</span></td><td>34.1 <span class="pm">&plusmn;5.9</span></td><td>9.3 <span class="pm">&plusmn;4.0</span></td><td>58.9 <span class="pm">&plusmn;5.3</span></td><td>&ndash;</td></tr><tr><th>Qwen3-VL-8B</th><td>91.0 <span class="pm">&plusmn;5.8</span></td><td>69.0 <span class="pm">&plusmn;6.8</span></td><td>79.9 <span class="pm">&plusmn;5.7</span></td><td>47.9 <span class="pm">&plusmn;5.5</span></td><td>72.3 <span class="pm">&plusmn;4.4</span></td><td>&ndash;</td></tr><tr><th>Qwen3.5-9B</th><td>86.9 <span class="pm">&plusmn;6.5</span></td><td>44.4 <span class="pm">&plusmn;6.3</span></td><td>96.9 <span class="pm">&plusmn;2.5</span></td><td>11.7 <span class="pm">&plusmn;3.7</span></td><td>63.2 <span class="pm">&plusmn;4.8</span></td><td>5,173</td></tr><tr><th>Qwen3.8-27B</th><td>91.0 <span class="pm">&plusmn;5.8</span></td><td><b>76.2 <span class="pm">&plusmn;6.3</span></b></td><td>84.8 <span class="pm">&plusmn;4.3</span></td><td>58.2 <span class="pm">&plusmn;4.8</span></td><td>79.3 <span class="pm">&plusmn;4.1</span></td><td>1,904</td></tr><tr><th>Gemini 3.1 Pro</th><td>89.7 <span class="pm">&plusmn;6.0</span></td><td>54.8 <span class="pm">&plusmn;6.6</span></td><td>96.0 <span class="pm">&plusmn;2.9</span></td><td>68.7 <span class="pm">&plusmn;4.3</span></td><td>75.2 <span class="pm">&plusmn;4.5</span></td><td>583</td></tr><tr><th>Gemini 3.7 Flash</th><td><b>93.1 <span class="pm">&plusmn;5.4</span></b></td><td>59.4 <span class="pm">&plusmn;6.6</span></td><td>96.6 <span class="pm">&plusmn;2.6</span></td><td><b>70.8 <span class="pm">&plusmn;4.0</span></b></td><td>81.4 <span class="pm">&plusmn;4.2</span></td><td>412</td></tr><tr><th>Gemini Robotics-ER 2</th><td>90.3 <span class="pm">&plusmn;5.9</span></td><td>54.0 <span class="pm">&plusmn;6.5</span></td><td><b>97.8 <span class="pm">&plusmn;2.3</span></b></td><td>69.6 <span class="pm">&plusmn;4.2</span></td><td>76.6 <span class="pm">&plusmn;4.1</span></td><td>510</td></tr><tr><th>GPT-5.6 Sol</th><td><b>93.1 <span class="pm">&plusmn;5.4</span></b></td><td>72.8 <span class="pm">&plusmn;6.3</span></td><td>86.4 <span class="pm">&plusmn;4.3</span></td><td>56.4 <span class="pm">&plusmn;4.7</span></td><td>82.0 <span class="pm">&plusmn;4.3</span></td><td>282</td></tr><tr><th>GPT-6 Astra</th><td>91.7 <span class="pm">&plusmn;5.7</span></td><td>71.1 <span class="pm">&plusmn;6.2</span></td><td>86.4 <span class="pm">&plusmn;4.4</span></td><td>53.2 <span class="pm">&plusmn;5.1</span></td><td><b>85.4 <span class="pm">&plusmn;4.0</span></b></td><td>203</td></tr><tr><th>Claude Opus 5</th><td>90.3 <span class="pm">&plusmn;5.9</span></td><td>68.6 <span class="pm">&plusmn;6.6</span></td><td>87.9 <span class="pm">&plusmn;4.1</span></td><td>61.0 <span class="pm">&plusmn;4.7</span></td><td>79.8 <span class="pm">&plusmn;4.4</span></td><td>400</td></tr></tbody></table></div><p class="table-note">Scores in % with 95% intervals. TP and TN rates: finished and unfinished subgoals judged correctly.</p>
+  </div>
+</section>
+
+<section class="section" id="real-world">
+  <div class="container is-max-widescreen">
+    <h2 class="title is-3 has-text-centered">Real world</h2><p class="section-subtitle">Does the ranking in simulation hold on physical robots?</p>
+    <div class="findings">
+      <div class="finding">
+        <span class="finding-value">2 robots</span>
+        <p class="finding-head">WidowX 250 and Franka FR3</p>
+        <p class="finding-text">The low-level policy alone, the Proprioceptive verifier and PSP-Agent on tasks of 1 to 5 subgoals, 12 episodes per task and system.</p>
+      </div>
+      <div class="finding">
+        <span class="finding-value">Same ranking</span>
+        <p class="finding-head">Simulation is indicative</p>
+        <p class="finding-text">As in simulation, the low-level policy collapses fastest, and the three systems keep their order.</p>
+      </div></div>
+    <div class="columns is-vcentered real-results">
+      <div class="column is-5"><div class="table-wrap"><table class="results compact"><thead><tr><th>Task category</th><th>Subgoals</th><th>Low-level policy</th><th>Prop. verifier</th><th>PSP-Agent</th></tr></thead><tbody><tr class="group"><td colspan="5"><i>WidowX</i></td></tr><tr><th>Single destination</th><td>1</td><td>66.7</td><td>75.0</td><td><b>100.0</b></td></tr><tr><th>Single destination</th><td>2&ndash;3</td><td>0.0</td><td>33.3</td><td><b>87.5</b></td></tr><tr><th>Split destination</th><td>2&ndash;3</td><td>0.0</td><td>29.2</td><td><b>83.3</b></td></tr><tr><th>Exclusion</th><td>2</td><td>0.0</td><td>58.3</td><td><b>91.7</b></td></tr><tr><th>Ordered</th><td>2</td><td>8.3</td><td>33.3</td><td><b>41.7</b></td></tr><tr><th>Duplicates</th><td>2</td><td>0.0</td><td>0.0</td><td><b>58.3</b></td></tr><tr class="group"><td colspan="5"><i>Franka</i></td></tr><tr><th>Single destination</th><td>5</td><td>0.0</td><td>8.3</td><td><b>25.0</b></td></tr><tr><th>Exclusion</th><td>2</td><td>0.0</td><td>83.3</td><td><b>100.0</b></td></tr><tr><th>Ordered</th><td>3</td><td>16.7</td><td>83.3</td><td><b>100.0</b></td></tr></tbody></table></div></div>
+      <div class="column is-7"><img class="figure" src="static/images/real_robot_rank.png" alt="Real-robot evaluation" loading="lazy"></div>
+    </div>
+    <p class="figure-caption"><b>Real-robot evaluation.</b> Left: task success (%) on the real robots per task category, 12 episodes per task and system. Right: overall task success in simulation (Table&nbsp;3) and on the real robots. Both rank the three systems the same.</p>
+    <h3 class="title is-4 has-text-centered subhead">Real-robot rollouts</h3><p class="subhead-note">The three systems on the same tasks. Successes where a system has them on the longest tasks, otherwise its run that got furthest. Speeds are relative to the control rate (5 Hz WidowX, 15 Hz Franka); the real control loop ran somewhat slower than that.</p>
+    <div class="tabs is-centered is-toggle is-toggle-rounded"><ul><li class="is-active"><a data-tabs="real" data-pane="real-widowx">WidowX 250</a></li><li class=""><a data-tabs="real" data-pane="real-franka">Franka FR3</a></li></ul></div><div class="tab-pane" data-tabs="real" id="real-widowx"><div class="tabs is-centered is-boxed is-small"><ul><li class="is-active"><a data-tabs="real-widowx" data-pane="real-widowx-psp_agent">PSP-Agent</a></li><li class=""><a data-tabs="real-widowx" data-pane="real-widowx-proprioceptive_verifier">Proprioceptive verifier</a></li><li class=""><a data-tabs="real-widowx" data-pane="real-widowx-low_level_policy">Low-level policy</a></li></ul></div><div class="tab-pane" data-tabs="real-widowx" id="real-widowx-psp_agent"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/widowx_2_a67d34c2b1.mp4" poster="static/videos/gallery/widowx_2_a67d34c2b1.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put both the eggplant and the cup on the cloth and put the carrot in the pot&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/widowx_1_78f2c69fb1.mp4" poster="static/videos/gallery/widowx_1_78f2c69fb1.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put everything in the pot&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/widowx_3_5ae3667d1a.mp4" poster="static/videos/gallery/widowx_3_5ae3667d1a.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;first put the carrot on the cloth, then put the eggplant on the cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">2 subgoals</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="real-widowx" id="real-widowx-proprioceptive_verifier"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/widowx_8_900d9d7a0e.mp4" poster="static/videos/gallery/widowx_8_900d9d7a0e.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put both the eggplant and the cup on the cloth and put the carrot in the pot&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/widowx_7_47b5461e4a.mp4" poster="static/videos/gallery/widowx_7_47b5461e4a.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put everything in the pot&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/widowx_9_01c8617ff5.mp4" poster="static/videos/gallery/widowx_9_01c8617ff5.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;first put the carrot on the cloth, then put the eggplant on the cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">2 subgoals</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="real-widowx" id="real-widowx-low_level_policy"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/widowx_5_974936eacc.mp4" poster="static/videos/gallery/widowx_5_974936eacc.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put both the eggplant and the cup on the cloth and put the carrot in the pot&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span><span class="chip bad">failure &middot; 2 of 3 done</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/widowx_6_90e166fcb7.mp4" poster="static/videos/gallery/widowx_6_90e166fcb7.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put everything in the pot&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span><span class="chip bad">failure &middot; 0 of 3 done</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/widowx_4_1afe81ed9a.mp4" poster="static/videos/gallery/widowx_4_1afe81ed9a.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;first put the carrot on the cloth, then put the eggplant on the cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">2 subgoals</span></p>
+          </div>
+        </div></div></div></div><div class="tab-pane is-hidden" data-tabs="real" id="real-franka"><div class="tabs is-centered is-boxed is-small"><ul><li class="is-active"><a data-tabs="real-franka" data-pane="real-franka-psp_agent">PSP-Agent</a></li><li class=""><a data-tabs="real-franka" data-pane="real-franka-proprioceptive_verifier">Proprioceptive verifier</a></li><li class=""><a data-tabs="real-franka" data-pane="real-franka-low_level_policy">Low-level policy</a></li></ul></div><div class="tab-pane" data-tabs="real-franka" id="real-franka-psp_agent"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/franka_1_2e5c02cb5d.mp4" poster="static/videos/gallery/franka_1_2e5c02cb5d.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;Put the corn, the carrot, the eggplant, the blue cup and the banana in the bowl&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">5 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/franka_2_205ac10889.mp4" poster="static/videos/gallery/franka_2_205ac10889.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;First put the blue cup on the plate, then put the blue cup in the bowl, then put the banana on the plate, then put the banana in the bowl&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">4 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/franka_3_068b6ac0ed.mp4" poster="static/videos/gallery/franka_3_068b6ac0ed.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;Put the carrot and the blue cup in the bowl and put the eggplant on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="real-franka" id="real-franka-proprioceptive_verifier"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/franka_6_0eb0aaf20a.mp4" poster="static/videos/gallery/franka_6_0eb0aaf20a.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;Put the corn, the carrot, the eggplant, the blue cup and the banana in the bowl&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">5 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/franka_7_abe3a0e632.mp4" poster="static/videos/gallery/franka_7_abe3a0e632.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;First put the blue cup in the bowl, then put the carrot in the bowl, then put the eggplant in the bowl&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="real-franka" id="real-franka-low_level_policy"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/franka_4_96a0e73efc.mp4" poster="static/videos/gallery/franka_4_96a0e73efc.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;Put the corn, the carrot, the eggplant, the blue cup and the banana in the bowl&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">5 subgoals</span><span class="chip bad">failure &middot; 4 of 5 done</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/franka_5_60d03f0782.mp4" poster="static/videos/gallery/franka_5_60d03f0782.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;First put the blue cup in the bowl, then put the carrot in the bowl, then put the eggplant in the bowl&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span></p>
+          </div>
+        </div></div></div></div>
+  </div>
+</section>
+
+<section class="section shade" id="rollouts">
+  <div class="container is-max-widescreen">
+    <h2 class="title is-3 has-text-centered">Rollouts</h2><p class="section-subtitle">Episodes from the released evaluation. The label on each video gives its playback speed against the robot's real time.</p>
+    <div class="tabs is-centered is-toggle is-toggle-rounded"><ul><li class="is-active"><a data-tabs="sim" data-pane="sim-simplerenv">SimplerEnv-Long</a></li><li class=""><a data-tabs="sim" data-pane="sim-robotarena">RobotArena-&infin;-Long</a></li><li class=""><a data-tabs="sim" data-pane="sim-robolab">RoboLab-Long</a></li></ul></div><div class="tab-pane" data-tabs="sim" id="sim-simplerenv"><p class="pane-text">54 tasks &middot; SAPIEN &middot; WidowX 250 &middot; low-level policy: Bridge policy</p><p class="row-title">Highlights: long tasks solved without a single mistake</p><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/simplerenv_2_1af6121734.mp4" poster="static/videos/gallery/simplerenv_2_1af6121734.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div><p class="clip-title">CaP-X</p>
+            <p class="clip-instruction">&ldquo;first put the carrot on the plate, then put the spoon on the plate, then put the eggplant on the plate, then put the carrot on the blue towel, then put the spoon on the blue towel, then put the eggplant on the blue towel, then put the carrot on the plate, then put the spoon on the plate, then put the eggplant on the plate, then put the carrot on the blue towel&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/simplerenv_3_df71fd4688.mp4" poster="static/videos/gallery/simplerenv_3_df71fd4688.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div><p class="clip-title">PSP-Agent</p>
+            <p class="clip-instruction">&ldquo;first put the carrot on the plate, then put the spoon on the plate, then put the eggplant on the plate, then put the carrot on the blue towel, then put the spoon on the blue towel, then put the eggplant on the blue towel, then put the carrot on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">7 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/simplerenv_4_5ef52eca1f.mp4" poster="static/videos/gallery/simplerenv_4_5ef52eca1f.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div><p class="clip-title">VoLo</p>
+            <p class="clip-instruction">&ldquo;first put the carrot on the plate, then put the carrot on the blue towel, then put the spoon on the plate, then put the spoon on the blue towel, then put the eggplant on the plate, then put the eggplant on the blue towel&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span></p>
+          </div>
+        </div></div><p class="row-title">One scene, growing horizon <span class="select is-small picker"><select data-tabs="hz-simplerenv" aria-label="System"><option value="hz-simplerenv-psp_agent">PSP-Agent</option><option value="hz-simplerenv-low_level_policy">Low-level policy</option><option value="hz-simplerenv-periodic_trigger">Periodic trigger</option><option value="hz-simplerenv-proprioceptive_trigger">Proprioceptive trigger</option><option value="hz-simplerenv-proprioceptive_verifier">Proprioceptive verifier</option><option value="hz-simplerenv-volo">VoLo</option><option value="hz-simplerenv-cap_x">CaP-X</option><option value="hz-simplerenv-tiptop">TiPToP</option><option value="hz-simplerenv-gpt_policy">GPT-Policy</option><option value="hz-simplerenv-privileged_verifier">Privileged verifier</option></select></span></p><div class="tab-pane" data-tabs="hz-simplerenv" id="hz-simplerenv-psp_agent"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_psp_agent_1_c70da96844.mp4" poster="static/videos/gallery/horizon_simplerenv_psp_agent_1_c70da96844.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the carrot on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_psp_agent_5_90f1d268b9.mp4" poster="static/videos/gallery/horizon_simplerenv_psp_agent_5_90f1d268b9.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put both carrots, both spoons and the eggplant on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">5 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_psp_agent_10_25175086c6.mp4" poster="static/videos/gallery/horizon_simplerenv_psp_agent_10_25175086c6.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the four carrots, the three spoons and the three eggplants on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-simplerenv" id="hz-simplerenv-low_level_policy"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_low_level_policy_1_0fde9ae342.mp4" poster="static/videos/gallery/horizon_simplerenv_low_level_policy_1_0fde9ae342.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the carrot on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_low_level_policy_5_1659ba0fc5.mp4" poster="static/videos/gallery/horizon_simplerenv_low_level_policy_5_1659ba0fc5.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put both carrots, both spoons and the eggplant on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">5 subgoals</span><span class="chip bad">failure &middot; 4 of 5 done</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_low_level_policy_10_54e9e69ad0.mp4" poster="static/videos/gallery/horizon_simplerenv_low_level_policy_10_54e9e69ad0.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the four carrots, the three spoons and the three eggplants on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span><span class="chip bad">failure &middot; 5 of 10 done</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-simplerenv" id="hz-simplerenv-periodic_trigger"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_periodic_trigger_1_c4fca03543.mp4" poster="static/videos/gallery/horizon_simplerenv_periodic_trigger_1_c4fca03543.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the carrot on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_periodic_trigger_5_3abc79e42d.mp4" poster="static/videos/gallery/horizon_simplerenv_periodic_trigger_5_3abc79e42d.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put both carrots, both spoons and the eggplant on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">5 subgoals</span><span class="chip bad">failure &middot; 4 of 5 done</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_periodic_trigger_10_56d3291dc5.mp4" poster="static/videos/gallery/horizon_simplerenv_periodic_trigger_10_56d3291dc5.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the four carrots, the three spoons and the three eggplants on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span><span class="chip bad">failure &middot; 6 of 10 done</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-simplerenv" id="hz-simplerenv-proprioceptive_trigger"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_proprioceptive_trigger_1_04b08bcb02.mp4" poster="static/videos/gallery/horizon_simplerenv_proprioceptive_trigger_1_04b08bcb02.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the carrot on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_proprioceptive_trigger_5_610af0d120.mp4" poster="static/videos/gallery/horizon_simplerenv_proprioceptive_trigger_5_610af0d120.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put both carrots, both spoons and the eggplant on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">5 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_proprioceptive_trigger_10_14f7419b03.mp4" poster="static/videos/gallery/horizon_simplerenv_proprioceptive_trigger_10_14f7419b03.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the four carrots, the three spoons and the three eggplants on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span><span class="chip bad">failure &middot; 8 of 10 done</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-simplerenv" id="hz-simplerenv-proprioceptive_verifier"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_proprioceptive_verifier_1_eead5db754.mp4" poster="static/videos/gallery/horizon_simplerenv_proprioceptive_verifier_1_eead5db754.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the carrot on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_proprioceptive_verifier_5_1de3c9d12f.mp4" poster="static/videos/gallery/horizon_simplerenv_proprioceptive_verifier_5_1de3c9d12f.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put both carrots, both spoons and the eggplant on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">5 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_proprioceptive_verifier_10_8968656ba0.mp4" poster="static/videos/gallery/horizon_simplerenv_proprioceptive_verifier_10_8968656ba0.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the four carrots, the three spoons and the three eggplants on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span><span class="chip bad">failure &middot; 9 of 10 done</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-simplerenv" id="hz-simplerenv-volo"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_volo_1_6c2f6a103f.mp4" poster="static/videos/gallery/horizon_simplerenv_volo_1_6c2f6a103f.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the carrot on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_volo_5_1bff95ad40.mp4" poster="static/videos/gallery/horizon_simplerenv_volo_5_1bff95ad40.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put both carrots, both spoons and the eggplant on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">5 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_volo_10_ccf277c538.mp4" poster="static/videos/gallery/horizon_simplerenv_volo_10_ccf277c538.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the four carrots, the three spoons and the three eggplants on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span><span class="chip bad">failure &middot; 8 of 10 done</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-simplerenv" id="hz-simplerenv-cap_x"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_cap_x_1_0d83cc8e0b.mp4" poster="static/videos/gallery/horizon_simplerenv_cap_x_1_0d83cc8e0b.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the carrot on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_cap_x_5_96078956aa.mp4" poster="static/videos/gallery/horizon_simplerenv_cap_x_5_96078956aa.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put both carrots, both spoons and the eggplant on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">5 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_cap_x_10_56a719d106.mp4" poster="static/videos/gallery/horizon_simplerenv_cap_x_10_56a719d106.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the four carrots, the three spoons and the three eggplants on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span><span class="chip bad">failure &middot; 7 of 10 done</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-simplerenv" id="hz-simplerenv-tiptop"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_tiptop_1_cbe007306b.mp4" poster="static/videos/gallery/horizon_simplerenv_tiptop_1_cbe007306b.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the carrot on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_tiptop_5_1c368f80f9.mp4" poster="static/videos/gallery/horizon_simplerenv_tiptop_5_1c368f80f9.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put both carrots, both spoons and the eggplant on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">5 subgoals</span><span class="chip bad">failure &middot; 2 of 5 done</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_tiptop_10_864054bcce.mp4" poster="static/videos/gallery/horizon_simplerenv_tiptop_10_864054bcce.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the four carrots, the three spoons and the three eggplants on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span><span class="chip bad">failure &middot; 0 of 10 done</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-simplerenv" id="hz-simplerenv-gpt_policy"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_gpt_policy_1_df1e3d44be.mp4" poster="static/videos/gallery/horizon_simplerenv_gpt_policy_1_df1e3d44be.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the carrot on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_gpt_policy_5_808bdaad97.mp4" poster="static/videos/gallery/horizon_simplerenv_gpt_policy_5_808bdaad97.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put both carrots, both spoons and the eggplant on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">5 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_gpt_policy_10_9be40e05e3.mp4" poster="static/videos/gallery/horizon_simplerenv_gpt_policy_10_9be40e05e3.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the four carrots, the three spoons and the three eggplants on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-simplerenv" id="hz-simplerenv-privileged_verifier"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_privileged_verifier_1_8936f97ee2.mp4" poster="static/videos/gallery/horizon_simplerenv_privileged_verifier_1_8936f97ee2.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the carrot on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_privileged_verifier_5_526d36fb90.mp4" poster="static/videos/gallery/horizon_simplerenv_privileged_verifier_5_526d36fb90.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put both carrots, both spoons and the eggplant on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">5 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_simplerenv_privileged_verifier_10_e6b35e9fee.mp4" poster="static/videos/gallery/horizon_simplerenv_privileged_verifier_10_e6b35e9fee.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the four carrots, the three spoons and the three eggplants on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span></p>
+          </div>
+        </div></div></div><p class="row-title">Task categories</p><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/categories_se_0_7bd41eb15b.mp4" poster="static/videos/gallery/categories_se_0_7bd41eb15b.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div><p class="clip-title">Proprioceptive verifier</p>
+            <p class="clip-instruction">&ldquo;put both carrots, both spoons and the eggplant on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">5 subgoals</span><span class="chip ">Single destination</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/categories_se_3_dc1e07a0cf.mp4" poster="static/videos/gallery/categories_se_3_dc1e07a0cf.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div><p class="clip-title">Proprioceptive verifier</p>
+            <p class="clip-instruction">&ldquo;first put the carrot on the plate, then put the carrot on the blue towel, then put the spoon on the plate, then put the spoon on the blue towel, then put the eggplant on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">5 subgoals</span><span class="chip ">Relay</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/categories_se_6_abd9f579c2.mp4" poster="static/videos/gallery/categories_se_6_abd9f579c2.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div><p class="clip-title">GPT-Policy</p>
+            <p class="clip-instruction">&ldquo;first put the carrot on the plate, then put the spoon on the plate, then put the eggplant on the plate&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span><span class="chip ">Ordered</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="sim" id="sim-robotarena"><p class="pane-text">47 tasks &middot; Genesis &middot; WidowX 250 &middot; low-level policy: Bridge policy</p><p class="row-title">Highlights: long tasks solved without a single mistake</p><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/robotarena_2_d57b277133.mp4" poster="static/videos/gallery/robotarena_2_d57b277133.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div><p class="clip-title">GPT-Policy</p>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy, the cheese, the banana and the mushroom on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">5 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/robotarena_3_ba07dc6d13.mp4" poster="static/videos/gallery/robotarena_3_ba07dc6d13.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div><p class="clip-title">PSP-Agent</p>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy, the banana and the cheese on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">4 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/robotarena_4_697d591afa.mp4" poster="static/videos/gallery/robotarena_4_697d591afa.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div><p class="clip-title">VoLo</p>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy, the cheese and the banana on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">4 subgoals</span></p>
+          </div>
+        </div></div><p class="row-title">One scene, growing horizon <span class="select is-small picker"><select data-tabs="hz-robotarena" aria-label="System"><option value="hz-robotarena-psp_agent">PSP-Agent</option><option value="hz-robotarena-low_level_policy">Low-level policy</option><option value="hz-robotarena-periodic_trigger">Periodic trigger</option><option value="hz-robotarena-proprioceptive_trigger">Proprioceptive trigger</option><option value="hz-robotarena-proprioceptive_verifier">Proprioceptive verifier</option><option value="hz-robotarena-volo">VoLo</option><option value="hz-robotarena-cap_x">CaP-X</option><option value="hz-robotarena-tiptop">TiPToP</option><option value="hz-robotarena-gpt_policy">GPT-Policy</option><option value="hz-robotarena-privileged_verifier">Privileged verifier</option></select></span></p><div class="tab-pane" data-tabs="hz-robotarena" id="hz-robotarena-psp_agent"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_psp_agent_1_5ee5d71750.mp4" poster="static/videos/gallery/horizon_robotarena_psp_agent_1_5ee5d71750.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_psp_agent_3_72122870a9.mp4" poster="static/videos/gallery/horizon_robotarena_psp_agent_3_72122870a9.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy and the banana on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_psp_agent_6_243fc810cf.mp4" poster="static/videos/gallery/horizon_robotarena_psp_agent_6_243fc810cf.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy, the cheese, the banana, the mushroom and the corn cob on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-robotarena" id="hz-robotarena-low_level_policy"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_low_level_policy_1_c079c45577.mp4" poster="static/videos/gallery/horizon_robotarena_low_level_policy_1_c079c45577.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_low_level_policy_3_9364cea20e.mp4" poster="static/videos/gallery/horizon_robotarena_low_level_policy_3_9364cea20e.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy and the banana on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span><span class="chip bad">failure &middot; 1 of 3 done</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_low_level_policy_6_a049e19c8d.mp4" poster="static/videos/gallery/horizon_robotarena_low_level_policy_6_a049e19c8d.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy, the cheese, the banana, the mushroom and the corn cob on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span><span class="chip bad">failure &middot; 1 of 6 done</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-robotarena" id="hz-robotarena-periodic_trigger"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_periodic_trigger_1_c605f757c4.mp4" poster="static/videos/gallery/horizon_robotarena_periodic_trigger_1_c605f757c4.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_periodic_trigger_3_c5d8b6ad32.mp4" poster="static/videos/gallery/horizon_robotarena_periodic_trigger_3_c5d8b6ad32.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy and the banana on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span><span class="chip bad">failure &middot; 2 of 3 done</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_periodic_trigger_6_be02e969d5.mp4" poster="static/videos/gallery/horizon_robotarena_periodic_trigger_6_be02e969d5.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy, the cheese, the banana, the mushroom and the corn cob on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span><span class="chip bad">failure &middot; 3 of 6 done</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-robotarena" id="hz-robotarena-proprioceptive_trigger"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_proprioceptive_trigger_1_9a3bd853d8.mp4" poster="static/videos/gallery/horizon_robotarena_proprioceptive_trigger_1_9a3bd853d8.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_proprioceptive_trigger_3_0d83c3f3db.mp4" poster="static/videos/gallery/horizon_robotarena_proprioceptive_trigger_3_0d83c3f3db.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy and the banana on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span><span class="chip bad">failure &middot; 2 of 3 done</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_proprioceptive_trigger_6_31faf0757d.mp4" poster="static/videos/gallery/horizon_robotarena_proprioceptive_trigger_6_31faf0757d.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy, the cheese, the banana, the mushroom and the corn cob on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span><span class="chip bad">failure &middot; 4 of 6 done</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-robotarena" id="hz-robotarena-proprioceptive_verifier"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_proprioceptive_verifier_1_654b1c32f5.mp4" poster="static/videos/gallery/horizon_robotarena_proprioceptive_verifier_1_654b1c32f5.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_proprioceptive_verifier_3_0f1c0cc285.mp4" poster="static/videos/gallery/horizon_robotarena_proprioceptive_verifier_3_0f1c0cc285.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy and the banana on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_proprioceptive_verifier_6_31ac361b7c.mp4" poster="static/videos/gallery/horizon_robotarena_proprioceptive_verifier_6_31ac361b7c.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy, the cheese, the banana, the mushroom and the corn cob on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span><span class="chip bad">failure &middot; 4 of 6 done</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-robotarena" id="hz-robotarena-volo"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_volo_1_0559efb95f.mp4" poster="static/videos/gallery/horizon_robotarena_volo_1_0559efb95f.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_volo_3_b60991dbcf.mp4" poster="static/videos/gallery/horizon_robotarena_volo_3_b60991dbcf.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy and the banana on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_volo_6_e080b32dec.mp4" poster="static/videos/gallery/horizon_robotarena_volo_6_e080b32dec.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy, the cheese, the banana, the mushroom and the corn cob on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span><span class="chip bad">failure &middot; 3 of 6 done</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-robotarena" id="hz-robotarena-cap_x"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_cap_x_1_9f1d4ce3ba.mp4" poster="static/videos/gallery/horizon_robotarena_cap_x_1_9f1d4ce3ba.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_cap_x_3_1d45764a42.mp4" poster="static/videos/gallery/horizon_robotarena_cap_x_3_1d45764a42.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy and the banana on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span><span class="chip bad">failure &middot; 1 of 3 done</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_cap_x_6_4ab2b032bf.mp4" poster="static/videos/gallery/horizon_robotarena_cap_x_6_4ab2b032bf.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy, the cheese, the banana, the mushroom and the corn cob on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span><span class="chip bad">failure &middot; 2 of 6 done</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-robotarena" id="hz-robotarena-tiptop"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_tiptop_1_bfe827f1be.mp4" poster="static/videos/gallery/horizon_robotarena_tiptop_1_bfe827f1be.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span><span class="chip bad">failure &middot; 0 of 1 done</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_tiptop_3_21a40a7c47.mp4" poster="static/videos/gallery/horizon_robotarena_tiptop_3_21a40a7c47.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy and the banana on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span><span class="chip bad">failure &middot; 1 of 3 done</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_tiptop_6_efb5493906.mp4" poster="static/videos/gallery/horizon_robotarena_tiptop_6_efb5493906.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy, the cheese, the banana, the mushroom and the corn cob on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span><span class="chip bad">failure &middot; 0 of 6 done</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-robotarena" id="hz-robotarena-gpt_policy"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_gpt_policy_1_fba8cbc78b.mp4" poster="static/videos/gallery/horizon_robotarena_gpt_policy_1_fba8cbc78b.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_gpt_policy_3_fd3bf3dbd3.mp4" poster="static/videos/gallery/horizon_robotarena_gpt_policy_3_fd3bf3dbd3.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy and the banana on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_gpt_policy_6_11b393675c.mp4" poster="static/videos/gallery/horizon_robotarena_gpt_policy_6_11b393675c.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy, the cheese, the banana, the mushroom and the corn cob on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-robotarena" id="hz-robotarena-privileged_verifier"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_privileged_verifier_1_1a175f322c.mp4" poster="static/videos/gallery/horizon_robotarena_privileged_verifier_1_1a175f322c.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_privileged_verifier_3_505ae6e0a1.mp4" poster="static/videos/gallery/horizon_robotarena_privileged_verifier_3_505ae6e0a1.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy and the banana on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robotarena_privileged_verifier_6_c9a4004da8.mp4" poster="static/videos/gallery/horizon_robotarena_privileged_verifier_6_c9a4004da8.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the blue bowl, the sushi toy, the cheese, the banana, the mushroom and the corn cob on the purple cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span><span class="chip bad">failure &middot; 4 of 6 done</span></p>
+          </div>
+        </div></div></div><p class="row-title">Task categories</p><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/categories_ra_1_f1bde64159.mp4" poster="static/videos/gallery/categories_ra_1_f1bde64159.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div><p class="clip-title">PSP-Agent</p>
+            <p class="clip-instruction">&ldquo;put the spoon and the corn cob on the cloth and put the chicken drumstick in the pot&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span><span class="chip ">Split destination</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/categories_ra_4_242e4f4289.mp4" poster="static/videos/gallery/categories_ra_4_242e4f4289.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div><p class="clip-title">GPT-Policy</p>
+            <p class="clip-instruction">&ldquo;first put the spoon on the cloth, then put the spoon in the pot, then put the spoon on the cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span><span class="chip ">Revisit</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/categories_ra_7_5daf4f8f9e.mp4" poster="static/videos/gallery/categories_ra_7_5daf4f8f9e.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div><p class="clip-title">GPT-Policy</p>
+            <p class="clip-instruction">&ldquo;put the three corn cobs on the cloth&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span><span class="chip ">Duplicates</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="sim" id="sim-robolab"><p class="pane-text">44 tasks &middot; Isaac Sim &middot; Franka FR3 &middot; low-level policy: &pi;<sub>0.5</sub> (DROID)</p><p class="row-title">Highlights: long tasks solved without a single mistake</p><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/robolab_2_fe0190c1e4.mp4" poster="static/videos/gallery/robolab_2_fe0190c1e4.jpg" style="aspect-ratio: 640 / 360" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div><p class="clip-title">CaP-X</p>
+            <p class="clip-instruction">&ldquo;first put the orange in the bin, then put the pumpkin in the bin, then put the lychee in the bin, then put the lemon in the bin, then put the lime in the bin, then put the banana in the bin, then put the onion in the bin, then put the avocado in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">8 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/robolab_3_ca2abc3a48.mp4" poster="static/videos/gallery/robolab_3_ca2abc3a48.jpg" style="aspect-ratio: 640 / 360" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div><p class="clip-title">GPT-Policy</p>
+            <p class="clip-instruction">&ldquo;first put the lemon on the plate, then put the lemon in the bin, then put the lime on the plate, then put the lime in the bin, then put the banana on the plate, then put the banana in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/robolab_4_9128b79afb.mp4" poster="static/videos/gallery/robolab_4_9128b79afb.jpg" style="aspect-ratio: 640 / 360" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div><p class="clip-title">GPT-Policy</p>
+            <p class="clip-instruction">&ldquo;put the avocado, the banana and the lemon on the plate and put the orange, the lime and the onion in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span></p>
+          </div>
+        </div></div><p class="row-title">One scene, growing horizon <span class="select is-small picker"><select data-tabs="hz-robolab" aria-label="System"><option value="hz-robolab-psp_agent">PSP-Agent</option><option value="hz-robolab-low_level_policy">Low-level policy</option><option value="hz-robolab-periodic_trigger">Periodic trigger</option><option value="hz-robolab-proprioceptive_trigger">Proprioceptive trigger</option><option value="hz-robolab-proprioceptive_verifier">Proprioceptive verifier</option><option value="hz-robolab-volo">VoLo</option><option value="hz-robolab-cap_x">CaP-X</option><option value="hz-robolab-tiptop">TiPToP</option><option value="hz-robolab-gpt_policy">GPT-Policy</option><option value="hz-robolab-privileged_verifier">Privileged verifier</option></select></span></p><div class="tab-pane" data-tabs="hz-robolab" id="hz-robolab-psp_agent"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_psp_agent_1_0ef7968718.mp4" poster="static/videos/gallery/horizon_robolab_psp_agent_1_0ef7968718.jpg" style="aspect-ratio: 640 / 360" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_psp_agent_6_33d8473463.mp4" poster="static/videos/gallery/horizon_robolab_psp_agent_6_33d8473463.jpg" style="aspect-ratio: 640 / 360" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, the orange, the lemon, the lime, the avocado and the onion in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_psp_agent_10_9e6567b982.mp4" poster="static/videos/gallery/horizon_robolab_psp_agent_10_9e6567b982.jpg" style="aspect-ratio: 640 / 360" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, both oranges, the lemon, the lime, the avocado, the onion, the lychee, the pumpkin and the pomegranate in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-robolab" id="hz-robolab-low_level_policy"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_low_level_policy_1_389998a704.mp4" poster="static/videos/gallery/horizon_robolab_low_level_policy_1_389998a704.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_low_level_policy_6_aed47e572d.mp4" poster="static/videos/gallery/horizon_robolab_low_level_policy_6_aed47e572d.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, the orange, the lemon, the lime, the avocado and the onion in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_low_level_policy_10_73d882c7b2.mp4" poster="static/videos/gallery/horizon_robolab_low_level_policy_10_73d882c7b2.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, both oranges, the lemon, the lime, the avocado, the onion, the lychee, the pumpkin and the pomegranate in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-robolab" id="hz-robolab-periodic_trigger"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_periodic_trigger_1_05878867c0.mp4" poster="static/videos/gallery/horizon_robolab_periodic_trigger_1_05878867c0.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_periodic_trigger_6_b0ad770aab.mp4" poster="static/videos/gallery/horizon_robolab_periodic_trigger_6_b0ad770aab.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, the orange, the lemon, the lime, the avocado and the onion in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_periodic_trigger_10_ff792cb0be.mp4" poster="static/videos/gallery/horizon_robolab_periodic_trigger_10_ff792cb0be.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, both oranges, the lemon, the lime, the avocado, the onion, the lychee, the pumpkin and the pomegranate in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-robolab" id="hz-robolab-proprioceptive_trigger"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_proprioceptive_trigger_1_e0a90c215c.mp4" poster="static/videos/gallery/horizon_robolab_proprioceptive_trigger_1_e0a90c215c.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_proprioceptive_trigger_6_63aff816b3.mp4" poster="static/videos/gallery/horizon_robolab_proprioceptive_trigger_6_63aff816b3.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, the orange, the lemon, the lime, the avocado and the onion in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_proprioceptive_trigger_10_17a895172b.mp4" poster="static/videos/gallery/horizon_robolab_proprioceptive_trigger_10_17a895172b.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, both oranges, the lemon, the lime, the avocado, the onion, the lychee, the pumpkin and the pomegranate in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span><span class="chip bad">failure &middot; 9 of 10 done</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-robolab" id="hz-robolab-proprioceptive_verifier"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_proprioceptive_verifier_1_428c87880d.mp4" poster="static/videos/gallery/horizon_robolab_proprioceptive_verifier_1_428c87880d.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_proprioceptive_verifier_6_dee61963ce.mp4" poster="static/videos/gallery/horizon_robolab_proprioceptive_verifier_6_dee61963ce.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, the orange, the lemon, the lime, the avocado and the onion in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_proprioceptive_verifier_10_2acd242382.mp4" poster="static/videos/gallery/horizon_robolab_proprioceptive_verifier_10_2acd242382.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, both oranges, the lemon, the lime, the avocado, the onion, the lychee, the pumpkin and the pomegranate in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-robolab" id="hz-robolab-volo"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_volo_1_9759d6e729.mp4" poster="static/videos/gallery/horizon_robolab_volo_1_9759d6e729.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_volo_6_0229de15c9.mp4" poster="static/videos/gallery/horizon_robolab_volo_6_0229de15c9.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, the orange, the lemon, the lime, the avocado and the onion in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_volo_10_d6a0f04160.mp4" poster="static/videos/gallery/horizon_robolab_volo_10_d6a0f04160.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, both oranges, the lemon, the lime, the avocado, the onion, the lychee, the pumpkin and the pomegranate in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-robolab" id="hz-robolab-cap_x"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_cap_x_1_7cadeba1db.mp4" poster="static/videos/gallery/horizon_robolab_cap_x_1_7cadeba1db.jpg" style="aspect-ratio: 640 / 360" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_cap_x_6_595acfe645.mp4" poster="static/videos/gallery/horizon_robolab_cap_x_6_595acfe645.jpg" style="aspect-ratio: 640 / 360" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, the orange, the lemon, the lime, the avocado and the onion in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_cap_x_10_5fcd516078.mp4" poster="static/videos/gallery/horizon_robolab_cap_x_10_5fcd516078.jpg" style="aspect-ratio: 640 / 360" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, both oranges, the lemon, the lime, the avocado, the onion, the lychee, the pumpkin and the pomegranate in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-robolab" id="hz-robolab-tiptop"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_tiptop_1_7ead3eb4f4.mp4" poster="static/videos/gallery/horizon_robolab_tiptop_1_7ead3eb4f4.jpg" style="aspect-ratio: 640 / 360" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_tiptop_6_47b7b1bb1e.mp4" poster="static/videos/gallery/horizon_robolab_tiptop_6_47b7b1bb1e.jpg" style="aspect-ratio: 640 / 360" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, the orange, the lemon, the lime, the avocado and the onion in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span><span class="chip bad">failure &middot; 0 of 6 done</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_tiptop_10_b1b4cf43d2.mp4" poster="static/videos/gallery/horizon_robolab_tiptop_10_b1b4cf43d2.jpg" style="aspect-ratio: 640 / 360" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, both oranges, the lemon, the lime, the avocado, the onion, the lychee, the pumpkin and the pomegranate in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span><span class="chip bad">failure &middot; 0 of 10 done</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-robolab" id="hz-robolab-gpt_policy"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_gpt_policy_1_3e6ce4c3cc.mp4" poster="static/videos/gallery/horizon_robolab_gpt_policy_1_3e6ce4c3cc.jpg" style="aspect-ratio: 640 / 360" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_gpt_policy_6_98ba2fb997.mp4" poster="static/videos/gallery/horizon_robolab_gpt_policy_6_98ba2fb997.jpg" style="aspect-ratio: 640 / 360" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, the orange, the lemon, the lime, the avocado and the onion in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_gpt_policy_10_c14fcefe58.mp4" poster="static/videos/gallery/horizon_robolab_gpt_policy_10_c14fcefe58.jpg" style="aspect-ratio: 640 / 360" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, both oranges, the lemon, the lime, the avocado, the onion, the lychee, the pumpkin and the pomegranate in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span></p>
+          </div>
+        </div></div></div><div class="tab-pane is-hidden" data-tabs="hz-robolab" id="hz-robolab-privileged_verifier"><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_privileged_verifier_1_befeb48bbe.mp4" poster="static/videos/gallery/horizon_robolab_privileged_verifier_1_befeb48bbe.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">1 subgoal</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_privileged_verifier_6_de63222764.mp4" poster="static/videos/gallery/horizon_robolab_privileged_verifier_6_de63222764.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, the orange, the lemon, the lime, the avocado and the onion in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">6 subgoals</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/horizon_robolab_privileged_verifier_10_0ccf91e0ad.mp4" poster="static/videos/gallery/horizon_robolab_privileged_verifier_10_0ccf91e0ad.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div>
+            <p class="clip-instruction">&ldquo;put the banana, both oranges, the lemon, the lime, the avocado, the onion, the lychee, the pumpkin and the pomegranate in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">10 subgoals</span></p>
+          </div>
+        </div></div></div><p class="row-title">Task categories</p><div class="columns is-multiline">
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/categories_rl_2_f757d6c9d5.mp4" poster="static/videos/gallery/categories_rl_2_f757d6c9d5.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div><p class="clip-title">Proprioceptive trigger</p>
+            <p class="clip-instruction">&ldquo;move the orange, the lemon and the lime from the plate to the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">3 subgoals</span><span class="chip ">Transfer</span></p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/categories_rl_5_8c117ec6d2.mp4" poster="static/videos/gallery/categories_rl_5_8c117ec6d2.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">2&times; speed</span></div><p class="clip-title">Privileged verifier</p>
+            <p class="clip-instruction">&ldquo;put everything except the red block and the blue block in the bin&rdquo;</p>
+            <p class="clip-meta"><span class="chip strong">4 subgoals</span><span class="chip ">Exclusion</span></p>
+          </div>
+        </div></div></div><h3 class="title is-4 has-text-centered subhead">One task, every system</h3><p class="subhead-note">RoboLab-Long, 4 subgoals: &ldquo;put the avocado and the banana on the plate and put the orange and the lime in the bin&rdquo;. Episodes are sampled at random, so failures are shown where they occurred.</p><div class="columns is-multiline is-mobile system-grid">
+        <div class="column is-one-fifth-desktop is-one-third-tablet is-half-mobile">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/systems_rl_8_ec02e9b424.mp4" poster="static/videos/gallery/systems_rl_8_ec02e9b424.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">4&times; speed</span></div>
+            <p class="clip-title">Low-level policy</p>
+            <p class="clip-meta"><span class="chip bad">failure</span></p>
+          </div>
+        </div>
+        <div class="column is-one-fifth-desktop is-one-third-tablet is-half-mobile">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/systems_rl_9_c184c73d09.mp4" poster="static/videos/gallery/systems_rl_9_c184c73d09.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">4&times; speed</span></div>
+            <p class="clip-title">Periodic trigger</p>
+            <p class="clip-meta"><span class="chip ok">success</span></p>
+          </div>
+        </div>
+        <div class="column is-one-fifth-desktop is-one-third-tablet is-half-mobile">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/systems_rl_10_e8e9fca777.mp4" poster="static/videos/gallery/systems_rl_10_e8e9fca777.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">4&times; speed</span></div>
+            <p class="clip-title">Proprioceptive trigger</p>
+            <p class="clip-meta"><span class="chip bad">failure</span></p>
+          </div>
+        </div>
+        <div class="column is-one-fifth-desktop is-one-third-tablet is-half-mobile">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/systems_rl_11_ed589cc966.mp4" poster="static/videos/gallery/systems_rl_11_ed589cc966.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">4&times; speed</span></div>
+            <p class="clip-title">Proprioceptive verifier</p>
+            <p class="clip-meta"><span class="chip bad">failure</span></p>
+          </div>
+        </div>
+        <div class="column is-one-fifth-desktop is-one-third-tablet is-half-mobile">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/systems_rl_12_db33909be2.mp4" poster="static/videos/gallery/systems_rl_12_db33909be2.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">4&times; speed</span></div>
+            <p class="clip-title">VoLo</p>
+            <p class="clip-meta"><span class="chip ok">success</span></p>
+          </div>
+        </div>
+        <div class="column is-one-fifth-desktop is-one-third-tablet is-half-mobile">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/systems_rl_13_1b0085d87c.mp4" poster="static/videos/gallery/systems_rl_13_1b0085d87c.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">4&times; speed</span></div>
+            <p class="clip-title">CaP-X</p>
+            <p class="clip-meta"><span class="chip ok">success</span></p>
+          </div>
+        </div>
+        <div class="column is-one-fifth-desktop is-one-third-tablet is-half-mobile">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/systems_rl_14_0fdc1ba0e5.mp4" poster="static/videos/gallery/systems_rl_14_0fdc1ba0e5.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">4&times; speed</span></div>
+            <p class="clip-title">TiPToP</p>
+            <p class="clip-meta"><span class="chip ok">success</span></p>
+          </div>
+        </div>
+        <div class="column is-one-fifth-desktop is-one-third-tablet is-half-mobile">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/systems_rl_15_d712d91ac9.mp4" poster="static/videos/gallery/systems_rl_15_d712d91ac9.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">4&times; speed</span></div>
+            <p class="clip-title">PSP-Agent</p>
+            <p class="clip-meta"><span class="chip ok">success</span></p>
+          </div>
+        </div>
+        <div class="column is-one-fifth-desktop is-one-third-tablet is-half-mobile">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/systems_rl_16_8d47357133.mp4" poster="static/videos/gallery/systems_rl_16_8d47357133.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">4&times; speed</span></div>
+            <p class="clip-title">GPT-Policy</p>
+            <p class="clip-meta"><span class="chip ok">success</span></p>
+          </div>
+        </div>
+        <div class="column is-one-fifth-desktop is-one-third-tablet is-half-mobile">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/systems_rl_17_231865d319.mp4" poster="static/videos/gallery/systems_rl_17_231865d319.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">4&times; speed</span></div>
+            <p class="clip-title">Privileged verifier</p>
+            <p class="clip-meta"><span class="chip ok">success</span></p>
+          </div>
+        </div></div><h3 class="title is-4 has-text-centered subhead">The same policy, with and without an orchestrator</h3><p class="subhead-note">Given the whole instruction at once, the low-level policy stalls after the first subgoals. Driven by the Proprioceptive verifier, it completes the task.</p><p class="row-title has-text-centered">Relay &middot; 6 subgoals: &ldquo;first put the lemon on the plate, then put the lemon in the bin, then put the lime on the plate, then put the lime in the bin, then put the banana on the plate, then put the banana in the bin&rdquo;</p><div class="columns is-centered">
+        <div class="column is-5-desktop is-half-tablet">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/contrast_rl_18_0184d34fcb.mp4" poster="static/videos/gallery/contrast_rl_18_0184d34fcb.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">4&times; speed</span></div>
+            <p class="clip-title">Low-level policy <span class="chip bad">failure</span></p>
+          </div>
+        </div>
+        <div class="column is-5-desktop is-half-tablet">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/contrast_rl_19_4038703ca4.mp4" poster="static/videos/gallery/contrast_rl_19_4038703ca4.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">4&times; speed</span></div>
+            <p class="clip-title">Proprioceptive verifier <span class="chip ok">success</span></p>
+          </div>
+        </div></div><p class="row-title has-text-centered">Ordered &middot; 4 subgoals: &ldquo;first put the orange in the bin, then put the lemon in the bin, then put the lime in the bin, then put the banana in the bin&rdquo;</p><div class="columns is-centered">
+        <div class="column is-5-desktop is-half-tablet">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/contrast_rl_20_9e1da06f6f.mp4" poster="static/videos/gallery/contrast_rl_20_9e1da06f6f.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">4&times; speed</span></div>
+            <p class="clip-title">Low-level policy <span class="chip bad">failure</span></p>
+          </div>
+        </div>
+        <div class="column is-5-desktop is-half-tablet">
+          <div class="clip-card">
+            <div class="vid"><video class="rollout" src="static/videos/gallery/contrast_rl_21_ca85b01a81.mp4" poster="static/videos/gallery/contrast_rl_21_ca85b01a81.jpg" style="aspect-ratio: 896 / 496" muted loop playsinline preload="none"></video><span class="speed-badge">4&times; speed</span></div>
+            <p class="clip-title">Proprioceptive verifier <span class="chip ok">success</span></p>
+          </div>
+        </div></div>
+  </div>
+</section>
+
+<section class="section" id="resources">
+  <div class="container is-max-widescreen">
+    <h2 class="title is-3 has-text-centered">Resources</h2><p class="section-subtitle">Everything needed to run the benchmark and reproduce the paper.</p>
+    <div class="columns is-multiline">
+        <div class="column is-one-quarter-desktop is-half-tablet">
+          <a class="resource" href="https://github.com/insait-institute/ladder">
+            <span class="resource-icon"><i class="fab fa-github"></i></span>
+            <span class="resource-name">Code</span>
+            <span class="resource-text">The three benchmark suites, every orchestrator and baseline adapter, and the evaluation harness.</span>
+          </a>
+        </div>
+        <div class="column is-one-quarter-desktop is-half-tablet">
+          <a class="resource" href="https://huggingface.co/INSAIT-Institute/LADDER-Bridge-Policy">
+            <span class="resource-icon"><i class="fas fa-robot"></i></span>
+            <span class="resource-name">Bridge policy</span>
+            <span class="resource-text">The WidowX low-level policy of SimplerEnv-Long and RobotArena-&infin;-Long (Qwen3-VL backbone, BridgeData v2).</span>
+          </a>
+        </div>
+        <div class="column is-one-quarter-desktop is-half-tablet">
+          <a class="resource" href="https://huggingface.co/datasets/INSAIT-Institute/LADDER-Evaluation-Episodes">
+            <span class="resource-icon"><i class="fas fa-film"></i></span>
+            <span class="resource-name">Evaluation episodes</span>
+            <span class="resource-text">Every simulated episode of the paper with videos and step logs, plus the real-robot trials.</span>
+          </a>
+        </div>
+        <div class="column is-one-quarter-desktop is-half-tablet">
+          <a class="resource" href="https://huggingface.co/datasets/INSAIT-Institute/LADDER-Offline-VLM-Benchmark">
+            <span class="resource-icon"><i class="fas fa-tasks"></i></span>
+            <span class="resource-name">Offline VLM benchmark</span>
+            <span class="resource-text">145 scenes and 562 labelled frames to score a VLM as an orchestrator.</span>
+          </a>
+        </div></div>
+  </div>
+</section>
+
+<section class="section" id="bibtex">
+  <div class="container is-max-desktop content">
+    <h2 class="title is-3">BibTeX</h2>
+    <pre class="bibtex"><code>@article{ladder2026,
+  title   = {{LADDER}: A Long-Horizon Robot Manipulation Benchmark},
+  author  = {Petkov, Petko and Albanese, Giuliano and Nikolov, Nikolay and Van Gool, Luc and Tremblay, Jonathan and Paudel, Danda Pani},
+  journal = {arXiv preprint arXiv:XXXX.XXXXX},
+  year    = {2026},
+  url     = {https://arxiv.org/abs/XXXX.XXXXX}
+}</code></pre>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>It loads no third-party resources and
+      uses no analytics or tracking.</p>
+      <p>Website template adapted from <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>,
+      licensed under <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

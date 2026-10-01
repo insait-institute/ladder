@@ -1,0 +1,24 @@
+policy_config:
+  autoclass: ladder.components.inference.models.vlams.vlam_robot_inference.VLAMRobotInference
+  env_name: 'TODO'
+  controls_on_targets: True  # If True, apply controls on the target pose, otherwise on the observed pose
+  inference_config:
+    autoclass: ladder.components.inference.models.vlams.vlam_inference.VLAMInference
+    ckpt_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/checkpoints/$CKPT_NAME
+  controller_config:
+    autoclass: ladder.components.inference.models.vlams.controllers.action_chunking.ActionChunkingController
+    chunk_size: 4
+
+runner_config:
+  autoclass: ladder.components.inference.api.client.simpler_episode_runner.SimplerEpisodeRunner
+  env_config:
+    ip: localhost
+    port: 5556
+    raise_on_server_error: True
+    min_period: 0.0
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/sim/simpler/$CKPT_NAME/$ENV_NAME
+    fps: 5
+    rerun_enabled: False
+
+seed: 987654321

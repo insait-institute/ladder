@@ -1,0 +1,377 @@
+/* Adapted from the RoboLab dashboard (https://github.com/NVlabs/RoboLab, dashboard/static/app.css).
+ *
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* Dark theme tuned to roughly match lerobot's visualizer palette. */
+
+:root {
+  --bg-0: #07070a;        /* near-black, main background */
+  --bg-1: #101218;        /* tile/card surface */
+  --bg-2: #161922;        /* hover / elevated surface */
+  --border: #20232c;
+  --border-strong: #2a2e3a;
+  --text-0: #e6e7eb;
+  --text-1: #a4a8b4;       /* secondary */
+  --text-2: #6c707c;       /* tertiary, muted */
+  --accent: #4f46e5;       /* indigo-600, kept subtle */
+  --accent-fg: #c7d2fe;
+  --success: #34d399;
+  --fail: #f87171;
+}
+
+html, body { background-color: var(--bg-0); color: var(--text-0); }
+
+/* top nav */
+.topnav-brand {
+  color: var(--text-0);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+}
+.topnav-tab {
+  padding: 0.3rem 0.5rem;
+  margin-top: 0.25rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+  color: var(--text-2);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 80ms, color 80ms;
+}
+.topnav-tab.active { color: white; background: rgba(79, 70, 229, 0.25); }
+
+/* sidebar tree */
+.tree-row { cursor: pointer; transition: background-color 80ms ease; }
+.tree-row:hover { background-color: var(--bg-2); }
+.tree-row.selected {
+  background-color: rgba(79, 70, 229, 0.18);  /* accent @ ~18% */
+  border-left: 2px solid var(--accent);
+}
+
+/* matrix table for compare report */
+.matrix {
+  /* fixed layout = column widths declared in CSS are authoritative.
+     Width is intentionally NOT 100% — the table sizes to the sum of its
+     column widths so per-run columns stay compact instead of soaking up
+     a wide container. */
+  table-layout: fixed;
+}
+.matrix th, .matrix td {
+  padding: 0.4rem 0.65rem;
+  font-size: 0.78rem;
+  text-align: left;  /* default; numeric columns override via .cell-num */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.matrix th { color: var(--text-2); font-weight: 500; border-bottom: 1px solid var(--border); }
+.matrix tbody tr { border-top: 1px solid var(--border); }
+.matrix td.cell-num,
+.matrix th.cell-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  /* Numeric columns are sized to fit a stacked value + ±half CI line (e.g.
+     "29.7%" / "±5.4"). 50px is the empirically-tight estimate (paired with
+     a 100px cap on the colspan=2 header below). Bump it if you add wider
+     per-cell content later. */
+  width: 50px;
+}
+
+/* SR/Score value followed by a small CI annotation on the next line */
+.val-with-ci {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.15;
+}
+/* Inside numeric matrix cells, stretch the val-with-ci block to fill the
+   cell so the `title` attribute (which carries the full CI range / n) fires
+   from anywhere in the cell — not just over the few px of value text. */
+.matrix td.cell-num > .val-with-ci {
+  display: flex;
+  width: 100%;
+}
+.val-with-ci .val { font-variant-numeric: tabular-nums; }
+.val-with-ci .ci {
+  font-size: 0.65rem;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.matrix td.label-col,
+.matrix th.label-col {
+  /* Label column — fixed at a sensible reading width; long names truncate
+     with ellipsis (full text in tooltip via the `title` attribute).
+     Targeted via class (not :first-child) because header rows with
+     rowspan/colspan mis-identify the first body column under :first-child. */
+  width: 240px;
+  max-width: 240px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Inner wrapper for label cells: pins the actual rendered width to 240px
+   regardless of table-layout:auto column distribution, so every matrix's
+   Experiment/Task column has the same width. */
+.matrix td.label-col > .label-cell,
+.matrix th.label-col > .label-cell {
+  display: inline-block;
+  width: 240px;
+  max-width: 240px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+/* chips */
+.chip {
+  display: inline-flex; align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.7rem; font-weight: 500;
+  background-color: var(--bg-1);
+  color: var(--text-1);
+  border: 1px solid var(--border);
+}
+.chip.success { background-color: rgba(52,211,153,0.10); color: var(--success); border-color: rgba(52,211,153,0.35); }
+.chip.fail    { background-color: rgba(248,113,113,0.10); color: var(--fail);    border-color: rgba(248,113,113,0.35); }
+.chip.accent  { background-color: rgba(79,70,229,0.15);  color: var(--accent-fg); border-color: rgba(79,70,229,0.4); }
+
+/* camera tile */
+.cam-tile {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.cam-tile-label {
+  font-family: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  color: var(--text-1);
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-0);
+  display: flex; align-items: center; gap: 6px;
+}
+.cam-tile-label .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text-2);
+}
+/* Camera tile grid. Two layout modes:
+   - Narrow (default): width-bound grid; each video keeps natural aspect, so
+     tile heights vary with the mp4 dimensions.
+   - Wide (>= 1024px, lerobot-style): all tiles share a fixed height; widths
+     follow each video's true aspect, just like the lerobot screenshot.
+   No CSS aspect-ratio on <video>, so native fullscreen renders unclamped. */
+.cam-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 0.5rem;
+  align-items: start;
+}
+.cam-tile-video-wrap {
+  background: #000;
+  min-height: 60px;
+  position: relative;
+}
+.cam-tile-video-wrap video {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Loading state shown while a video element fetches its first frame.
+   .is-loading is set when the element is created and removed on `loadeddata`
+   (or `error`, in which case the failure variant is rendered instead). */
+.video-host {
+  position: relative;
+  background: #000;
+}
+.video-host.is-loading::after {
+  content: "Loading…";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: var(--text-2);
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0.04em;
+  background: rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+.video-host.is-failed::after {
+  content: "video failed";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: var(--fail);
+  font-family: ui-monospace, monospace;
+  background: rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+@media (min-width: 1024px) {
+  .cam-grid {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .cam-tile {
+    /* shrink to fit the contained video's natural width */
+    flex: 0 0 auto;
+    max-width: 100%;
+  }
+  .cam-tile-video-wrap {
+    height: 360px;
+    min-height: 0;
+  }
+  .cam-tile-video-wrap video {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+  }
+}
+
+/* tabs (lerobot-style underline) */
+.tab {
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 80ms ease, border-color 80ms ease;
+}
+.tab:hover { color: var(--text-1); }
+.tab.active {
+  color: var(--text-0);
+  border-bottom-color: var(--accent);
+}
+
+/* panel surfaces */
+.panel {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+}
+
+/* "language instruction" header used in episode view */
+.lang-label {
+  font-family: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+/* events timeline strip + scrollable list */
+.events-strip {
+  position: relative;
+  height: 28px;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+}
+.events-strip-track {
+  position: absolute; top: 50%; left: 8px; right: 8px;
+  height: 2px;
+  background: rgba(120, 128, 150, 0.25);
+  transform: translateY(-50%);
+}
+.events-strip-marker {
+  position: absolute; top: 4px; bottom: 4px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--text-2);
+  transform: translateX(-50%);
+}
+.events-strip-marker.success { background: var(--success); }
+.events-strip-marker.failure { background: var(--fail); }
+.events-strip-marker.active {
+  outline: 2px solid white;
+  outline-offset: 1px;
+}
+.events-strip-playhead {
+  position: absolute; top: 0; bottom: 0;
+  width: 2px; background: white;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.events-list {
+  max-height: 220px;
+  overflow-y: auto;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.events-row {
+  padding: 4px 8px;
+  border-top: 1px solid var(--border);
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.events-row:first-child { border-top: none; }
+.events-row:hover { background: var(--bg-2); }
+.events-row.active {
+  background: rgba(79, 70, 229, 0.18);
+  border-left: 2px solid var(--accent);
+}
+.events-row .ev-time {
+  font-family: ui-monospace, monospace;
+  color: var(--text-2);
+  font-size: 11px;
+}
+.events-row .ev-name {
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+}
+.events-row.success .ev-name { color: var(--success); }
+.events-row.failure .ev-name { color: var(--fail); }
+.events-row .ev-info {
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* table rows */
+.tbl-row { border-top: 1px solid var(--border); }
+.tbl-row-clickable:hover { background-color: var(--bg-2); }
+
+/* episode card on task view */
+.ep-card { transition: border-color 80ms ease; }
+.ep-card:hover { border-color: var(--accent) !important; }
+
+/* table head — subtle */
+table thead { background: var(--bg-0); color: var(--text-2); }
+table thead th { padding: 0.5rem 0.75rem; font-weight: 500; }
+
+/* Plotly tweaks for dark */
+.plotly .modebar-btn svg path { fill: var(--text-2) !important; }
+
+.bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  overflow: hidden;
+}
+.bar .fill { height: 100%; background: var(--success); }
