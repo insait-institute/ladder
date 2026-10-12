@@ -59,8 +59,8 @@ build --disk_cache=~/.cache/shared-ladder
 # Use hardlinks to avoid copying files (instant 'unzipping', e.g. for pip .whl)
 common --experimental_repository_cache_hardlinks
 
-# How many parallel_http_archive chunks are in flight. The default of 8 leaves most of the link
-# unused on the multi-GB asset archives. See build_support/repo/parallel_http_archive.bzl.
+# How many repository downloads are in flight. The default of 8 leaves most of the link unused
+# when a fresh build fetches its archives and wheels.
 common --http_max_parallel_downloads=32
 
 # CI runs bazel inside a fixed budget: a cgroup for the runner, a slurm allocation for the gpu tests.

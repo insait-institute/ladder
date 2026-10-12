@@ -78,12 +78,42 @@ py_binary(
     deps = [":tiptop"],
 )
 
+# The CUDA_HOME the kernels compile against: NVIDIA's compiler, runtime and C++ core libraries,
+# over the headers of this env's CUDA library wheels, which torch's CUDAContext.h includes.
+CUDA_HEADER_WHEELS = [
+    "nvidia_cublas_cu12",
+    "nvidia_cuda_runtime_cu12",
+    "nvidia_cufft_cu12",
+    "nvidia_cufile_cu12",
+    "nvidia_curand_cu12",
+    "nvidia_cusolver_cu12",
+    "nvidia_cusparse_cu12",
+    "nvidia_nccl_cu12",
+    "nvidia_nvjitlink_cu12",
+    "nvidia_nvtx_cu12",
+]
+
 copy_to_directory(
     name = "cuda_home",
-    srcs = ["@cuda_home_archive//:files"],
+    srcs = ["@pip-inference-models-tiptop//%s:extracted_whl_files" % wheel for wheel in CUDA_HEADER_WHEELS] + [
+        "@cuda_nvcc_archive//:files",
+        "@cuda_cudart_archive//:files",
+        "@cuda_cccl_archive//:files",
+    ],
     out = "cuda_home",
-    include_external_repositories = ["*cuda_home_archive"],
-    replace_prefixes = {"cuda_home/": ""},
+    allow_overwrites = True,
+    include_external_repositories = ["*"],
+    include_srcs_patterns = [
+        "site-packages/nvidia/*/include/**",
+        "LICENSE",
+        "bin/**",
+        "include/**",
+        "lib/**",
+        "lib64/**",
+        "nvvm/**",
+        "pkg-config/**",
+    ],
+    replace_prefixes = {"site-packages/nvidia/*/include/": "include/"},
     tags = ["manual"],
 )
 

@@ -35,7 +35,7 @@ keeps the integration frame-convention-free.
 
 - **Code** — `@robolab_repo`: the RoboLab source archive (sha256-pinned, code only). A `constants.py`
   patch makes it resolve assets from `ROBOLAB_ASSET_DIR`.
-- **Assets** — `@robolab_assets_archive`: the ~6 GB asset tree (HuggingFace tarball), staged into
+- **Assets** — `@robolab_assets_archive`: the ~1 GB asset tree the tasks load, staged into
   `assets/` by `copy_to_directory`. First build on a fresh machine fetches it once.
 - **openpi client** — `@openpi_client_repo` vendors `openpi_client` as source (its `numpy<2` pin
   conflicts with isaacsim's numpy 2.x; the source runs fine on 2.x).

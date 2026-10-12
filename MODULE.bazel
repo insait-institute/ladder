@@ -35,7 +35,7 @@ archive_override(
     module_name = "rules_uv",
     integrity = "sha256-ObU6SXXVaSOxpyWAb1tZm3vPsutGZoRBiyGoYaMUWbM=",
     strip_prefix = "rules_uv-3928773c",
-    urls = ["https://github.com/insait-institute/ladder/releases/download/assets-v1/rules_uv-3928773c.tar.gz"],
+    urls = ["https://github.com/insait-institute/ladder/releases/download/assets-v1/rules_uv_src.tar.gz"],
 )
 
 # Set up Python toolchain

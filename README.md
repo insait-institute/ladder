@@ -128,8 +128,9 @@ Debian 13 with NVIDIA RTX A6000, H200 and RTX PRO 6000 GPUs, and an RTX 3090.
 ## License
 
 The code and the Bridge policy are released under the [MIT License](LICENSE), and the evaluation
-episodes under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Third-party components are
-listed in [EVALUATION.md](EVALUATION.md#licenses-of-external-components).
+episodes under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The benchmark also uses
+third-party assets and code under their own licenses, some of which allow non-commercial use only.
+They are listed in [EVALUATION.md](EVALUATION.md#licenses-of-external-components).
 
 ## Citation
 

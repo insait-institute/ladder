@@ -83,9 +83,15 @@ filegroup(
 # Download and extract the ManiSkill3 assets (the data/ tree the env reads via MS_ASSET_DIR).
 copy_to_directory(
     name = "maniskill_assets_downloaded",
-    srcs = ["@simpler_maniskill3_assets_archive//:maniskill3_files"],
+    srcs = [
+        "@maniskill_widowx_archive//:maniskill3_files",
+        "@simpler_maniskill3_assets_archive//:maniskill3_files",
+    ],
     out = "maniskill3",
-    include_external_repositories = ["*simpler_maniskill3_assets_archive"],
+    include_external_repositories = [
+        "*maniskill_widowx_archive",
+        "*simpler_maniskill3_assets_archive",
+    ],
 )
 
 # The vendored SAPIEN PhysX GPU lib, laid out under sapien_physx/ in the runfiles so env_builder

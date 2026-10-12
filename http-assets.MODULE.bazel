@@ -1,16 +1,15 @@
-# Hermetic sim/robot-benchmark archives: asset tarballs, benchmark code drops, and vendored
-# sources. Split out of MODULE.bazel (include()d from there) to keep the module file readable
+# Hermetic sim/robot-benchmark archives: asset tarballs, benchmark code drops, vendored sources
+# and weights. Split out of MODULE.bazel (include()d from there) to keep the module file readable
 # as these pins grew; same pattern as the pip-*.MODULE.bazel segments.
+#
+# Everything we may redistribute is on the repository's assets-v1 release, so the build downloads it
+# from one place. CUDA, the WidowX model and GPT-Policy are not licensed for redistribution and come
+# from upstream; each says so where it is pinned.
 
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
 
-# For the multi-GB asset archives: one connection per URL caps at ~14 MB/s, chunked parallel ranges
-# reach ~105 MB/s. See build_support/repo/parallel_http_archive.bzl.
-parallel_http_archive = use_repo_rule("//build_support/repo:parallel_http_archive.bzl", "parallel_http_archive")
-
-# ManiSkill3 bridge digital twins + widowx robot assets, bundled hermetically (see
-# robots/simpler/BUILD).
+# ManiSkill3 bridge digital twins, bundled hermetically (see robots/simpler/BUILD).
 http_archive(
     name = "simpler_maniskill3_assets_archive",
     build_file_content = """
@@ -20,8 +19,25 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 """,
-    integrity = "sha256-06OUwcbZJES+djY8uDkshu1sDVNOOtBnQwTI5gUwyHc=",
-    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/simpler_maniskill3_assets.tar.gz",
+    integrity = "sha256-36Rd6KJnDMbwW7nbKM3xa266vCT0H+EKPL4P8b3lOp8=",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/simpler_assets.tar.gz",
+)
+
+# ManiSkill3's WidowX robot model, laid out where ManiSkill expects it next to the bridge assets.
+# Fetched from upstream rather than the assets-v1 release: the repository has no license.
+http_archive(
+    name = "maniskill_widowx_archive",
+    add_prefix = "data/robots/widowx",
+    build_file_content = """
+filegroup(
+    name = "maniskill3_files",
+    srcs = glob(["data/**/*"]),
+    visibility = ["//visibility:public"],
+)
+""",
+    sha256 = "c440d733291e28fd257d0e6a6fb71b8575d155fd7bde92f6779743a52d8fedd0",
+    strip_prefix = "ManiSkill-WidowX250S-6a12bb745d964aab9fc897f0999cad53aa29000c",
+    url = "https://github.com/haosulab/ManiSkill-WidowX250S/archive/6a12bb745d964aab9fc897f0999cad53aa29000c.tar.gz",
 )
 
 # SAPIEN's precompiled PhysX GPU library. SAPIEN downloads this to ~/.sapien/physx/<version> on the
@@ -37,11 +53,11 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 """,
-    integrity = "sha256-FnoBqtc4Gv75Y7iRaZaMKJ57ZTiAp6gjwRbYfuXAD8Y=",
-    url = "https://github.com/sapien-sim/physx-precompiled/releases/download/105.1-physx-5.3.1.patch0/linux-so.zip",
+    integrity = "sha256-A1OzsMXUXTrYUTbeOKyJwhbd/qjyMGlmv6+5PNbNg5w=",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/sapien_physx_gpu_linux.zip",
 )
 
-parallel_http_archive(
+http_archive(
     name = "robot_arena_archive",
     build_file_content = """
 filegroup(
@@ -54,65 +70,9 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 """,
-    integrity = "sha256-DT158kVcK9aUhfEmZDTU3KMevkdFEuwXS85vnvw7O5s=",
-    size_bytes = "241166646",
+    integrity = "sha256-Tpq5ZLwf4t1xVwMHJl3Aqw5+24Rm3f5GBW232QwLIYc=",
     strip_prefix = "robot_arena_data",
-    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/robot_arena_ladder_data.tar.gz",
-)
-
-# RoboTwin 2.0 benchmark code. Assets are NOT in the repo — they ship as the three zips below and are
-# staged into robots/robotwin/ by copy_to_directory in that package's BUILD.
-http_archive(
-    name = "robotwin_repo",
-    build_file_content = """
-load("@rules_python//python:py_library.bzl", "py_library")
-
-py_library(
-    name = "robotwin",
-    srcs = glob([
-        "envs/**/*.py",
-        "description/**/*.py",
-        "code_gen/**/*.py",
-    ]),
-    data = glob(
-        [
-            "task_config/**",
-            "description/**",
-            "assets/**",
-        ],
-        allow_empty = True,
-    ),
-    imports = ["."],
-    visibility = ["//visibility:public"],
-)
-""",
-    integrity = "sha256-AGNhTYDqz3HG6FVtNc3PdSTnim1WEa7EWrg40URruGU=",
-    strip_prefix = "RoboTwin-c3ddfa8b97d5519efa828b075999bd0006778e5e",
-    url = "https://github.com/robotwin-Platform/RoboTwin/archive/c3ddfa8b97d5519efa828b075999bd0006778e5e.tar.gz",
-)
-
-parallel_http_archive(
-    name = "robotwin_objects_archive",
-    build_file_content = 'filegroup(name = "files", srcs = glob(["**/*"], exclude = ["BUILD.bazel", "WORKSPACE", "WORKSPACE.bazel", "REPO.bazel", "MODULE.bazel"]), visibility = ["//visibility:public"])',
-    integrity = "sha256-aqVrPPHhBk98gJMIFE2jawCBX4sTf+8tfk3oVvi+zyc=",
-    size_bytes = "3737778549",
-    url = "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/resolve/9dc9299c163db059931898a9f0852098a61155a1/objects.zip",
-)
-
-parallel_http_archive(
-    name = "robotwin_background_texture_archive",
-    build_file_content = 'filegroup(name = "files", srcs = glob(["**/*"], exclude = ["BUILD.bazel", "WORKSPACE", "WORKSPACE.bazel", "REPO.bazel", "MODULE.bazel"]), visibility = ["//visibility:public"])',
-    integrity = "sha256-VO3g+1t4Pg+qK8mHINOv/Wyju5KAsiW0jBqvrzFHMHA=",
-    size_bytes = "10970687027",
-    url = "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/resolve/9dc9299c163db059931898a9f0852098a61155a1/background_texture.zip",
-)
-
-parallel_http_archive(
-    name = "robotwin_embodiments_archive",
-    build_file_content = 'filegroup(name = "files", srcs = glob(["**/*"], exclude = ["BUILD.bazel", "WORKSPACE", "WORKSPACE.bazel", "REPO.bazel", "MODULE.bazel"]), visibility = ["//visibility:public"])',
-    integrity = "sha256-a4fX1V4QbY/yWRfgU46x4Xf8VJKA6KdCqM7Dy5+VP8Y=",
-    size_bytes = "219859313",
-    url = "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/resolve/9dc9299c163db059931898a9f0852098a61155a1/embodiments.zip",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/robot_arena_assets.tar.gz",
 )
 
 # RoboLab benchmark code (no LFS assets — those ship via @robolab_assets_archive). The patch makes
@@ -163,23 +123,22 @@ py_library(
     ],
     sha256 = "4dfd0ea7601ce65129f81b50b7202afd0e68b774d1045ba7d39907e0b0815023",
     strip_prefix = "sam3-6fe87d64a5beb9084923d7a9e002741178635b09",
-    url = "https://github.com/Max-Fu/sam3/archive/6fe87d64a5beb9084923d7a9e002741178635b09.tar.gz",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/sam3_src.tar.gz",
 )
 
-# Full RoboLab ~6 GB asset tree, hosted as one HuggingFace tarball; staged into robots/robolab/assets/
+# The RoboLab assets the LADDER tasks load (~1 GB); staged into robots/robolab/assets/
 # by copy_to_directory in that package's BUILD.
-parallel_http_archive(
+http_archive(
     name = "robolab_assets_archive",
     build_file_content = """
 filegroup(
     name = "assets_files",
-    srcs = glob(["assets/**"], exclude = ["assets/**/README.md"]),
+    srcs = glob(["assets/**"], exclude = ["assets/**/README.md", "assets/**/LICENSE"]),
     visibility = ["//visibility:public"],
 )
 """,
-    integrity = "sha256-Z8Yyp0uMhRoordbs8/OCB8/3gw4jdnP6IHV0QpU+0KA=",
-    size_bytes = "1032428686",
-    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/robolab_ladder_assets.tar.gz",
+    integrity = "sha256-Gdo6vMjZQSZ5GnjDywbLO3h3boUTxzvirQlhIGsgnY0=",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/robolab_assets.tar.gz",
 )
 
 # openpi, vendored as source rather than installed as a package: its own dependency set pulls the
@@ -213,7 +172,7 @@ py_library(
 """,
     sha256 = "2e36927c2c77ffaf111a16e5533d6d4ac26ea00fb47c1650f95a96e5d9f078de",
     strip_prefix = "openpi-aa6420561529593114160d05e5ad155792b272f3",
-    url = "https://github.com/xuningy/openpi/archive/aa6420561529593114160d05e5ad155792b272f3.tar.gz",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/openpi_src.tar.gz",
 )
 
 # VoLo (NVlabs/VoLoAgent), vendored as source so the strategy that decides is upstream's own.
@@ -231,7 +190,7 @@ py_library(
 """,
     sha256 = "829c6570f4511cc2a713f771ab1fa8014e34cb266be08cec84db1ea83d6c3704",
     strip_prefix = "VoLoAgent-b4e623079ca8498a16bcd5016920d71f76c44d30",
-    url = "https://github.com/NVlabs/VoLoAgent/archive/b4e623079ca8498a16bcd5016920d71f76c44d30.tar.gz",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/volo_agent_src.tar.gz",
 )
 
 # cuTAMP, our fork of upstream e206ab8: the widowx robot, the incumbent-plan recovery and the
@@ -262,7 +221,7 @@ py_library(
 )
 """,
     integrity = "sha256-xSn1Uh7ODAQUvTAW2sdcHMkMQVcR6Wpqpcq8nJWT9jM=",
-    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/cutamp_fork.tar.gz",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/cutamp_src.tar.gz",
 )
 
 # curobo, pristine upstream (our tree is byte-identical to it): vendored as source so the
@@ -289,8 +248,9 @@ py_library(
     visibility = ["//visibility:public"],
 )
 """,
+    integrity = "sha256-BKx/U9OtoKqP+OPwIY3+qmZu9CIHlEbCnwxZMXnonNY=",
     strip_prefix = "curobo-b5fad1df2a3ac4d3e33e369918b7d62d0e59ebd1",
-    url = "https://github.com/williamshen-nz/curobo/archive/b5fad1df2a3ac4d3e33e369918b7d62d0e59ebd1.tar.gz",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/curobo_src.tar.gz",
 )
 
 # M2T2 grasp proposer, pristine upstream. pointnet2_ops builds against nvcc at server
@@ -337,8 +297,9 @@ filegroup(
     patches = [
         "//build_support/python/patches:m2t2_pointnet2_ext_src.patch",
     ],
+    integrity = "sha256-AAkR6j+ginAXuskNOFqH7wNpCAqMTnBG+VEo+9PxBd8=",
     strip_prefix = "M2T2-96201acdb77baa1bc9d01bdf4d6f870d79b4b696",
-    url = "https://github.com/williamshen-nz/M2T2/archive/96201acdb77baa1bc9d01bdf4d6f870d79b4b696.tar.gz",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/m2t2_src.tar.gz",
 )
 
 # SAM-2, pristine upstream, pure Python.
@@ -363,29 +324,51 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 """,
+    integrity = "sha256-Hy+/rT/6OBEDaKusdsbvnfnCgqZtXCgHvJSr9NL7MPg=",
     strip_prefix = "sam2-2b90b9f5ceec907a1c18123530e92e794ad901a4",
-    url = "https://github.com/facebookresearch/segment-anything-2/archive/2b90b9f5ceec907a1c18123530e92e794ad901a4.tar.gz",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/sam2_src.tar.gz",
 )
 
 # The M2T2 grasp weights and the SAM-2 checkpoint download at server startup into the
 # session's cache dir, like openpi checkpoints and SAM-3 weights: no build-time fetch.
 
-# The one directory torch's extension compiler wants: NVIDIA's nvcc and cudart redist
-# tarballs merged into bin/, include/, lib/ (with lib as lib64) and nvvm/. curobo compiles
-# its fused ops at server startup against it, with the pip nvcc wheel carrying only ptxas.
-http_archive(
-    name = "cuda_home_archive",
-    build_file_content = """
+# CUDA 12.9's compiler, runtime and C++ core libraries, from NVIDIA's redistributable archives
+# (the CUDA license does not let us host them). TiPToP merges them into the CUDA_HOME that curobo
+# and M2T2 compile their kernels against at server startup; see models/tiptop/BUILD. lib64 is the
+# path torch's extension builder links against.
+CUDA_ARCHIVE_BUILD = """
 filegroup(
     name = "files",
-    srcs = glob([
-        "cuda_home/**/*",
-    ]),
+    srcs = glob(["**"], exclude = ["BUILD.bazel", "WORKSPACE", "REPO.bazel"]),
     visibility = ["//visibility:public"],
 )
-""",
-    integrity = "sha256-gZhLQ2T8pyy5eYLMJecQ1xpw0TKNfM7hhx/kIRb6ngY=",
-    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/cuda_home.tar.gz",
+"""
+
+http_archive(
+    name = "cuda_nvcc_archive",
+    build_file_content = CUDA_ARCHIVE_BUILD,
+    patch_cmds = ["ln -s lib lib64"],
+    sha256 = "b3a0e115840e04c0cfa559263cbbe8b78a2455788e12605732aff68abc50dd34",
+    strip_prefix = "cuda_nvcc-linux-x86_64-12.9.41-archive",
+    url = "https://developer.download.nvidia.com/compute/cuda/redist/cuda_nvcc/linux-x86_64/cuda_nvcc-linux-x86_64-12.9.41-archive.tar.xz",
+)
+
+http_archive(
+    name = "cuda_cudart_archive",
+    build_file_content = CUDA_ARCHIVE_BUILD,
+    patch_cmds = ["ln -s lib lib64"],
+    sha256 = "db950a2443a34daa10069c8df1bccec868af3144cb898cd1d903a9ea04cccfa4",
+    strip_prefix = "cuda_cudart-linux-x86_64-12.9.37-archive",
+    url = "https://developer.download.nvidia.com/compute/cuda/redist/cuda_cudart/linux-x86_64/cuda_cudart-linux-x86_64-12.9.37-archive.tar.xz",
+)
+
+http_archive(
+    name = "cuda_cccl_archive",
+    build_file_content = CUDA_ARCHIVE_BUILD,
+    patch_cmds = ["ln -s lib lib64"],
+    sha256 = "8b1a5095669e94f2f9afd7715533314d418179e9452be61e2fde4c82a3e542aa",
+    strip_prefix = "cuda_cccl-linux-x86_64-12.9.27-archive",
+    url = "https://developer.download.nvidia.com/compute/cuda/redist/cuda_cccl/linux-x86_64/cuda_cccl-linux-x86_64-12.9.27-archive.tar.xz",
 )
 
 # TiPToP's two pretrained checkpoints. Fetched here rather than downloaded on first use so that a
@@ -395,16 +378,17 @@ http_file(
     name = "sam2_hiera_large_weights",
     downloaded_file_path = "sam2.1_hiera_large.pt",
     integrity = "sha256-JkeHjV36UJjy+GSYJXOKk0VXK64tQ1CiRoWH7OR90xg=",
-    url = "https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_large.pt",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/sam2.1_hiera_large.pt",
 )
 
 http_file(
     name = "m2t2_weights",
     downloaded_file_path = "m2t2.pth",
     integrity = "sha256-41w8sR4G9GxdQGvfx1a8BvSLJW3W1jhAjZpf8T3rl/s=",
-    url = "https://huggingface.co/wentao-yuan/m2t2/resolve/main/m2t2.pth",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/m2t2.pth",
 )
 
+# Fetched from upstream rather than the assets-v1 release: its LICENSE does not permit redistribution.
 http_archive(
     name = "gpt_policy_repo",
     build_file_content = """
