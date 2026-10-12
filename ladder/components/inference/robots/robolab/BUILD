@@ -27,7 +27,7 @@ copy_to_directory(
     include_external_repositories = ["*robolab_assets_archive"],
     replace_prefixes = {"assets/": ""},
     # manual for the same reason as the eval binaries below, which are the only consumers: without
-    # it `//...` expands these two directly and downloads the ~6 GB archive on every cold CI run.
+    # it `//...` expands these two directly and downloads the ~1 GB archive on every cold CI run.
     tags = ["manual"],
 )
 
@@ -85,7 +85,7 @@ py_library(
 )
 
 # Renders one reset frame per composition scene plus the scene records the decomposition benchmark
-# is scored against. Manual: it boots Isaac and needs the ~6 GB asset tree.
+# is scored against. Manual: it boots Isaac and needs the ~1 GB asset tree.
 py_binary(
     name = "export_scenes",
     srcs = ["composition/export_scenes.py"],

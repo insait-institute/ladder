@@ -40,8 +40,8 @@ jobs:
         run: tools/ci/check_repo.py links
 
   tests:
-    # The build downloads its pinned simulation assets anonymously (the repository's asset release,
-    # Hugging Face). They are downloadable once the repository is public; until then this job skips.
+    # The build downloads its pinned simulation assets anonymously from the repository's asset
+    # release. They are downloadable once the repository is public; until then this job skips.
     if: ${{ !github.event.repository.private }}
     runs-on: ubuntu-latest
     timeout-minutes: 240
