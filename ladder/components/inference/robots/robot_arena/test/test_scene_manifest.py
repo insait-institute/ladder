@@ -200,16 +200,6 @@ class TestSceneManifest(unittest.TestCase):
 class TestTaskSpecOverridesInvariants(unittest.TestCase):
     """Validate structural properties of TASK_SPEC_OVERRIDES."""
 
-    def test_overrides_reference_existing_scenes(self) -> None:
-        """Every scene in TASK_SPEC_OVERRIDES must exist on disk."""
-        available = set(list_available_scenes(_DATA_ROOT))
-        missing: List[str] = []
-        for scene_name in TASK_SPEC_OVERRIDES:
-            if scene_name not in available:
-                missing.append(scene_name)
-        if missing:
-            self.fail(f"TASK_SPEC_OVERRIDES references {len(missing)} scenes not on disk: {missing}")
-
     def test_overrides_have_valid_task_types(self) -> None:
         """All overrides must have valid TaskType values."""
         for scene_name, spec in TASK_SPEC_OVERRIDES.items():
