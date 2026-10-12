@@ -1,0 +1,13 @@
+import: vlam_robot_arena_composition_plan_verifier_local.yaml
+
+# RobotArena composition -- the in-process verifier advancing on a step clock instead of the gripper
+# cycle. Imports this benchmark's _plan_verifier_local rather than the shared plan_verifier_interval
+# so the served-VLM block is not repeated; the two keys below are what that shared file adds.
+runner_config:
+  hlc_config:
+    advancer:
+      gripper_trigger: False
+      # The shared clock, as this benchmark's _plan_periodic also takes it.
+      verify_interval: 30
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robot_arena_composition_plan_verifier_local_interval/$CKPT_NAME/$ENV_NAME

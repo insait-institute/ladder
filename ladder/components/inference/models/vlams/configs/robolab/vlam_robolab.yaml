@@ -1,0 +1,21 @@
+import: ../vlam_simpler_remote.yaml
+
+# RoboLab eval client config, paired with robots/robolab:env_server (driven by vlam_robolab.sh).
+# One run_model drains the server's whole (task x run) list; the runner buckets results per task via
+# each batch's env_name. The remote-client scaffolding (the shared batch_inference_server holds the
+# model) comes from the import; below are only the RoboLab deltas.
+
+policy_config:
+  env_name: droid
+  inference_config:
+    client_config:
+      recv_timeout_ms: 120000
+
+runner_config:
+  env_config:
+    # First RESET of each task builds the Isaac env (scene load takes minutes): 10 min budget.
+    recv_timeout_ms: 600000
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_unified/$CKPT_NAME/$ENV_NAME
+    # Match the 15 Hz control rate so a clip's duration equals the robot's elapsed time.
+    fps: 15

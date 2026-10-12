@@ -1,0 +1,34 @@
+import: vlam_robolab_composition.yaml
+
+# RoboLab composition -- verifier-advanced, over this benchmark's tracked plans. Needs VLM_API_KEY.
+# The advancer block below is RoboLab's tuning of the shared system and every _plan_verifier_* variant
+# imports it, so a retune lands in one place.
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/plan_verifier.yaml
+    source:
+      cache_path: ladder/components/inference/robots/robolab/composition/decomp_cache.json
+    advancer:
+      # A RoboLab Franka pick-and-place takes ~250 steps, ~5x a SimplerEnv/RobotArena placement, so
+      # the 45-step default abandons goals mid-reach. Matches the oracle's stuck_patience_steps.
+      #
+      # The gripper-cycle knobs, rescaled to RoboLab's timescale from SimplerEnv's 5 Hz defaults.
+      # Without a hold and lift check, any brief closure counted as a finished attempt. A short
+      # verify delay asked the VLM "is it placed?" while the arm still hid the object; 35 steps gives
+      # it time to move away, which improves both verdict precision and recall.
+      min_hold_steps: 21
+      lift_threshold_m: 0.03
+      verify_delay_steps: 35
+      attempt_stall_steps: 300
+      # Ordered scenes ("banana THEN cube") otherwise stall forever on a single verifier
+      # false negative for goal 0 (the banana in the bowl is often occluded). Provisional ordered
+      # advance moves on after a clean lifted grasp-release cycle and lets the VLM confirm or revoke.
+      ordered_provisional: true
+      auto_schedule: true  # distinct plan -> retry_in_place; duplicate objects -> skip-and-return
+      verifier:
+        # Both views. RoboLab's "main" is an over-shoulder camera in which the bin is a small box at
+        # the frame edge, often occluded by the arm, so a verifier reading `main` alone has very low
+        # recall. The wrist camera looks into the bin.
+        image_cameras: [main, wrist]
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_plan_verifier/$CKPT_NAME/$ENV_NAME

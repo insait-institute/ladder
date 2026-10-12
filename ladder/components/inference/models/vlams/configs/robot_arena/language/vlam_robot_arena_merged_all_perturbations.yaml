@@ -1,0 +1,5 @@
+import: ../vlam_robot_arena_batched_envs.yaml
+
+# Stub: the full per-scene perturbation instruction_override corpus is supplied locally; this empty default keeps the unified config loadable.
+runner_config:
+  instruction_override: {}

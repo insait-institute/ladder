@@ -1,0 +1,28 @@
+import: ../vlam_simpler_composition.yaml
+
+# Paraphrase robustness on the composition benchmark: the runner replaces each env's generated
+# instruction, keyed by "<task>-v0", with entry 0 the canonical phrasing. A count that divides n_envs
+# gives equal episodes per paraphrase (4 over 24 envs -> 6 each), otherwise it round-robins; set
+# runner_config.default_block_size to keep a canonical control block in the same batch. The three below
+# are examples of the phrasings worth probing -- a quantifier, a required order, and a destination.
+runner_config:
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/simpler_composition_paraphrase/$CKPT_NAME/$ENV_NAME
+  instruction_override:
+    all4_plate-v0:
+      - "put everything on the plate"
+      - "move all of the objects onto the plate"
+      - "put each of the items on the plate"
+      - "clear the table by putting everything on the plate"
+
+    ordered_plate_2-v0:
+      - "first put the carrot on the plate, then put the spoon on the plate"
+      - "put the carrot on the plate before you put the spoon on the plate"
+      - "start with the carrot on the plate, then the spoon"
+      - "the carrot goes on the plate first, then the spoon"
+
+    all1_towel-v0:
+      - "put the spoon on the blue towel"
+      - "place the spoon onto the blue towel"
+      - "move the spoon over to the blue towel"
+      - "spoon onto blue towel"

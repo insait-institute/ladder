@@ -1,0 +1,16 @@
+[project]
+name = "ladder-components-dashboard"
+version = "0.0.0"
+requires-python = ">=3.10"
+dependencies = [
+    "ladder-components-inference-api-client",
+    "fastapi>=0.110",
+    "huggingface-hub>=0.30",
+    "uvicorn>=0.27",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+ladder-components-inference-api-client = { path = "../inference/api/client", package = false }

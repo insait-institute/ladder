@@ -1,0 +1,466 @@
+{
+ "_meta": {
+  "role": "ground truth",
+  "model": "ground_truth",
+  "generated": "2026-09-09",
+  "note": "NOT a model output: the reference plan per task, from registry.COMPOSITION_TASKS via multi_goal.subtask_instruction(). Every entry is {subtasks, ordered, revisits}."
+ },
+ "robot_arena_scene36_1goal": {
+  "subtasks": [
+   "put the fork in the pan."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene36_2goal": {
+  "subtasks": [
+   "put the fork in the pan.",
+   "put the corn cob in the pan."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene45_1goal": {
+  "subtasks": [
+   "put the blue bowl on the purple cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene45_2goal": {
+  "subtasks": [
+   "put the blue bowl on the purple cloth.",
+   "put the sushi toy on the purple cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene45_3goal": {
+  "subtasks": [
+   "put the blue bowl on the purple cloth.",
+   "put the sushi toy on the purple cloth.",
+   "put the banana on the purple cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene45_4goal": {
+  "subtasks": [
+   "put the blue bowl on the purple cloth.",
+   "put the sushi toy on the purple cloth.",
+   "put the cheese on the purple cloth.",
+   "put the banana on the purple cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene45_5goal": {
+  "subtasks": [
+   "put the blue bowl on the purple cloth.",
+   "put the sushi toy on the purple cloth.",
+   "put the cheese on the purple cloth.",
+   "put the banana on the purple cloth.",
+   "put the mushroom on the purple cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene45_6goal": {
+  "subtasks": [
+   "put the blue bowl on the purple cloth.",
+   "put the sushi toy on the purple cloth.",
+   "put the cheese on the purple cloth.",
+   "put the banana on the purple cloth.",
+   "put the mushroom on the purple cloth.",
+   "put the corn cob on the purple cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene45_all_2": {
+  "subtasks": [
+   "put the blue bowl on the purple cloth.",
+   "put the sushi toy on the purple cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene45_all_3": {
+  "subtasks": [
+   "put the blue bowl on the purple cloth.",
+   "put the sushi toy on the purple cloth.",
+   "put the banana on the purple cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene45_all_4": {
+  "subtasks": [
+   "put the blue bowl on the purple cloth.",
+   "put the sushi toy on the purple cloth.",
+   "put the banana on the purple cloth.",
+   "put the cheese on the purple cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene45_all_5": {
+  "subtasks": [
+   "put the blue bowl on the purple cloth.",
+   "put the sushi toy on the purple cloth.",
+   "put the banana on the purple cloth.",
+   "put the cheese on the purple cloth.",
+   "put the mushroom on the purple cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene45_all_6": {
+  "subtasks": [
+   "put the blue bowl on the purple cloth.",
+   "put the sushi toy on the purple cloth.",
+   "put the banana on the purple cloth.",
+   "put the cheese on the purple cloth.",
+   "put the mushroom on the purple cloth.",
+   "put the corn cob on the purple cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene45_except_2": {
+  "subtasks": [
+   "put the blue bowl on the purple cloth.",
+   "put the sushi toy on the purple cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene45_except_3": {
+  "subtasks": [
+   "put the blue bowl on the purple cloth.",
+   "put the sushi toy on the purple cloth.",
+   "put the banana on the purple cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene45_except_4": {
+  "subtasks": [
+   "put the blue bowl on the purple cloth.",
+   "put the sushi toy on the purple cloth.",
+   "put the banana on the purple cloth.",
+   "put the cheese on the purple cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene45_except_5": {
+  "subtasks": [
+   "put the blue bowl on the purple cloth.",
+   "put the sushi toy on the purple cloth.",
+   "put the banana on the purple cloth.",
+   "put the cheese on the purple cloth.",
+   "put the mushroom on the purple cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene45_except_6": {
+  "subtasks": [
+   "put the blue bowl on the purple cloth.",
+   "put the sushi toy on the purple cloth.",
+   "put the banana on the purple cloth.",
+   "put the cheese on the purple cloth.",
+   "put the mushroom on the purple cloth.",
+   "put the corn cob on the purple cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene50_3goal": {
+  "subtasks": [
+   "put the stuffed animal in the pot.",
+   "put the blue block in the pot.",
+   "put the cheese in the pot."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene54_1goal": {
+  "subtasks": [
+   "put the spoon on the cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene54_2goal": {
+  "subtasks": [
+   "put the spoon on the cloth.",
+   "put the chicken drumstick on the cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene54_2goal_ordered": {
+  "subtasks": [
+   "put the chicken drumstick on the cloth.",
+   "put the spoon on the cloth."
+  ],
+  "ordered": true,
+  "revisits": false
+ },
+ "robot_arena_scene54_3goal": {
+  "subtasks": [
+   "put the spoon on the cloth.",
+   "put the chicken drumstick on the cloth.",
+   "put the pot on the cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene54_3goal_ordered": {
+  "subtasks": [
+   "put the corn cob on the cloth.",
+   "put the spoon on the cloth.",
+   "put the chicken drumstick on the cloth."
+  ],
+  "ordered": true,
+  "revisits": false
+ },
+ "robot_arena_scene54_duplicates_2": {
+  "subtasks": [
+   "put the corn cob on the cloth.",
+   "put the corn cob on the cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene54_duplicates_3": {
+  "subtasks": [
+   "put the corn cob on the cloth.",
+   "put the corn cob on the cloth.",
+   "put the corn cob on the cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene54_except": {
+  "subtasks": [
+   "put the spoon on the cloth.",
+   "put the chicken drumstick on the cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene54_except_3": {
+  "subtasks": [
+   "put the spoon on the cloth.",
+   "put the chicken drumstick on the cloth.",
+   "put the corn cob on the cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene54_relay_2": {
+  "subtasks": [
+   "put the spoon on the cloth.",
+   "put the spoon in the pot."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "robot_arena_scene54_relay_4": {
+  "subtasks": [
+   "put the spoon on the cloth.",
+   "put the spoon in the pot.",
+   "put the chicken drumstick on the cloth.",
+   "put the chicken drumstick in the pot."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "robot_arena_scene54_revisit_10": {
+  "subtasks": [
+   "put the spoon on the cloth.",
+   "put the spoon in the pot.",
+   "put the spoon on the cloth.",
+   "put the spoon in the pot.",
+   "put the spoon on the cloth.",
+   "put the spoon in the pot.",
+   "put the spoon on the cloth.",
+   "put the spoon in the pot.",
+   "put the spoon on the cloth.",
+   "put the spoon in the pot."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "robot_arena_scene54_revisit_3": {
+  "subtasks": [
+   "put the spoon on the cloth.",
+   "put the spoon in the pot.",
+   "put the spoon on the cloth."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "robot_arena_scene54_revisit_6": {
+  "subtasks": [
+   "put the spoon on the cloth.",
+   "put the spoon in the pot.",
+   "put the spoon on the cloth.",
+   "put the chicken drumstick on the cloth.",
+   "put the chicken drumstick in the pot.",
+   "put the chicken drumstick on the cloth."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "robot_arena_scene54_revisit_7": {
+  "subtasks": [
+   "put the spoon on the cloth.",
+   "put the spoon in the pot.",
+   "put the spoon on the cloth.",
+   "put the spoon in the pot.",
+   "put the spoon on the cloth.",
+   "put the spoon in the pot.",
+   "put the spoon on the cloth."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "robot_arena_scene54_revisit_8": {
+  "subtasks": [
+   "put the spoon on the cloth.",
+   "put the spoon in the pot.",
+   "put the spoon on the cloth.",
+   "put the spoon in the pot.",
+   "put the spoon on the cloth.",
+   "put the spoon in the pot.",
+   "put the spoon on the cloth.",
+   "put the spoon in the pot."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "robot_arena_scene54_revisit_9": {
+  "subtasks": [
+   "put the spoon on the cloth.",
+   "put the spoon in the pot.",
+   "put the spoon on the cloth.",
+   "put the chicken drumstick on the cloth.",
+   "put the chicken drumstick in the pot.",
+   "put the chicken drumstick on the cloth.",
+   "put the corn cob on the cloth.",
+   "put the corn cob in the pot.",
+   "put the corn cob on the cloth."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "robot_arena_scene54_route_2": {
+  "subtasks": [
+   "put the spoon in the pot.",
+   "put the spoon on the cloth."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "robot_arena_scene54_route_4": {
+  "subtasks": [
+   "put the spoon in the pot.",
+   "put the spoon on the cloth.",
+   "put the chicken drumstick in the pot.",
+   "put the chicken drumstick on the cloth."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "robot_arena_scene54_route_6": {
+  "subtasks": [
+   "put the spoon in the pot.",
+   "put the spoon on the cloth.",
+   "put the chicken drumstick in the pot.",
+   "put the chicken drumstick on the cloth.",
+   "put the corn cob in the pot.",
+   "put the corn cob on the cloth."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "robot_arena_scene54_route_7": {
+  "subtasks": [
+   "put the spoon in the pot.",
+   "put the spoon on the cloth.",
+   "put the chicken drumstick in the pot.",
+   "put the chicken drumstick on the cloth.",
+   "put the corn cob in the pot.",
+   "put the corn cob on the cloth.",
+   "put the cheese on the cloth."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "robot_arena_scene54_route_8": {
+  "subtasks": [
+   "put the spoon in the pot.",
+   "put the spoon on the cloth.",
+   "put the chicken drumstick in the pot.",
+   "put the chicken drumstick on the cloth.",
+   "put the corn cob in the pot.",
+   "put the corn cob on the cloth.",
+   "put the cheese in the pot.",
+   "put the cheese on the cloth."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "robot_arena_scene54_split_2": {
+  "subtasks": [
+   "put the spoon on the cloth.",
+   "put the chicken drumstick in the pot."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene54_split_3": {
+  "subtasks": [
+   "put the spoon on the cloth.",
+   "put the corn cob on the cloth.",
+   "put the chicken drumstick in the pot."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene54_transfer_2": {
+  "subtasks": [
+   "put the spoon in the pot.",
+   "put the chicken drumstick in the pot."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene76_1goal": {
+  "subtasks": [
+   "put the metal pot on the yellow cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene76_2goal": {
+  "subtasks": [
+   "put the metal pot on the yellow cloth.",
+   "put the mushroom toy on the yellow cloth."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "robot_arena_scene76_2goal_ordered": {
+  "subtasks": [
+   "put the metal pot on the yellow cloth.",
+   "put the mushroom toy on the yellow cloth."
+  ],
+  "ordered": true,
+  "revisits": false
+ }
+}

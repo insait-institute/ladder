@@ -1,0 +1,45 @@
+--- a/rerun/__init__.py
++++ b/rerun/__init__.py
+@@ -0,0 +1,42 @@
++import importlib.util
++import sys
++import os
++
++
++def _import_py_module(file_path: str, module_name: str):
++    file_path = str(file_path)
++    spec = importlib.util.spec_from_file_location(module_name, file_path)
++    py_module = importlib.util.module_from_spec(spec)
++    sys.modules[module_name] = py_module
++    spec.loader.exec_module(py_module)
++    return py_module
++
++
++# Find the path to rerun_sdk/rerun/__init__.py
++_site_packages_path = os.path.dirname(os.path.dirname(__file__))  # .../site-packages/
++_rerun_sdk_path = os.path.join(_site_packages_path, "rerun_sdk", "rerun", "__init__.py")
++_rerun_sdk_path = os.path.abspath(_rerun_sdk_path)
++
++# Add rerun_cli to PATH so that spawn() can find the executable
++_rerun_cli_path = os.path.join(_site_packages_path, "rerun_sdk", "rerun_cli")
++if _rerun_cli_path not in os.environ["PATH"]:
++    os.environ["PATH"] = _rerun_cli_path + os.pathsep + os.environ["PATH"]
++
++# Dynamically import rerun_sdk.rerun as 'rerun'
++_real_rerun = _import_py_module(_rerun_sdk_path, "rerun")
++
++# Inject all attributes into this module's namespace
++globals().update(vars(_real_rerun))
++
++# Ensure sys.modules['rerun'] points to this module
++sys.modules[__name__] = sys.modules["rerun"]
++
++# Clean up helper variables and functions from the namespace
++del _import_py_module
++del _site_packages_path
++del _rerun_sdk_path
++del _rerun_cli_path
++del _real_rerun
++del os
++del sys
++del importlib

@@ -1,0 +1,38 @@
+# Remote-client config for the BATCHED eval path: identical to vlam_simpler.yaml EXCEPT the policy's
+# inference is a RemoteInferenceClient connected to a shared BatchPolicyServer (one model
+# copy, N lanes batched) instead of an in-process VLAMInference. Self-contained (not an import of
+# vlam_simpler.yaml) so no in-process ckpt_path leaks into the remote-client config under the strict
+# vendored databib. The launcher overrides client_config.port at runtime. Selecting batched vs
+# in-process is purely which client YAML the launcher passes.
+policy_config:
+  autoclass: ladder.components.inference.models.vlams.vlam_robot_inference.VLAMRobotInference
+  env_name: 'TODO'
+  controls_on_targets: True
+  inference_config:
+    autoclass: ladder.components.inference.api.client.batch_inference.remote_inference_client.RemoteInferenceClient
+    client_config:
+      autoclass: ladder.components.inference.api.core.request_reply.ZmqRequestReplyClient
+      ip: localhost
+      port: 0
+      recv_timeout_ms: 600000
+      propagate_timeout: True
+  controller_config:
+    autoclass: ladder.components.inference.models.vlams.controllers.action_chunking.ActionChunkingController
+    chunk_size: 4
+
+runner_config:
+  autoclass: ladder.components.inference.api.client.simpler_episode_runner.SimplerEpisodeRunner
+  env_config:
+    ip: localhost
+    port: 5556
+    raise_on_server_error: True
+    min_period: 0.0
+    # Generous reset timeout: many sim lanes reset their GPU envs concurrently under the shared batch
+    # server, so a contended sim can take far longer than the 15s default to answer the reset request.
+    recv_timeout_ms: 180000
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/sim/simpler/$CKPT_NAME/$ENV_NAME
+    fps: 5
+    rerun_enabled: False
+
+seed: 987654321

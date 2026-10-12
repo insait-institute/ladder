@@ -1,0 +1,24 @@
+import: ../../../../vlams/configs/robolab/composition/vlam_robolab_composition.yaml
+
+policy_config: !overwrite
+  autoclass: ladder.components.inference.models.gpt_policy.policy.GptPolicyPolicy
+  robot_name: Franka Emika robot arm
+  cameras: [scene]
+  max_decisions: 300
+  vlm:
+    import: ../../vlm.yaml
+  host:
+    tool_offset_m: 0.168
+    control_hz: 15.0
+    max_translation_per_step_m: 0.02
+    settle_steps: 25
+    gripper_steps: 30
+    max_steps_per_segment: 90
+    workspace_min_m: [-0.1, -0.5, 0.005]
+    workspace_max_m: [0.75, 0.5, 0.9]
+
+runner_config:
+  recorder_config:
+    video_enabled: true
+    rerun_enabled: false
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_gpt_policy/$CKPT_NAME/$ENV_NAME

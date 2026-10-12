@@ -1,0 +1,8 @@
+import: ../robolab/vlam_robolab.yaml
+
+runner_config:
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_volo/$CKPT_NAME/$ENV_NAME
+  hlc_config:
+    import: ../../../../api/client/hlc/configs/volo.yaml
+    extra_cameras: [wrist]   # RoboLab renders a real wrist view alongside the exterior one

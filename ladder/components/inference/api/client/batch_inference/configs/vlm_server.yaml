@@ -1,0 +1,10 @@
+# A batch policy server that also hosts the auxiliary VLM, so the lanes sharing this GPU share one
+# copy of it instead of loading ~17 GB each. Pair it with a client config whose VLM roles are
+# vlm_served.yaml (plan_verifier_local); without it the server answers VLM_COMPLETE with
+# "server has no vlm_config".
+#
+# Only vlm_config is set: policy_config comes from the launcher's --config <server.yaml>, as
+# it does for a server with no VLM. The hosted model is the same spec the in-process backend uses, so
+# the two deployments differ only in WHERE the weights live.
+vlm_config:
+  import: ../../hlc/configs/vlm_local.yaml

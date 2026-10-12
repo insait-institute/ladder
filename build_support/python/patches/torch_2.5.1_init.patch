@@ -1,0 +1,10 @@
+--- a/torch/__init__.py
++++ b/torch/__init__.py
+@@ -309,7 +309,6 @@
+             "cuda_cupti": "libcupti.so.*[0-9]",
+             "cufft": "libcufft.so.*[0-9]",
+             "curand": "libcurand.so.*[0-9]",
+-            "nvjitlink": "libnvJitLink.so.*[0-9]",
+             "cusparse": "libcusparse.so.*[0-9]",
+             "cusolver": "libcusolver.so.*[0-9]",
+             "nccl": "libnccl.so.*[0-9]",

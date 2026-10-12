@@ -1,0 +1,10 @@
+--- a/lerobot-0.4.4.dist-info/METADATA
++++ b/lerobot-0.4.4.dist-info/METADATA
+@@ -32,7 +32,6 @@ Requires-Dist: opencv-python-headless<4.13.0,>=4.9.0
+ Requires-Dist: av<16.0.0,>=15.0.0
+ Requires-Dist: jsonlines<5.0.0,>=4.0.0
+ Requires-Dist: packaging<26.0,>=24.2
+-Requires-Dist: pynput<1.9.0,>=1.7.7
+ Requires-Dist: pyserial<4.0,>=3.5
+ Requires-Dist: wandb<0.25.0,>=0.24.0
+ Requires-Dist: torch<2.11.0,>=2.2.1

@@ -1,0 +1,5 @@
+import: ../../../api/client/hlc/configs/vlm.yaml
+send_temperature: false
+max_rps: 4.0
+rate_limit_burst: 24
+rate_limit_attempts: 5

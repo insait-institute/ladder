@@ -1,0 +1,71 @@
+import: vlam_robot_arena_batched_envs.yaml
+
+# RobotArena -- the SCRIPTED privileged-state policy, run as the completability gate: it solves
+# from ground truth, so a task it cannot finish cannot be finished by any learned policy. The
+# launcher turns on the sim's privileged payload whenever the client config is this one, so any
+# scene set works: composition tasks and the ordinary scenes alike.
+policy_config: !overwrite
+  autoclass: ladder.components.inference.api.client.scripted.scripted_policy.ScriptedPolicy
+  # A 4 cm step overshoots the grasp point and the object gets nudged before the jaws close.
+  max_translation_per_step_m: 0.015
+  approach_height_m: 0.07
+  # Transit height is what makes a multi-goal task finish: carried too low, the gripper clips the
+  # objects it has already delivered and knocks them off, which pins a task at N-1 goals.
+  lift_height_m: 0.14
+  carry_height_m: 0.16
+  place_clearance_m: 0.025
+  # The settings below are where RobotArena differs from SimplerEnv, which runs the same
+  # widowx at the same rate but is otherwise laid out to suit a fixed top-down grasp.
+  #
+  # RobotArena's objects rest at whatever yaw the scene gives them (scene54's 14 cm spoon lies
+  # diagonally), and a parallel jaw closing along an object's LENGTH cannot span it -- it just pushes
+  # it away. SimplerEnv lays every object's long axis on a world axis, so it needs none of this.
+  align_grasp_yaw: True
+  # Fingers close in about two steps in free air but roughly thirty times slower once they load
+  # against an object, so a short window aborts every real grasp just before it forms.
+  max_grasp_steps: 90
+  max_phase_steps: 15
+  xy_tol_m: 0.008
+  transit_translation_per_step_m: 0.03
+  # Grip at the object's top, not its centre: the centre of a pot is air and of a flat object the table.
+  grasp_from_top: True
+  grasp_z_offset_m: -0.005
+  grasp_confirm_steps: 2
+  grasp_lost_steps: 3
+  # Pot and bowl: grip the wall along the jaw axis near the rim, closing while descending slowly,
+  # with the jaw axis tilted to match the flared wall.
+  rim_grasp_min_span_m: 0.06
+  rim_along_jaw: True
+  rim_inset_m: 0.008
+  rim_z_offset_m: -0.004
+  close_above_m: 0.03
+  close_descent_step_m: 0.002
+  rim_roll_deg: -30
+  # Keep the wrist inside the arm's reach: past it the IK flips and the arm flails.
+  reach_center_m: [0.0, 0.0, 0.111]
+  reach_radius_m: 0.49
+  wrist_offset_m: 0.158
+  # Deliveries: finish one credited on the way down, climb straight out before the next object, take
+  # an object sticking out of a container by its outer end, and set a long one in lengthwise.
+  finish_credited_delivery: True
+  climb_out_after_delivery: True
+  grasp_outside_container_m: 0.025
+  long_object_along_container: True
+  # A finger that would land on a neighbour (a spoon lying against the pot) slides the grip along
+  # the object's long axis instead.
+  grasp_clear_half_span_m: 0.045
+  # Past the top-down reach, retry a failed grasp with the wrist pitched (the SimplerEnv set).
+  grasp_orientations_deg: [[0, 0], [0, -30], [-45, -30], [45, -30]]
+  rotate_on_failure: True
+  reach_keep_height: True
+  # Ordered and milestone scenes are scored as a sequence: never skip past the active goal.
+  respect_order: True
+
+runner_config:
+  # No hlc_config: the policy drives from the task's own goals, not from a decomposition.
+  # A gate only needs the first env to finish, so stop each one as its success latches.
+  terminate_on_success: True
+  recorder_config:
+    output_path: $SCRIPTED_OUT/$ENV_NAME
+    # Run with RENDER_IMAGES=False, which renders no images.
+    video_enabled: False

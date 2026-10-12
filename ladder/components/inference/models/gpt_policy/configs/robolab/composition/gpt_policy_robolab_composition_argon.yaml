@@ -1,0 +1,10 @@
+import: gpt_policy_robolab_composition.yaml
+
+policy_config:
+  point_grid: 1000
+  vlm:
+    import: ../../vlm_argon.yaml
+
+runner_config:
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_gpt_policy_argon/$CKPT_NAME/$ENV_NAME

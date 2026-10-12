@@ -1,0 +1,17 @@
+--- a/sam3/train/data/collator.py	2026-02-04 07:24:13.000000000 +0000
++++ b/sam3/train/data/collator.py	2026-09-09 10:08:14.387936333 +0000
+@@ -13,7 +13,13 @@
+     FindStage,
+ )
+ 
+-from .sam3_image_dataset import Datapoint
++try:
++    from .sam3_image_dataset import Datapoint
++except ImportError:
++    # The image model imports this module for BatchedDatapoint alone, and Datapoint is only a type
++    # annotation here. The dataset it lives in pulls the whole training data stack (decord,
++    # pycocotools), which inference does not need.
++    Datapoint = Any
+ 
+ 
+ MyTensor = Union[torch.Tensor, List[Any]]

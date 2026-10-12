@@ -1,0 +1,64 @@
+diff -ur a/isaacsim/__init__.py b/isaacsim/__init__.py
+--- a/isaacsim/__init__.py
++++ b/isaacsim/__init__.py
+@@ -101,7 +101,7 @@
+ 
+ def bootstrap_kernel():
+     # isaac-sim path
+-    isaacsim_path = os.path.dirname(os.path.abspath(os.path.realpath(__file__)))
++    isaacsim_path = os.path.dirname(os.path.abspath(__file__))
+ 
+     # check for non-Python package manager installation
+     if isaacsim_path.split(os.sep)[-2:] == ["python_packages", "isaacsim"]:
+@@ -128,7 +128,7 @@
+         try:
+             import omni.kit_app  # importing 'kit_app' will bootstrap kernel
+ 
+-            kit_path = os.path.dirname(os.path.abspath(os.path.realpath(omni.kit_app.__file__)))
++            kit_path = os.path.dirname(os.path.abspath(omni.kit_app.__file__))
+         except ModuleNotFoundError:
+             sys.exit("Unable to find 'omniverse-kit' package")
+ 
+@@ -173,7 +173,7 @@
+         # try to import API from isaacsim/simulation_app folder instead
+         try:
+             # get isaacsim/simulation_app folder path
+-            isaacsim_path = os.path.dirname(os.path.abspath(os.path.realpath(__file__)))
++            isaacsim_path = os.path.dirname(os.path.abspath(__file__))
+             path = glob.glob(
+                 os.path.join(
+                     os.environ.get("ISAAC_PATH", isaacsim_path), "exts*", "isaacsim.simulation_app*", "isaacsim"
+@@ -202,7 +202,7 @@
+ 
+     # get paths
+     # isaac-sim path
+-    isaacsim_path = os.path.dirname(os.path.abspath(os.path.realpath(__file__)))
++    isaacsim_path = os.path.dirname(os.path.abspath(__file__))
+     # kit path (internal kernel)
+     if os.path.isdir(os.path.join(isaacsim_path, "kit", "extscore")):
+         kit_path = os.path.join(isaacsim_path, "kit")
+@@ -212,7 +212,7 @@
+         try:
+             import omni.kit_app  # importing 'omni.kit_app' will bootstrap kernel
+ 
+-            kit_path = os.path.dirname(os.path.abspath(os.path.realpath(omni.kit_app.__file__)))
++            kit_path = os.path.dirname(os.path.abspath(omni.kit_app.__file__))
+         except ModuleNotFoundError:
+             sys.exit("Unable to find 'omniverse-kit' package")
+ 
+diff -ur a/isaacsim/kit/kit_app.py b/isaacsim/kit/kit_app.py
+--- a/isaacsim/kit/kit_app.py
++++ b/isaacsim/kit/kit_app.py
+@@ -86,6 +86,12 @@
+                 continue
+             sys.path.insert(0, path)
+ 
++    # rules_python may create omni/__init__.py with pkgutil.extend_path before
++    # this function mutates sys.path; refresh the namespace path after updates.
++    import pkgutil
++    import omni
++    omni.__path__ = pkgutil.extend_path(omni.__path__, omni.__name__)
++
+ 
+ check_eula()
+ bootstrap_kernel()

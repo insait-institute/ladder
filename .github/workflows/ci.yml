@@ -1,0 +1,43 @@
+# Checks on every push and pull request.
+#
+# - repo: fast checks without Bazel (citation metadata, YAML syntax, shell syntax, README links, and
+#   every leaderboard submission, scored the way the page shows it).
+# The test suite runs locally, not here (CONTRIBUTING.md).
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  repo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install cffconvert==2.0.0 pyyaml==6.0.2
+      - name: CITATION.cff
+        run: cffconvert --validate
+      - name: YAML files parse
+        run: tools/ci/check_repo.py yaml
+      - name: Shell scripts parse
+        run: tools/ci/check_repo.py shell
+      - name: Relative links in Markdown files exist
+        run: tools/ci/check_repo.py links
+      - name: Leaderboard submissions are complete and score (leaderboard/README.md)
+        run: |
+          shopt -s nullglob
+          entries=(leaderboard/submissions/*/)
+          [ ${#entries[@]} -eq 0 ] || scripts/leaderboard.py check "${entries[@]}"
+

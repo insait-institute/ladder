@@ -1,0 +1,27 @@
+import: vlam_robolab_composition.yaml
+
+# RoboLab composition -- gripper-advanced, over this benchmark's tracked plans. Deployable: the plans
+# are read from the cache, so there is no VLM call at run time.
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/plan_gripper.yaml
+    source:
+      cache_path: ladder/components/inference/robots/robolab/composition/decomp_cache.json
+    advancer:
+      # A release only counts as a finished attempt if the object actually came up. Without a lift
+      # check, failed clenches advanced the plan. 21 is the same 7x RoboLab rescale that
+      # advance_cooldown_steps uses (8 -> 57); 0.03 m is what the verifier calls a real lift.
+      min_hold_steps: 21
+      lift_threshold_m: 0.03
+      # Required with the gate above: this advancer has no other escape, and the gate alone stalls
+      # most episodes on their first subtask. 300 matches plan_verifier and sits just above
+      # RoboLab's median time per achieved goal.
+      attempt_stall_steps: 300
+      # The shared 8 is SimplerEnv's, scaled by the ~7x longer RoboLab timescale, the same rule the
+      # oracle config uses for its settle and patience.
+      advance_cooldown_steps: 57
+      # The advancer has no patience knob, so wrapping is its only escape from a goal the policy
+      # cannot finish. Without it an episode that never completes goal 0 spends its budget on it.
+      cyclic_repair: True
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_plan_gripper/$CKPT_NAME/$ENV_NAME

@@ -1,0 +1,71 @@
+
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip_env = use_extension("//build_support/python:pip_env_ext.bzl", "pip_env")
+
+# -----------------------------------------------------------------------------
+# Set up pip-build environment
+# -----------------------------------------------------------------------------
+
+pip_env.env(
+    name = "build",
+    paths = ["build_support", "tools"],
+    pyproject = "//build_support/python:pyproject.toml",
+)
+
+pip.parse(
+    experimental_index_url = "https://pypi.org/simple",
+    hub_name = "pip-build",
+    python_version = "3.10",
+    requirements_lock = "//:build_support/python/requirements.txt.lock",
+    target_platforms = ["linux_x86_64"],
+)
+
+use_repo(pip, "pip-build")
+
+# -----------------------------------------------------------------------------
+# Set up pip-databib environment
+# -----------------------------------------------------------------------------
+
+pip_env.env(
+    name = "databib",
+    paths = ["ladder/core/databib"],
+    deps = ["build"],
+    pyproject = "//ladder/core/databib:pyproject.toml",
+)
+
+pip.parse(
+    experimental_index_url = "https://pypi.org/simple",
+    experimental_index_url_overrides = {
+        "torch": "https://download.pytorch.org/whl/cu130",
+    },
+    hub_name = "pip-databib",
+    python_version = "3.10",
+    requirements_lock = "//:ladder/core/databib/requirements.txt.lock",
+    target_platforms = ["linux_x86_64"],
+)
+
+use_repo(pip, "pip-databib")
+
+# -----------------------------------------------------------------------------
+# Set up pip-core environment
+# -----------------------------------------------------------------------------
+
+pip_env.env(
+    name = "core",
+    paths = ["ladder/core"],
+    deps = ["build", "databib"],
+    pyproject = "//ladder/core:pyproject.toml",
+)
+
+pip.parse(
+    experimental_index_url = "https://pypi.org/simple",
+    experimental_index_url_overrides = {
+        "torch": "https://download.pytorch.org/whl/cu130",
+    },
+    hub_name = "pip-core",
+    python_version = "3.10",
+    requirements_lock = "//:ladder/core/requirements.txt.lock",
+    target_platforms = ["linux_x86_64"],
+)
+
+use_repo(pip, "pip-core")

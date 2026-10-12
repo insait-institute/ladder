@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ladderrobotics.ai/sitemap.xml

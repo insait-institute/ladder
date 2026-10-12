@@ -1,0 +1,10 @@
+import: ../vlam_simpler.yaml
+
+# The stepwise system on the four canonical single-goal scenes: a subtask generated from the current
+# frame every N steps, with no plan. The composition variants of the same system are
+# vlam_simpler_composition_stepwise_{gripper,interval}.yaml.
+runner_config:
+  hlc_config:
+    import: ../../../../api/client/hlc/configs/stepwise_interval.yaml
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/simpler_stepwise_interval/$CKPT_NAME/$ENV_NAME

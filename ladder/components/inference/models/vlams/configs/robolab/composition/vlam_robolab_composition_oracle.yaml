@@ -1,0 +1,24 @@
+import: vlam_robolab_composition.yaml
+
+# RoboLab composition -- privileged oracle (reference ceiling). Needs no plans: env_server publishes
+# the ground-truth subtasks and per-goal achieved flags in metadata["oracle"], synthesized from the
+# task's own subtask spec (verb + instruction-grounded nouns) paired with each goal's spec condition.
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/oracle.yaml
+    advancer:
+      # The shared default of 3 steps was tuned on SimplerEnv at 5 Hz. RoboLab runs at 15 Hz with
+      # placements ~7x longer, and objects teetering on a bin rim flicker the achieved flag. A settle
+      # that is too short abandons goals that were nearly finished, one that is too long waits for a
+      # settle that never arrives; 120 sits at the peak between the two.
+      advance_settle_steps: 120
+      # Skip-and-return. At patience 0 the advancer returns unachieved[0] forever, so the first goal
+      # the policy cannot finish blocks the whole plan. Non-zero patience also switches completion to
+      # round-robin (_next_after) instead of snapping back to unachieved[0].
+      #
+      # It must exceed one placement: a shorter value rotates goals on the patience clock rather than
+      # on achievement. 600 sits between the median and the upper tail of RoboLab placement times and
+      # roughly matches each task's per-goal step budget.
+      stuck_patience_steps: 600
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_oracle/$CKPT_NAME/$ENV_NAME

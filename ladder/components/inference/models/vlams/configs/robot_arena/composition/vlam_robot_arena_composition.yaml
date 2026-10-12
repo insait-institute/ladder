@@ -1,0 +1,24 @@
+# Flat (no HLC) RobotArena composition eval: the model sees only the composed multi-goal instruction.
+# Base for the oracle / plan_gripper / plan_verifier RA composition configs (they import this).
+import: ../vlam_robot_arena_batched_envs.yaml
+
+policy_config:
+  # !overwrite replaces the inherited local ckpt_path inference config with the remote client that
+  # talks to the shared batch_inference_server (port set at runtime). Mirrors vlam_robot_arena_unified.
+  inference_config: !overwrite
+    autoclass: ladder.components.inference.api.client.batch_inference.remote_inference_client.RemoteInferenceClient
+    client_config:
+      autoclass: ladder.components.inference.api.core.request_reply.ZmqRequestReplyClient
+      ip: localhost
+      port: 0
+      recv_timeout_ms: 120000
+      propagate_timeout: True
+
+runner_config:
+  # Long-horizon composition episodes run for hundreds of steps; ending each env as soon as its
+  # conjunction success latches (skipping the rest of its inference) is a large wall-clock win.
+  # Overrides the False inherited from vlam_robot_arena_batched_envs.yaml; the hierarchical variants
+  # import this config, so they inherit it too.
+  terminate_on_success: True
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robot_arena_composition/$CKPT_NAME/$ENV_NAME

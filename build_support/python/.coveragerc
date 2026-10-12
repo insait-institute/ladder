@@ -1,0 +1,9 @@
+[run]
+omit =
+    */site-packages/*
+    */.venv/*
+    */*.venv/*
+    */external/*
+    */runfiles/*
+    */test/*
+    *test_*.py

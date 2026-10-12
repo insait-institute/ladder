@@ -1,0 +1,6 @@
+autoclass: ladder.components.inference.api.client.hlc.controller.SubtaskController
+source:
+  import: subtask_generator.yaml
+advancer:
+  autoclass: ladder.components.inference.api.client.hlc.advancers.periodic.PeriodicAdvancer
+  interval: 20  # steps between re-queries

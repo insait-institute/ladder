@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="145 long-horizon manipulation tasks across three simulators, from 1 to 10 subgoals per instruction. We evaluate ten systems, from end-to-end policies to VLM orchestrators and tool selection agents, and confirm the ranking on two real robots.">
+  <title>LADDER: A Long-Horizon Robot Manipulation Benchmark</title>
+  <!-- seo -->
+  <link rel="canonical" href="https://ladderrobotics.ai/">
+  <meta name="theme-color" content="#0072B2">
+  <link rel="apple-touch-icon" href="./static/images/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="LADDER">
+  <meta property="og:title" content="LADDER: A Long-Horizon Robot Manipulation Benchmark">
+  <meta property="og:description" content="145 long-horizon manipulation tasks across three simulators, from 1 to 10 subgoals per instruction. We evaluate ten systems, from end-to-end policies to VLM orchestrators and tool selection agents, and confirm the ranking on two real robots.">
+  <meta property="og:url" content="https://ladderrobotics.ai/">
+  <meta property="og:image" content="https://ladderrobotics.ai/static/images/social.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="LADDER: how well can today&#x27;s best AI models control a robot? Leaderboard of AI models on 145 robot tasks">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="LADDER: A Long-Horizon Robot Manipulation Benchmark">
+  <meta name="twitter:description" content="145 long-horizon manipulation tasks across three simulators, from 1 to 10 subgoals per instruction. We evaluate ten systems, from end-to-end policies to VLM orchestrators and tool selection agents, and confirm the ranking on two real robots.">
+  <meta name="twitter:image" content="https://ladderrobotics.ai/static/images/social.jpg">
+  <meta name="twitter:image:alt" content="LADDER: how well can today&#x27;s best AI models control a robot? Leaderboard of AI models on 145 robot tasks">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "LADDER: A Long-Horizon Robot Manipulation Benchmark",
+  "alternateName": "LADDER",
+  "description": "145 long-horizon manipulation tasks across three simulators, from 1 to 10 subgoals per instruction. We evaluate ten systems, from end-to-end policies to VLM orchestrators and tool selection agents, and confirm the ranking on two real robots.",
+  "url": "https://ladderrobotics.ai/",
+  "image": "https://ladderrobotics.ai/static/images/social.jpg",
+  "keywords": [
+    "robot manipulation",
+    "long-horizon tasks",
+    "benchmark",
+    "vision-language-action models",
+    "VLM orchestration",
+    "simulation",
+    "SimplerEnv",
+    "RobotArena",
+    "RoboLab"
+  ],
+  "creator": [
+    {
+      "@type": "Person",
+      "name": "Petko Petkov",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "Institute for Computer Science, Artificial Intelligence and Technology",
+        "url": "https://insait.ai"
+      }
+    },
+    {
+      "@type": "Person",
+      "name": "Giuliano Albanese",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "Institute for Computer Science, Artificial Intelligence and Technology",
+        "url": "https://insait.ai"
+      }
+    },
+    {
+      "@type": "Person",
+      "name": "Nikolay Nikolov",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "Institute for Computer Science, Artificial Intelligence and Technology",
+        "url": "https://insait.ai"
+      }
+    },
+    {
+      "@type": "Person",
+      "name": "Luc Van Gool",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "Institute for Computer Science, Artificial Intelligence and Technology",
+        "url": "https://insait.ai"
+      }
+    },
+    {
+      "@type": "Person",
+      "name": "Jonathan Tremblay",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "NVIDIA",
+        "url": "https://www.nvidia.com"
+      }
+    },
+    {
+      "@type": "Person",
+      "name": "Danda Pani Paudel",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "Institute for Computer Science, Artificial Intelligence and Technology",
+        "url": "https://insait.ai"
+      }
+    }
+  ],
+  "sameAs": [
+    "https://github.com/insait-institute/ladder",
+    "https://huggingface.co/collections/INSAIT-Institute/ladder-6abbbddc46691080f5d954c8"
+  ],
+  "isAccessibleForFree": true
+}
+</script>
+  <link rel="preload" href="static/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="static/fonts/inter-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <style>@font-face {
+  font-family: 'Castoro';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(static/fonts/Castoro-400.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(static/fonts/NotoSans-400.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(static/fonts/NotoSans-600.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(static/fonts/NotoSans-700.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url(static/fonts/inter-latin-400-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 500; font-display: swap; src: url(static/fonts/inter-latin-500-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 600; font-display: swap; src: url(static/fonts/inter-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 700; font-display: swap; src: url(static/fonts/inter-latin-700-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 800; font-display: swap; src: url(static/fonts/inter-latin-800-normal.woff2) format('woff2'); }
+</style>
+  <style>.button,.delete,.tabs{-webkit-touch-callout:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.select:not(.is-multiple):not(.is-loading)::after{border:3px solid transparent;border-radius:2px;border-right:0;border-top:0;content:" ";display:block;height:.625em;margin-top:-.4375em;pointer-events:none;position:absolute;top:50%;transform:rotate(-45deg);transform-origin:center;width:.625em}.block:not(:last-child),.box:not(:last-child),.content:not(:last-child),.progress:not(:last-child),.table:not(:last-child),.tabs:not(:last-child),.title:not(:last-child){margin-bottom:1.5rem}.delete{-moz-appearance:none;-webkit-appearance:none;background-color:rgba(10,10,10,.2);border:none;border-radius:290486px;cursor:pointer;pointer-events:auto;display:inline-block;flex-grow:0;flex-shrink:0;font-size:0;height:20px;max-height:20px;max-width:20px;min-height:20px;min-width:20px;outline:0;position:relative;vertical-align:top;width:20px}.delete::after,.delete::before{background-color:#fff;content:"";display:block;left:50%;position:absolute;top:50%;transform:translateX(-50%) translateY(-50%) rotate(45deg);transform-origin:center center}.delete::before{height:2px;width:50%}.delete::after{height:50%;width:2px}.delete:focus,.delete:hover{background-color:rgba(10,10,10,.3)}.delete:active{background-color:rgba(10,10,10,.4)}.is-small.delete{height:16px;max-height:16px;max-width:16px;min-height:16px;min-width:16px;width:16px}.button,.input,.select select{-moz-appearance:none;-webkit-appearance:none;align-items:center;border:1px solid transparent;border-radius:4px;box-shadow:none;display:inline-flex;font-size:1rem;height:2.5em;justify-content:flex-start;line-height:1.5;padding-bottom:calc(.5em - 1px);padding-left:calc(.75em - 1px);padding-right:calc(.75em - 1px);padding-top:calc(.5em - 1px);position:relative;vertical-align:top}.button:active,.button:focus,.input:active,.input:focus,.is-active.button,.is-active.input,.select select.is-active,.select select:active,.select select:focus{outline:0}body,dd,dl,dt,figure,h1,h2,h3,html,legend,li,ol,p,pre,ul{margin:0;padding:0}h1,h2,h3{font-size:100%;font-weight:400}ul{list-style:none}button,input,select{margin:0}html{box-sizing:border-box}*,::after,::before{box-sizing:inherit}img,video{height:auto;max-width:100%}table{border-collapse:collapse;border-spacing:0}td,th{padding:0}td:not([align]),th:not([align]){text-align:inherit}html{background-color:#fff;font-size:16px;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;min-width:300px;overflow-x:hidden;overflow-y:scroll;text-rendering:optimizeLegibility;-webkit-text-size-adjust:100%;-moz-text-size-adjust:100%;-ms-text-size-adjust:100%;text-size-adjust:100%}article,aside,figure,section{display:block}body,button,input,select{font-family:BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif}code,pre{-moz-osx-font-smoothing:auto;-webkit-font-smoothing:auto;font-family:monospace}body{color:#4a4a4a;font-size:1em;font-weight:400;line-height:1.5}a{color:#3273dc;cursor:pointer;text-decoration:none}a strong{color:currentColor}a:hover{color:#363636}code{background-color:#f5f5f5;color:#da1039;font-size:.875em;font-weight:400;padding:.25em .5em .25em}img{height:auto;max-width:100%}small{font-size:.875em}span{font-style:inherit;font-weight:inherit}strong{color:#363636;font-weight:700}pre{-webkit-overflow-scrolling:touch;background-color:#f5f5f5;color:#4a4a4a;font-size:.875em;overflow-x:auto;padding:1.25rem 1.5rem;white-space:pre;word-wrap:normal}pre code{background-color:transparent;color:currentColor;font-size:1em;padding:0}table td,table th{vertical-align:top}table td:not([align]),table th:not([align]){text-align:inherit}table th{color:#363636}.box{background-color:#fff;border-radius:6px;box-shadow:0 .5em 1em -.125em rgba(10,10,10,.1),0 0 0 1px rgba(10,10,10,.02);color:#4a4a4a;display:block;padding:1.25rem}a.box:focus,a.box:hover{box-shadow:0 .5em 1em -.125em rgba(10,10,10,.1),0 0 0 1px #3273dc}a.box:active{box-shadow:inset 0 1px 2px rgba(10,10,10,.2),0 0 0 1px #3273dc}.button{background-color:#fff;border-color:#dbdbdb;border-width:1px;color:#363636;cursor:pointer;justify-content:center;padding-bottom:calc(.5em - 1px);padding-left:1em;padding-right:1em;padding-top:calc(.5em - 1px);text-align:center;white-space:nowrap}.button strong{color:inherit}.button .icon,.button .icon.is-small{height:1.5em;width:1.5em}.button .icon:first-child:not(:last-child){margin-left:calc(-.5em - 1px);margin-right:.25em}.button .icon:last-child:not(:first-child){margin-left:.25em;margin-right:calc(-.5em - 1px)}.button .icon:first-child:last-child{margin-left:calc(-.5em - 1px);margin-right:calc(-.5em - 1px)}.button:hover{border-color:#b5b5b5;color:#363636}.button:focus{border-color:#3273dc;color:#363636}.button:focus:not(:active){box-shadow:0 0 0 .125em rgba(50,115,220,.25)}.button.is-active,.button:active{border-color:#4a4a4a;color:#363636}.button.is-light{background-color:#f5f5f5;border-color:transparent;color:rgba(0,0,0,.7)}.button.is-light:hover{background-color:#eee;border-color:transparent;color:rgba(0,0,0,.7)}.button.is-light:focus{border-color:transparent;color:rgba(0,0,0,.7)}.button.is-light:focus:not(:active){box-shadow:0 0 0 .125em rgba(245,245,245,.25)}.button.is-light.is-active,.button.is-light:active{background-color:#e8e8e8;border-color:transparent;color:rgba(0,0,0,.7)}.button.is-dark{background-color:#363636;border-color:transparent;color:#fff}.button.is-dark:hover{background-color:#2f2f2f;border-color:transparent;color:#fff}.button.is-dark:focus{border-color:transparent;color:#fff}.button.is-dark:focus:not(:active){box-shadow:0 0 0 .125em rgba(54,54,54,.25)}.button.is-dark.is-active,.button.is-dark:active{background-color:#292929;border-color:transparent;color:#fff}.button.is-small{border-radius:2px;font-size:.75rem}.button.is-normal{font-size:1rem}.button.is-rounded{border-radius:290486px;padding-left:calc(1em + .25em);padding-right:calc(1em + .25em)}.buttons{align-items:center;display:flex;flex-wrap:wrap;justify-content:flex-start}.buttons .button{margin-bottom:.5rem}.buttons .button:not(:last-child):not(.is-fullwidth){margin-right:.5rem}.buttons:last-child{margin-bottom:-.5rem}.buttons:not(:last-child){margin-bottom:1rem}.buttons.is-centered{justify-content:center}.buttons.is-centered:not(.has-addons) .button:not(.is-fullwidth){margin-left:.25rem;margin-right:.25rem}.container{flex-grow:1;margin:0 auto;position:relative;width:auto}@media screen and (min-width:1024px){.container{max-width:960px}}@media screen and (min-width:1216px){.container:not(.is-max-desktop){max-width:1152px}}@media screen and (min-width:1408px){.container:not(.is-max-desktop):not(.is-max-widescreen){max-width:1344px}}.content li+li{margin-top:.25em}.content dl:not(:last-child),.content ol:not(:last-child),.content p:not(:last-child),.content pre:not(:last-child),.content table:not(:last-child),.content ul:not(:last-child){margin-bottom:1em}.content h1,.content h2,.content h3{color:#363636;font-weight:600;line-height:1.125}.content h1{font-size:2em;margin-bottom:.5em}.content h1:not(:first-child){margin-top:1em}.content h2{font-size:1.75em;margin-bottom:.5714em}.content h2:not(:first-child){margin-top:1.1428em}.content h3{font-size:1.5em;margin-bottom:.6666em}.content h3:not(:first-child){margin-top:1.3333em}.content ol{list-style-position:outside;margin-left:2em;margin-top:1em}.content ol:not([type]){list-style-type:decimal}.content ul{list-style:disc outside;margin-left:2em;margin-top:1em}.content ul ul{list-style-type:circle;margin-top:.5em}.content ul ul ul{list-style-type:square}.content dd{margin-left:2em}.content figure{margin-left:2em;margin-right:2em;text-align:center}.content figure:not(:first-child){margin-top:2em}.content figure:not(:last-child){margin-bottom:2em}.content figure img{display:inline-block}.content pre{-webkit-overflow-scrolling:touch;overflow-x:auto;padding:1.25em 1.5em;white-space:pre;word-wrap:normal}.content sub,.content sup{font-size:75%}.content table{width:100%}.content table td,.content table th{border:1px solid #dbdbdb;border-width:0 0 1px;padding:.5em .75em;vertical-align:top}.content table th{color:#363636}.content table th:not([align]){text-align:inherit}.content table thead td,.content table thead th{border-width:0 0 2px;color:#363636}.content table tbody tr:last-child td,.content table tbody tr:last-child th{border-bottom-width:0}.content .tabs li+li{margin-top:0}.content.is-small{font-size:.75rem}.icon{align-items:center;display:inline-flex;justify-content:center;height:1.5rem;width:1.5rem}.icon.is-small{height:1rem;width:1rem}.image{display:block;position:relative}.image img{display:block;height:auto;width:100%}.image img.is-rounded{border-radius:290486px}.progress{-moz-appearance:none;-webkit-appearance:none;border:none;border-radius:290486px;display:block;height:1rem;overflow:hidden;padding:0;width:100%}.progress::-webkit-progress-bar{background-color:#ededed}.progress::-webkit-progress-value{background-color:#4a4a4a}.progress::-moz-progress-bar{background-color:#4a4a4a}.progress::-ms-fill{background-color:#4a4a4a;border:none}.progress.is-light::-webkit-progress-value{background-color:#f5f5f5}.progress.is-light::-moz-progress-bar{background-color:#f5f5f5}.progress.is-light::-ms-fill{background-color:#f5f5f5}.progress.is-light:indeterminate{background-image:linear-gradient(to right,#f5f5f5 30%,#ededed 30%)}.progress.is-dark::-webkit-progress-value{background-color:#363636}.progress.is-dark::-moz-progress-bar{background-color:#363636}.progress.is-dark::-ms-fill{background-color:#363636}.progress.is-dark:indeterminate{background-image:linear-gradient(to right,#363636 30%,#ededed 30%)}.progress:indeterminate{-webkit-animation-duration:1.5s;animation-duration:1.5s;-webkit-animation-iteration-count:infinite;animation-iteration-count:infinite;-webkit-animation-name:moveIndeterminate;animation-name:moveIndeterminate;-webkit-animation-timing-function:linear;animation-timing-function:linear;background-color:#ededed;background-image:linear-gradient(to right,#4a4a4a 30%,#ededed 30%);background-position:top left;background-repeat:no-repeat;background-size:150% 150%}.progress:indeterminate::-webkit-progress-bar{background-color:transparent}.progress:indeterminate::-moz-progress-bar{background-color:transparent}.progress:indeterminate::-ms-fill{animation-name:none}.progress.is-small{height:.75rem}@-webkit-keyframes moveIndeterminate{from{background-position:200% 0}to{background-position:-200% 0}}@keyframes moveIndeterminate{from{background-position:200% 0}to{background-position:-200% 0}}.table{background-color:#fff;color:#363636}.table td,.table th{border:1px solid #dbdbdb;border-width:0 0 1px;padding:.5em .75em;vertical-align:top}.table td.is-light,.table th.is-light{background-color:#f5f5f5;border-color:#f5f5f5;color:rgba(0,0,0,.7)}.table td.is-dark,.table th.is-dark{background-color:#363636;border-color:#363636;color:#fff}.table td.is-vcentered,.table th.is-vcentered{vertical-align:middle}.table th{color:#363636}.table th:not([align]){text-align:inherit}.table thead{background-color:transparent}.table thead td,.table thead th{border-width:0 0 2px;color:#363636}.table tbody{background-color:transparent}.table tbody tr:last-child td,.table tbody tr:last-child th{border-bottom-width:0}.tags{align-items:center;display:flex;flex-wrap:wrap;justify-content:flex-start}.tags:last-child{margin-bottom:-.5rem}.tags:not(:last-child){margin-bottom:1rem}.tags.is-centered{justify-content:center}.title{word-break:break-word}.title em,.title span{font-weight:inherit}.title sub{font-size:.75em}.title sup{font-size:.75em}.title{color:#363636;font-size:2rem;font-weight:600;line-height:1.125}.title strong{color:inherit;font-weight:inherit}.title.is-1{font-size:3rem}.title.is-3{font-size:2rem}.title.is-4{font-size:1.5rem}.title.is-5{font-size:1.25rem}.title.is-6{font-size:1rem}.title.is-7{font-size:.75rem}.number{align-items:center;background-color:#f5f5f5;border-radius:290486px;display:inline-flex;font-size:1.25rem;height:2em;justify-content:center;margin-right:1.5rem;min-width:2.5em;padding:.25rem .5rem;text-align:center;vertical-align:top}.input,.select select{background-color:#fff;border-color:#dbdbdb;border-radius:4px;color:#363636}.input::-moz-placeholder,.select select::-moz-placeholder{color:rgba(54,54,54,.3)}.input::-webkit-input-placeholder,.select select::-webkit-input-placeholder{color:rgba(54,54,54,.3)}.input:-moz-placeholder,.select select:-moz-placeholder{color:rgba(54,54,54,.3)}.input:-ms-input-placeholder,.select select:-ms-input-placeholder{color:rgba(54,54,54,.3)}.input:hover,.select select:hover{border-color:#b5b5b5}.input:active,.input:focus,.is-active.input,.select select.is-active,.select select:active,.select select:focus{border-color:#3273dc;box-shadow:0 0 0 .125em rgba(50,115,220,.25)}.input{box-shadow:inset 0 .0625em .125em rgba(10,10,10,.05);max-width:100%;width:100%}.is-light.input{border-color:#f5f5f5}.is-light.input:active,.is-light.input:focus,.is-light.is-active.input{box-shadow:0 0 0 .125em rgba(245,245,245,.25)}.is-dark.input{border-color:#363636}.is-dark.input:active,.is-dark.input:focus,.is-dark.is-active.input{box-shadow:0 0 0 .125em rgba(54,54,54,.25)}.is-small.input{border-radius:2px;font-size:.75rem}.input.is-rounded{border-radius:290486px;padding-left:calc(calc(.75em - 1px) + .375em);padding-right:calc(calc(.75em - 1px) + .375em)}.select{display:inline-block;max-width:100%;position:relative;vertical-align:top}.select:not(.is-multiple){height:2.5em}.select:not(.is-multiple):not(.is-loading)::after{border-color:#3273dc;right:1.125em;z-index:4}.select.is-rounded select{border-radius:290486px;padding-left:1em}.select select{cursor:pointer;display:block;font-size:1em;max-width:100%;outline:0}.select select::-ms-expand{display:none}.select select:not([multiple]){padding-right:2.5em}.select:not(.is-multiple):not(.is-loading):hover::after{border-color:#363636}.select.is-light:not(:hover)::after{border-color:#f5f5f5}.select.is-light select{border-color:#f5f5f5}.select.is-light select:hover{border-color:#e8e8e8}.select.is-light select.is-active,.select.is-light select:active,.select.is-light select:focus{box-shadow:0 0 0 .125em rgba(245,245,245,.25)}.select.is-dark:not(:hover)::after{border-color:#363636}.select.is-dark select{border-color:#363636}.select.is-dark select:hover{border-color:#292929}.select.is-dark select.is-active,.select.is-dark select:active,.select.is-dark select:focus{box-shadow:0 0 0 .125em rgba(54,54,54,.25)}.select.is-small{border-radius:2px;font-size:.75rem}.label{color:#363636;display:block;font-size:1rem;font-weight:700}.label:not(:last-child){margin-bottom:.5em}.label.is-small{font-size:.75rem}.help{display:block;font-size:.75rem;margin-top:.25rem}.help.is-light{color:#f5f5f5}.help.is-dark{color:#363636}.control{box-sizing:border-box;clear:both;font-size:1rem;position:relative;text-align:inherit}.card{background-color:#fff;border-radius:.25rem;box-shadow:0 .5em 1em -.125em rgba(10,10,10,.1),0 0 0 1px rgba(10,10,10,.02);color:#4a4a4a;max-width:100%;overflow:hidden;position:relative}.tabs{-webkit-overflow-scrolling:touch;align-items:stretch;display:flex;font-size:1rem;justify-content:space-between;overflow:hidden;overflow-x:auto;white-space:nowrap}.tabs a{align-items:center;border-bottom-color:#dbdbdb;border-bottom-style:solid;border-bottom-width:1px;color:#4a4a4a;display:flex;justify-content:center;margin-bottom:-1px;padding:.5em 1em;vertical-align:top}.tabs a:hover{border-bottom-color:#363636;color:#363636}.tabs li{display:block}.tabs li.is-active a{border-bottom-color:#3273dc;color:#3273dc}.tabs ul{align-items:center;border-bottom-color:#dbdbdb;border-bottom-style:solid;border-bottom-width:1px;display:flex;flex-grow:1;flex-shrink:0;justify-content:flex-start}.tabs .icon:first-child{margin-right:.5em}.tabs .icon:last-child{margin-left:.5em}.tabs.is-centered ul{justify-content:center}.tabs.is-boxed a{border:1px solid transparent;border-radius:4px 4px 0 0}.tabs.is-boxed a:hover{background-color:#f5f5f5;border-bottom-color:#dbdbdb}.tabs.is-boxed li.is-active a{background-color:#fff;border-color:#dbdbdb;border-bottom-color:transparent!important}.tabs.is-toggle a{border-color:#dbdbdb;border-style:solid;border-width:1px;margin-bottom:0;position:relative}.tabs.is-toggle a:hover{background-color:#f5f5f5;border-color:#b5b5b5;z-index:2}.tabs.is-toggle li+li{margin-left:-1px}.tabs.is-toggle li:first-child a{border-top-left-radius:4px;border-bottom-left-radius:4px}.tabs.is-toggle li:last-child a{border-top-right-radius:4px;border-bottom-right-radius:4px}.tabs.is-toggle li.is-active a{background-color:#3273dc;border-color:#3273dc;color:#fff;z-index:1}.tabs.is-toggle ul{border-bottom:none}.tabs.is-toggle.is-toggle-rounded li:first-child a{border-bottom-left-radius:290486px;border-top-left-radius:290486px;padding-left:1.25em}.tabs.is-toggle.is-toggle-rounded li:last-child a{border-bottom-right-radius:290486px;border-top-right-radius:290486px;padding-right:1.25em}.tabs.is-small{font-size:.75rem}.column{display:block;flex-basis:0;flex-grow:1;flex-shrink:1;padding:.75rem}.columns.is-mobile>.column.is-half{flex:none;width:50%}.columns.is-mobile>.column.is-one-third{flex:none;width:33.3333%}.columns.is-mobile>.column.is-1{flex:none;width:8.33333%}.columns.is-mobile>.column.is-3{flex:none;width:25%}.columns.is-mobile>.column.is-4{flex:none;width:33.33333%}.columns.is-mobile>.column.is-5{flex:none;width:41.66667%}.columns.is-mobile>.column.is-6{flex:none;width:50%}.columns.is-mobile>.column.is-7{flex:none;width:58.33333%}@media screen and (max-width:768px){.column.is-half-mobile{flex:none;width:50%}}@media screen and (min-width:769px),print{.column.is-half,.column.is-half-tablet{flex:none;width:50%}.column.is-one-third,.column.is-one-third-tablet{flex:none;width:33.3333%}.column.is-1{flex:none;width:8.33333%}.column.is-3{flex:none;width:25%}.column.is-4{flex:none;width:33.33333%}.column.is-5{flex:none;width:41.66667%}.column.is-6{flex:none;width:50%}.column.is-7{flex:none;width:58.33333%}}@media screen and (min-width:1024px){.column.is-one-third-desktop{flex:none;width:33.3333%}.column.is-one-quarter-desktop{flex:none;width:25%}.column.is-one-fifth-desktop{flex:none;width:20%}.column.is-5-desktop{flex:none;width:41.66667%}}.columns{margin-left:-.75rem;margin-right:-.75rem;margin-top:-.75rem}.columns:last-child{margin-bottom:-.75rem}.columns:not(:last-child){margin-bottom:calc(1.5rem - .75rem)}.columns.is-centered{justify-content:center}.columns.is-mobile{display:flex}.columns.is-multiline{flex-wrap:wrap}.columns.is-vcentered{align-items:center}@media screen and (min-width:769px),print{.columns:not(.is-desktop){display:flex}}.is-size-5{font-size:1.25rem!important}.is-size-6{font-size:1rem!important}.has-text-centered{text-align:center!important}.has-text-justified{text-align:justify!important}.is-hidden{display:none!important}.hero{align-items:stretch;display:flex;flex-direction:column;justify-content:space-between}.hero .tabs ul{border-bottom:none}.hero.is-light{background-color:#f5f5f5;color:rgba(0,0,0,.7)}.hero.is-light a:not(.button):not(.dropdown-item):not(.tag):not(.pagination-link.is-current),.hero.is-light strong{color:inherit}.hero.is-light .title{color:rgba(0,0,0,.7)}.hero.is-light .tabs a{color:rgba(0,0,0,.7);opacity:.9}.hero.is-light .tabs a:hover{opacity:1}.hero.is-light .tabs li.is-active a{opacity:1}.hero.is-light .tabs.is-boxed a,.hero.is-light .tabs.is-toggle a{color:rgba(0,0,0,.7)}.hero.is-light .tabs.is-boxed a:hover,.hero.is-light .tabs.is-toggle a:hover{background-color:rgba(10,10,10,.1)}.hero.is-light .tabs.is-boxed li.is-active a,.hero.is-light .tabs.is-boxed li.is-active a:hover,.hero.is-light .tabs.is-toggle li.is-active a,.hero.is-light .tabs.is-toggle li.is-active a:hover{background-color:rgba(0,0,0,.7);border-color:rgba(0,0,0,.7);color:#f5f5f5}.hero.is-dark{background-color:#363636;color:#fff}.hero.is-dark a:not(.button):not(.dropdown-item):not(.tag):not(.pagination-link.is-current),.hero.is-dark strong{color:inherit}.hero.is-dark .title{color:#fff}.hero.is-dark .tabs a{color:#fff;opacity:.9}.hero.is-dark .tabs a:hover{opacity:1}.hero.is-dark .tabs li.is-active a{opacity:1}.hero.is-dark .tabs.is-boxed a,.hero.is-dark .tabs.is-toggle a{color:#fff}.hero.is-dark .tabs.is-boxed a:hover,.hero.is-dark .tabs.is-toggle a:hover{background-color:rgba(10,10,10,.1)}.hero.is-dark .tabs.is-boxed li.is-active a,.hero.is-dark .tabs.is-boxed li.is-active a:hover,.hero.is-dark .tabs.is-toggle li.is-active a,.hero.is-dark .tabs.is-toggle li.is-active a:hover{background-color:#fff;border-color:#fff;color:#363636}.hero.is-small .hero-body{padding:1.5rem}.hero-body{flex-grow:1;flex-shrink:0;padding:3rem 1.5rem}.section{padding:3rem 1.5rem}</style>
+  <style>body {
+  font-family: 'Noto Sans', sans-serif;
+}
+
+
+.footer .icon-link {
+    font-size: 25px;
+    color: #000;
+}
+
+.link-block a {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.dnerf {
+  font-variant: small-caps;
+}
+
+
+.teaser .hero-body {
+  padding-top: 0;
+  padding-bottom: 3rem;
+}
+
+.teaser {
+  font-family: 'Noto Sans', sans-serif;
+}
+
+
+.publication-title {
+}
+
+.publication-banner {
+  max-height: parent;
+
+}
+
+.publication-banner video {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  object-fit: fit;
+}
+
+.publication-header .hero-body {
+}
+
+.publication-title {
+    font-family: 'Noto Sans', sans-serif;
+}
+
+.publication-authors {
+    font-family: 'Noto Sans', sans-serif;
+}
+
+.publication-venue {
+    color: #555;
+    width: fit-content;
+    font-weight: bold;
+}
+
+.publication-awards {
+    color: #ff3860;
+    width: fit-content;
+    font-weight: bolder;
+}
+
+.publication-authors {
+}
+
+.publication-authors a {
+   color: #c62828 !important;
+}
+
+.publication-authors a:hover {
+    text-decoration: underline;
+}
+
+.author-block {
+  display: inline-block;
+}
+
+.publication-banner img {
+}
+
+.publication-authors {
+  
+}
+
+.publication-video {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%;
+
+    overflow: hidden;
+    border-radius: 10px !important;
+}
+
+.publication-video iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.publication-body img {
+}
+
+.results-carousel {
+  overflow: hidden;
+}
+
+.results-carousel .item {
+  margin: 5px;
+  overflow: hidden;
+  border: 1px solid #bbb;
+  border-radius: 10px;
+  padding: 0;
+  font-size: 0;
+}
+
+.results-carousel video {
+  margin: 0;
+}
+
+
+.interpolation-panel {
+  background: #f5f5f5;
+  border-radius: 10px;
+}
+
+.interpolation-panel .interpolation-image {
+  width: 100%;
+  border-radius: 5px;
+}
+
+.interpolation-video-column {
+}
+
+.interpolation-panel .slider {
+  margin: 0 !important;
+}
+
+.interpolation-panel .slider {
+  margin: 0 !important;
+}
+
+#interpolation-image-wrapper {
+  width: 100%;
+}
+#interpolation-image-wrapper img {
+  border-radius: 5px;
+}
+
+
+.publication-title { font-family: 'Noto Sans', sans-serif; }
+img.figure { width: 100%; height: auto; display: block; margin: 0 auto 1rem; }
+video.rollout { width: 100%; aspect-ratio: 4 / 3; object-fit: contain; border-radius: 6px; background: #000; display: block; }
+.video-title { font-weight: 600; margin-top: .4rem; font-size: .95rem; }
+.video-caption { font-size: .85rem; color: #555; font-style: italic; }
+</style>
+  <style>:root {
+  --ink: #1d2433;
+  --muted: #5b6475;
+  --line: #e6e8ee;
+  --shade: #f6f7fa;
+  --accent: #e63e3e;
+  --accent-text: #c62828;
+  --accent-soft: #fdecec;
+  --ok: #1f9d55;
+}
+
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+body { color: var(--ink); background: #fff; }
+
+
+.topnav {
+  position: sticky; top: 0; z-index: 30;
+  background: rgba(255, 255, 255, .92); backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+.topnav-inner {
+  max-width: var(--page); margin: 0 auto; padding: .7rem 1.25rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+}
+.topnav .brand { font-weight: 700; letter-spacing: .06em; color: var(--ink); }
+.topnav-links { display: flex; gap: 1.4rem; flex-wrap: wrap; justify-content: flex-end; }
+.topnav-links a { color: var(--muted); font-size: .95rem; }
+.topnav-links a:hover { color: var(--accent-text); }
+
+
+.hero .hero-body { padding: 3.5rem 1.5rem 1.5rem; }
+.publication-title { line-height: 1.2; margin-bottom: 1.5rem !important; }
+.publication-authors { margin-bottom: .35rem; }
+.publication-authors .author-block { margin: 0 .05rem 0 .3rem; }
+.affiliation-logos {
+  display: flex; justify-content: space-between; align-items: center; gap: 3rem;
+  max-width: 560px; margin: 1.6rem auto .4rem;
+}
+.affiliation-logos img { height: 34px; width: auto; display: block; }
+.affiliation-logos a:last-child img { height: 30px; }
+.publication-links { margin-top: 1.4rem; }
+.publication-links .button { margin: .25rem; }
+
+
+.vid { position: relative; }
+.speed-badge {
+  position: absolute; bottom: .55rem; left: .55rem; z-index: 2; pointer-events: none;
+  background: rgba(15, 20, 35, .72); color: #fff; font-size: .78rem; font-weight: 700; letter-spacing: .02em;
+  padding: .18rem .55rem; border-radius: 999px; backdrop-filter: blur(4px);
+}
+.system-badge {
+  position: absolute; top: .55rem; left: .55rem; z-index: 2; pointer-events: none;
+  background: rgba(255, 255, 255, .9); color: #1a1f2e; font-size: .78rem; font-weight: 700;
+  padding: .18rem .55rem; border-radius: 999px;
+}
+.clip-card .vid { border-radius: 12px 12px 0 0; overflow: hidden; }
+.teaser-videos .speed-badge { font-size: .85rem; bottom: .7rem; left: .7rem; }
+
+
+.teaser-videos { padding-top: 1rem; padding-bottom: 1.5rem; }
+.teaser-clip {
+  width: 100%; aspect-ratio: 16 / 10 !important; object-fit: cover; background: #000;
+  border-radius: 12px; display: block; box-shadow: 0 6px 24px rgba(20, 30, 60, .12);
+}
+.teaser-label { text-align: center; margin-top: .6rem; color: var(--muted); font-size: .95rem; }
+
+
+.section { padding: 4rem 1.5rem; }
+.section.shade { background: var(--shade); }
+.section .title.is-3 { margin-bottom: .75rem; }
+.section-subtitle { text-align: center; color: var(--muted); margin-bottom: 2rem; }
+.section > .container > .title.is-3 + * { margin-top: 1.75rem; }
+img.figure { width: 100%; height: auto; display: block; margin: 0 auto; }
+.figure-caption { color: var(--muted); font-size: .9rem; margin: .8rem auto 0; max-width: 820px; text-align: justify; }
+.abstract-title { margin-top: 2.5rem; }
+.abstract { max-width: 820px; margin: 0 auto; }
+
+
+.stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: .8rem; margin-bottom: 2.5rem; }
+.stat {
+  background: #fff; border: 1px solid var(--line); border-radius: 12px;
+  padding: 1rem .6rem; text-align: center;
+}
+.stat-value { display: block; font-size: 1.8rem; font-weight: 700; color: var(--accent); line-height: 1.1; }
+.stat-label { display: block; font-size: .85rem; color: var(--muted); margin-top: .25rem; }
+.suite-card {
+  background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; height: 100%;
+}
+.suite-card img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; background: #000; }
+.suite-body { padding: .9rem 1.1rem 1.1rem; }
+.suite-name { font-weight: 700; font-size: 1.1rem; margin-bottom: .2rem; }
+.suite-facts { color: var(--muted); font-size: .9rem; }
+
+
+.cat-card { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; height: 100%; }
+.cat-card img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; }
+.cat-body { padding: .75rem .9rem .9rem; }
+.cat-name { font-weight: 700; margin-bottom: .25rem; display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; }
+.cat-count { color: var(--muted); font-weight: 500; font-size: .8rem; white-space: nowrap; }
+.cat-req { font-size: .88rem; color: var(--ink); margin-bottom: .35rem; }
+.cat-example { font-size: .85rem; color: var(--muted); }
+
+
+.tagline { max-width: 860px; margin: 2rem auto 0; text-align: center; font-size: 1.15rem; line-height: 1.6; color: var(--ink); }
+.findings { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; margin: 2.2rem 0 2.5rem; }
+.finding {
+  background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--accent);
+  border-radius: 12px; padding: 1.1rem 1.2rem 1.2rem;
+}
+.shade .finding { box-shadow: 0 2px 10px rgba(20, 30, 60, .04); }
+.finding-value { display: block; font-size: 1.65rem; font-weight: 800; color: var(--accent); line-height: 1.15; }
+.finding-head { font-weight: 700; margin: .45rem 0 .3rem; line-height: 1.3; }
+.finding-text { color: var(--muted); font-size: .9rem; line-height: 1.5; }
+
+.subhead { margin-top: 3.5rem; margin-bottom: .5rem !important; }
+.subhead-note { text-align: center; color: var(--muted); max-width: 820px; margin: 0 auto 1.5rem; font-size: .95rem; }
+.row-title { font-weight: 700; font-size: 1rem; margin: 2rem 0 .8rem; color: var(--ink); }
+.row-title:first-of-type { margin-top: 0; }
+
+
+.chip {
+  display: inline-block; padding: .15rem .6rem; margin: .2rem; border-radius: 999px;
+  background: var(--accent-soft); color: var(--accent-text); font-size: .8rem; font-weight: 600;
+}
+.chip.strong { background: var(--accent-text); color: #fff; }
+.chip.ok { background: #e3f6ea; color: var(--ok); }
+.chip.bad { background: #eef0f4; color: #3f3f46; }
+.chip.muted { background: #eef0f4; color: var(--muted); }
+
+
+.table-wrap { overflow-x: auto; }
+table.results { width: 100%; border-collapse: collapse; font-size: .95rem; margin: 0 auto; }
+table.results th, table.results td { padding: .5rem .8rem; text-align: center; border-bottom: 1px solid var(--line); }
+table.results thead th { font-weight: 600; color: var(--muted); border-bottom: 2px solid var(--ink); }
+table.results tbody th { text-align: left; font-weight: 500; white-space: nowrap; }
+table.results td.bar { font-variant-numeric: tabular-nums; }
+table.results tr.ours th, table.results tr.ours td { font-weight: 700; }
+table.results tr.sep td { padding: 0; border-bottom: 2px solid var(--line); }
+table.results tr.foot th, table.results tr.foot td { color: var(--muted); font-style: italic; font-size: .85rem; border-bottom: none; }
+table.results .pm { color: var(--muted); font-size: .78em; font-weight: 400; margin-left: .15rem; white-space: nowrap; }
+table.results td { white-space: nowrap; }
+table.results tr.group td {
+  text-align: left; font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted); background: var(--shade); padding: .35rem .8rem;
+}
+.shade table.results tr.group td { background: #eceef3; }
+table.results tr.ours th, table.results tr.ours td { background: var(--accent-soft); }
+table.results.compact { font-size: .85rem; }
+table.results.compact th, table.results.compact td { padding: .35rem .55rem; }
+table.results thead th small { font-weight: 400; }
+.best-learned { color: #0a7d2c; font-weight: 700; }
+.best-tool { color: #c62828; font-weight: 700; }
+.best-learned .pm, .best-tool .pm { color: inherit; opacity: .75; }
+table.results.real td { font-variant-numeric: tabular-nums; }
+.table-note { color: var(--muted); font-size: .85rem; text-align: center; margin: .6rem 0 3rem; }
+.tab-pane + h3 { margin-top: 3rem; }
+.tabs.is-boxed { margin-bottom: 1.5rem; }
+.tabs.is-boxed li.is-active a { color: var(--accent-text); font-weight: 600; }
+details.more { margin: 1.5rem auto 0; border: 1px solid var(--line); border-radius: 10px; background: #fff; padding: .8rem 1rem; }
+details.more summary { cursor: pointer; font-weight: 600; color: var(--accent-text); }
+details.more[open] summary { margin-bottom: 1rem; }
+.real-results { margin-top: 1rem; }
+
+
+.tabs.is-toggle a { border-color: var(--line); }
+.tabs.is-toggle li.is-active a { background: var(--accent-text); border-color: var(--accent-text); }
+.tab-pane.is-hidden { display: none; }
+.pane-text { text-align: center; color: var(--muted); max-width: 820px; margin: 0 auto 1.5rem; font-size: .95rem; }
+.clip-card { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; height: 100%; }
+video.rollout { width: 100%; height: auto; object-fit: cover; background: #000; display: block; }
+.clip-title { font-weight: 600; font-size: .9rem; padding: .7rem .9rem 0; }
+.clip-instruction { font-size: .9rem; padding: .7rem .9rem .2rem; color: var(--ink); }
+.clip-meta { padding: 0 .7rem .8rem; }
+.system-grid .clip-title { padding-top: .5rem; font-size: .85rem; }
+.clip-title .chip { vertical-align: middle; }
+
+
+a.resource {
+  display: flex; flex-direction: column; height: 100%; background: #fff; border: 1px solid var(--line);
+  border-radius: 12px; padding: 1.2rem; color: var(--ink); transition: box-shadow .15s, border-color .15s;
+}
+a.resource:hover { border-color: var(--accent); box-shadow: 0 6px 20px rgba(230, 62, 62, .12); }
+.resource-icon { font-size: 1.6rem; color: var(--accent-text); margin-bottom: .5rem; }
+.resource-name { font-weight: 700; font-size: 1.05rem; margin-bottom: .3rem; }
+.resource-text { color: var(--muted); font-size: .9rem; line-height: 1.5; }
+
+pre.bibtex { white-space: pre-wrap; word-break: break-word; background: var(--shade); border: 1px solid var(--line); border-radius: 10px; font-size: .85rem; }
+.footer { background: #fff; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
+
+@media (max-width: 768px) {
+  .topnav-links { display: none; }
+  .affiliation-logos { gap: 1.5rem; }
+  .affiliation-logos img { height: 24px; }
+  .affiliation-logos a:last-child img { height: 22px; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .tagline { font-size: 1rem; }
+  .publication-title { font-size: 2.1rem !important; }
+  .tabs a { font-size: .85rem; padding: .4em .75em; }
+  .findings { gap: .75rem; }
+  table.results tbody th, table.results thead th:first-child { position: sticky; left: 0; z-index: 1; background: #fff; }
+  .shade table.results tbody th, .shade table.results thead th:first-child { background: var(--shade); }
+  table.results tr.ours th { background: var(--accent-soft); }
+  .abstract, .figure-caption { text-align: left !important; }
+}
+
+@media (min-width: 769px) and (max-width: 1100px) {
+  .stats { grid-template-columns: repeat(3, 1fr); }
+}
+.hf-logo { width: 1.25em; height: 1.25em; }
+
+
+:root { --page: 1152px; }
+@media (min-width: 1800px) { :root { --page: 1400px; } html { font-size: 17px; } }
+@media (min-width: 2400px) { :root { --page: 1600px; } html { font-size: 18px; } }
+.container.is-max-desktop, .container.is-max-widescreen { max-width: var(--page) !important; }
+#bibtex .title { text-align: center; }
+pre.bibtex { max-width: 900px; margin: 0 auto; }
+.lb-link { margin-top: 1.5rem; }
+.picker { margin-left: .6rem; vertical-align: middle; }
+.picker select { font-weight: 600; }
+
+
+.evaluate-card { height: 100%; padding: 1.2rem 1.3rem; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.evaluate-name { font-weight: 700; font-size: 1.05rem; margin-bottom: .3rem; }
+.evaluate-text { color: var(--muted); font-size: .92rem; margin-bottom: .8rem; }
+.evaluate-card pre { padding: .7rem .8rem; font-size: .76rem; background: #f6f7fa; border-radius: 6px; overflow-x: auto; }
+.evaluate-next { max-width: 46rem; margin: 1.2rem auto 0; text-align: center; color: var(--muted); }
+.evaluate-next code { font-size: .85em; color: var(--ink); }
+
+a { color: var(--accent-text); }
+a:hover { color: var(--accent-text); }
+</style>
+  <style>
+.lb { max-width: 1180px; margin: 0 auto; }
+.lb-header { text-align: center; margin-bottom: 2rem; }
+.lb-header h1 { font-size: 2.4rem; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.lb-header p { color: var(--muted); margin-top: .5rem; }
+
+.lb-bar-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .8rem; margin-bottom: 1rem; }
+.lb-controls { display: flex; flex-wrap: wrap; gap: .6rem; }
+.lb-seg { display: inline-flex; flex-wrap: wrap; background: var(--shade); border-radius: 8px; padding: 3px; gap: 2px; }
+.lb-seg button {
+  border: 0; background: transparent; color: var(--muted); font: inherit; font-size: .88rem; cursor: pointer;
+  padding: .35rem .8rem; border-radius: 6px;
+}
+.lb-seg button:hover { color: var(--ink); }
+.lb-seg button.is-active { background: #fff; color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(16, 24, 40, .12); }
+.lb-views button { font-size: .95rem; }
+
+.lb-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.lb-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: .95rem; }
+.lb-table th { font-size: .82rem; font-weight: 600; color: var(--muted);
+  padding: .6rem .7rem; border-bottom: 1px solid var(--line); text-align: right; line-height: 1.3; vertical-align: bottom; }
+.lb-table td { padding: .7rem .7rem; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.lb-table .lb-left { text-align: left; }
+.lb-table th.is-on, .lb-table td.is-on { color: var(--ink); font-weight: 600; }
+.lb-rank { width: 2rem; color: var(--muted); text-align: center !important; }
+.lb-name { display: flex; align-items: center; gap: .5rem; font-weight: 600; color: var(--ink); }
+.lb-name i { width: .55rem; height: .55rem; border-radius: 50%; flex: none; }
+.lb-kind { display: block; color: var(--muted); font-size: .78rem; margin-left: 1.05rem; }
+.lb-ref td { color: var(--muted); }
+.lb-ref .lb-name { color: var(--muted); font-weight: 500; }
+
+.lb-score { width: 13rem; }
+.lb-scorebox { display: flex; align-items: center; gap: .55rem; }
+.lb-scorebox b { font-weight: 700; color: var(--ink); min-width: 2.5rem; text-align: right; }
+.lb-scorebox small { color: var(--muted); font-size: .75rem; min-width: 2.3rem; text-align: left; }
+.lb-meter { flex: 1; height: .45rem; background: var(--shade); border-radius: 999px; overflow: hidden; }
+.lb-meter span { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+.lb-ref .lb-meter span { background: #c3c8d0; }
+.lb-ref .lb-scorebox b { color: var(--muted); }
+
+.lb-grid td.lb-heat { position: relative; }
+.lb-grid td.lb-heat { background: rgba(230, 62, 62, calc(var(--v) * .55)); }
+.lb-grid .lb-all { font-weight: 700; border-left: 1px solid var(--line); }
+
+.lb-chartbox { margin-bottom: 1.8rem; }
+.lb-plot { position: relative; }
+.lb-chart { width: 100%; height: auto; display: block; }
+.lb-chart text { font-size: 12px; fill: var(--muted); }
+.lb-gridline { stroke: var(--line); }
+.lb-guide { stroke: #9aa0aa; stroke-dasharray: 3 3; }
+.lb-hit { fill: transparent; }
+.lb-series polyline { fill: none; stroke: var(--c); stroke-width: 2.2; stroke-linejoin: round; }
+.lb-series circle { fill: var(--c); }
+.lb-series { transition: opacity .12s; cursor: pointer; }
+.lb-chartbox.is-focus .lb-series { opacity: .12; }
+.lb-chartbox.is-focus .lb-series.is-on { opacity: 1; }
+.lb-chartbox.is-focus .lb-series.is-on polyline { stroke-width: 3.5; }
+.lb-tip {
+  position: absolute; top: 4px; pointer-events: none; background: #fff; border: 1px solid var(--line); border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(16, 24, 40, .12); padding: .5rem .7rem; font-size: .8rem; min-width: 13rem; z-index: 2;
+}
+.lb-tip b { display: block; margin-bottom: .25rem; color: var(--ink); }
+.lb-tip span { display: flex; align-items: center; gap: .45rem; line-height: 1.6; color: var(--ink); }
+.lb-tip i, .lb-key i { width: .7rem; height: .7rem; border-radius: 3px; flex: none; display: inline-block; }
+.lb-tip em { margin-left: auto; font-style: normal; font-weight: 600; padding-left: .8rem; font-variant-numeric: tabular-nums; }
+.lb-axis { text-align: center; color: var(--muted); font-size: .8rem; margin-top: -.3rem; }
+.lb-legend { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .3rem .4rem; margin-top: .8rem; }
+.lb-key {
+  display: inline-flex; align-items: center; gap: .4rem; border: 1px solid var(--line); background: #fff; border-radius: 999px;
+  padding: .2rem .65rem; font: inherit; font-size: .82rem; color: var(--ink); cursor: pointer;
+}
+.lb-key:hover, .lb-key.is-on { border-color: #9aa0aa; }
+.lb-key.is-off { color: #aab0b9; }
+.lb-key.is-off i { background: #dfe2e7 !important; }
+.lb-keys-all { margin-left: .4rem; font-size: .8rem; color: var(--muted); }
+.lb-keys-all button { border: 0; background: none; color: var(--accent-text); font: inherit; cursor: pointer; padding: 0; }
+
+.lb-note { color: var(--muted); font-size: .82rem; margin-top: 1rem; line-height: 1.5; }
+.lb-badge { display: inline-block; padding: .05rem .4rem; border-radius: 999px; font-size: .68rem; font-weight: 600;
+  color: #8a5a00; background: #fff4dc; vertical-align: middle; white-space: nowrap; }
+.lb-badge.is-verified { color: #0b6b4f; background: #ddf5ec; }
+
+.lb-howto { margin-top: 2.8rem; padding-top: 1.6rem; border-top: 1px solid var(--line); max-width: 52rem; }
+.lb-howto h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: .4rem; }
+.lb-howto > p { color: var(--muted); }
+.lb-steps { margin: 1rem 0 0 1.2rem; }
+.lb-steps li { margin-bottom: 1rem; line-height: 1.55; }
+.lb-steps pre { margin-top: .5rem; padding: .8rem 1rem; font-size: .82rem; background: #f6f7fa; border-radius: 6px; overflow-x: auto; }
+.lb-howto code { font-size: .85em; color: var(--ink); }
+.lb-legend-note { font-size: .85rem; }
+
+@media (max-width: 768px) {
+  .lb { padding-top: 2rem; }
+  .lb-bar-top { justify-content: center; }
+  .lb-score { width: auto; }
+  .lb-meter { display: none; }
+  .lb-table:not(.lb-grid) .lb-num { display: none; }
+  .lb-table:not(.lb-grid) td.lb-left { white-space: normal; }
+  .lb-kind { font-size: .72rem; }
+  .lb-grid td:first-child, .lb-grid th:first-child { position: sticky; left: 0; background: #fff; z-index: 1; }
+  .lb-grid .lb-kind { display: none; }
+}
+.lb-guide { pointer-events: none; }
+
+
+.lb-hero .hero-body { padding: 3rem 1.5rem 1rem; }
+.lb-hero .kicker { text-transform: uppercase; letter-spacing: .12em; font-size: .78rem; font-weight: 700; color: var(--accent-text); margin-bottom: .6rem; }
+.lb-hero .publication-title { font-size: 2.6rem; }
+.lb-hero .tagline { margin-top: 0; }
+.lb-section { padding-top: 1.5rem; }
+.lb-table th.lb-sort { cursor: pointer; user-select: none; }
+.lb-table th.lb-sort:hover { color: var(--ink); }
+.lb-table th.lb-sort.is-on.is-desc::after { content: " \25BE"; }
+.lb-table th.lb-sort.is-on.is-asc::after { content: " \25B4"; }
+.lb-table th.lb-sort:not(.is-on):hover::after { content: " \25BE"; opacity: .4; }
+.lb-table th small { font-weight: 400; }
+.lb-table td.is-on { background: var(--accent-soft); }
+.lb-top .lb-rank { color: var(--accent-text); font-weight: 700; }
+.lb-model { color: var(--muted); font-size: .88rem; }
+.lb-cta { text-align: center; margin-top: 1.4rem; }
+.lb-cta .button { margin: .25rem; }
+.lb-frontbox { margin: 2.4rem 0 0; }
+.lb-subtitle { font-weight: 700; text-align: center; margin-bottom: .4rem; }
+.lb-front text { font-size: 11px; }
+.lb-front .lb-pt text { font-size: 12px; fill: var(--ink); font-weight: 600; paint-order: stroke; stroke: #fff; stroke-width: 4px; }
+.lb-front .lb-pt.is-ref text { fill: var(--muted); font-style: italic; font-weight: 400; }
+.lb-front .lb-pt circle { stroke: #fff; stroke-width: 2; }
+.lb-pareto { fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-dasharray: 5 4; opacity: .7; }
+.lb-axis i { display: inline-block; width: .65rem; height: .65rem; border-radius: 50%; margin: 0 .25rem 0 .6rem; vertical-align: -1px; }
+@media (max-width: 768px) {
+  .lb-hero .publication-title { font-size: 1.9rem; }
+  .lb-table .lb-suite, .lb-table .lb-model { display: none; }
+  .lb-kind { display: none; }
+  .lb-score { width: auto; }
+  .lb-meter { display: none; }
+  .lb-table th, .lb-table td { padding: .55rem .4rem; }
+  .lb-frontbox { overflow-x: auto; }
+  .lb-front { min-width: 620px; }
+}
+.how { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.2rem; margin: 0 0 2rem; }
+.how-item { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 1rem 1.1rem; font-size: .95rem; line-height: 1.55; }
+.how-item b { display: block; margin-bottom: .3rem; color: var(--ink); }
+@media (max-width: 768px) { .how { grid-template-columns: 1fr; } }
+#results .findings { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 900px) { #results .findings { grid-template-columns: 1fr; } }
+.paper-block { align-items: flex-start; }
+.paper-title { font-weight: 700; font-size: 1.15rem; margin-bottom: .8rem; color: var(--ink); }
+.paper-card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 1.1rem; }
+.paper-card .publication-links { margin: 0 0 .8rem; text-align: left; }
+.paper-cite { font-weight: 700; font-size: .9rem; margin: .2rem 0 .4rem; }
+.paper-card pre.bibtex { font-size: .72rem; white-space: pre-wrap; word-break: break-word; margin: 0; }
+
+.affiliation-logos.big { max-width: 620px; margin: 1.4rem auto .6rem; gap: 4rem; justify-content: center; }
+.affiliation-logos.big img { height: 52px; }
+.affiliation-logos.big a:last-child img { height: 44px; }
+@media (max-width: 768px) { .affiliation-logos.big { gap: 1.8rem; } .affiliation-logos.big img { height: 30px; } .affiliation-logos.big a:last-child img { height: 26px; } }
+
+a.evaluate-card { display: block; height: 100%; color: var(--ink); transition: border-color .15s, box-shadow .15s; }
+a.evaluate-card:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(16, 24, 40, .08); }
+.evaluate-link { display: inline-block; margin-top: .5rem; color: var(--accent-text); font-weight: 600; font-size: .9rem; }
+.evaluate-steps { max-width: 760px; margin: 1.6rem auto 0; padding-left: 1.4rem; line-height: 1.7; }
+.evaluate-steps li { margin-bottom: .35rem; }
+.team .publication-authors { font-size: 1.1rem; }
+details.cite { max-width: 820px; margin: 1.6rem auto 0; }
+
+.lb-pm { display: block; color: var(--muted); font-size: .72rem; }
+.lb-money { font-weight: 600; color: var(--ink); }
+.lb-front text { font-size: 13px; }
+.lb-front .lb-pt text { font-size: 14px; }
+.lb-subtitle { font-size: 1.1rem; }
+.lb-intro { text-align: center; color: var(--muted); max-width: 820px; margin: 0 auto 1.4rem; font-size: 1.02rem; }
+.lb-section { padding-top: .5rem; }
+.how-item b { font-size: 1rem; }
+.cost-block { margin-bottom: 1.5rem; }
+.cost-lead { font-size: 1.05rem; line-height: 1.65; }
+.cost-lead b { color: var(--accent-text); font-size: 1.15rem; }
+.cost-table { width: 100%; font-size: .92rem; }
+.cost-table th, .cost-table td { padding: .5rem .6rem; text-align: right; }
+.cost-table th:first-child, .cost-table td:first-child, .cost-table tbody th { text-align: left; }
+.cost-table tbody tr:first-child { background: #fff4ec; }
+.cite { max-width: 820px; margin: 1.6rem auto 0; }
+.cite-title { font-weight: 700; margin-bottom: .4rem; text-align: center; }
+
+
+:root { --ink: #111111; --accent: #e63e3e; --accent-text: #c62828; --accent-soft: #fdecec; --muted: #5f6368; }
+body, button, input, .title, .subtitle, .publication-title, .content, table { font-family: 'Inter', 'Noto Sans', system-ui, sans-serif !important; }
+.title, .publication-title { letter-spacing: -.015em; }
+
+
+.brand-hero { display: flex; align-items: center; justify-content: center; gap: 1.6rem; margin-bottom: .6rem; }
+.brand-hero .mark { width: 92px; height: auto; overflow: visible; }
+.brand-hero .wordmark { font-weight: 700; font-size: 4.2rem; letter-spacing: .12em; color: var(--ink); line-height: 1; }
+.brand-hero .wordmark span { display: inline-block; }
+.brand-sub { font-size: 1.35rem; color: var(--muted); font-weight: 500; margin-bottom: .2rem; }
+.topnav .brand { display: flex; align-items: center; gap: .45rem; letter-spacing: .12em; }
+.topnav .brand img { height: 22px; width: auto; }
+@media (max-width: 768px) { .brand-hero { gap: 1rem; } .brand-hero .mark { width: 56px; } .brand-hero .wordmark { font-size: 2.6rem; } .brand-sub { font-size: 1.05rem; } }
+@media (max-width: 768px) {
+  .lb-table:not(.lb-grid) .lb-num.lb-money:not(.lb-suite) { display: table-cell; }
+  .lb-views button, .lb-controls button { font-size: .8rem; padding: .3rem .55rem; }
+  .lb-intro { font-size: .92rem; }
+}
+@media (max-width: 768px) { .lb-table:not(.lb-grid) th.lb-score { display: table-cell; } }
+.brand-joint { margin: 1.2rem 0 0; font-size: .78rem; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); font-weight: 600; }
+.lb-hero .affiliation-logos.big { margin-top: .5rem; }
+.resource-links { text-align: center; margin: 0 0 1.6rem; }
+
+:root { --page: 1360px; }
+@media (min-width: 1800px) { :root { --page: 1560px; } }
+@media (min-width: 2400px) { :root { --page: 1760px; } }
+.lb { max-width: none; }
+.lb-hero .hero-body { padding: 2.2rem 1.5rem .4rem; }
+.lb-hero .affiliation-logos.big { margin: .9rem auto .2rem; }
+.brand-sub { margin-bottom: 0; }
+.lb-intro { font-size: .95rem; margin-bottom: 1rem; }
+.lb-kind { display: none; }
+.lb-table td { padding-top: .6rem; padding-bottom: .6rem; }
+.lb-controls { align-items: center; }
+.lb-typekey { font-size: .8rem; color: var(--muted); margin-right: .6rem; }
+.lb-typekey i { display: inline-block; width: .55rem; height: .55rem; border-radius: 50%; margin: 0 .3rem 0 .7rem; }
+@media (max-width: 768px) { .lb-typekey { display: none; } }
+.bench-intro { max-width: 900px; margin: 0 auto 1.6rem; text-align: center; font-size: 1.08rem; line-height: 1.65; color: var(--ink); }
+#benchmark .section-subtitle:empty { display: none; }
+#vlms .section-subtitle:empty { display: none; }
+
+.brand-block { display: flex; align-items: center; gap: .9rem; }
+.brand-by { display: flex; align-items: center; gap: .55rem; color: var(--muted); font-size: .82rem; border-left: 1px solid var(--line); padding-left: .9rem; }
+.brand-by img { display: block; width: auto; }
+.brand-by .by-insait { height: 15px; }
+.brand-by .by-nvidia { height: 17px; }
+.brand-msg { max-width: 760px; margin: .7rem auto 0; color: var(--ink); font-size: 1.02rem; line-height: 1.55; }
+.news { max-width: 760px; margin: 1.1rem auto .2rem; text-align: left; border-left: 3px solid var(--accent); background: var(--accent-soft, #fdecec); border-radius: 6px; padding: .6rem .9rem; font-size: .92rem; }
+.news-title { font-weight: 700; font-size: .75rem; text-transform: uppercase; letter-spacing: .1em; color: var(--accent-text); margin-bottom: .2rem; }
+.news ul { margin: 0; list-style: none; }
+.news li + li { margin-top: .15rem; }
+@media (max-width: 768px) { .brand-by { font-size: .72rem; gap: .4rem; padding-left: .6rem; } .brand-by .by-insait { height: 12px; } .brand-by .by-nvidia { height: 13px; } .brand-msg { font-size: .92rem; } }
+
+.brand-by .by-insait { height: 19px; }
+.brand-by .by-nvidia { height: 15px; }
+.team .affiliation-logos.big { align-items: center; gap: 3.5rem; }
+.team .affiliation-logos.big a:first-child img { height: 56px; }
+.team .affiliation-logos.big a:last-child img { height: 40px; }
+@media (max-width: 768px) {
+  .brand-by .by-insait { height: 14px; } .brand-by .by-nvidia { height: 11px; }
+  .team .affiliation-logos.big { gap: 1.4rem; flex-wrap: wrap; }
+  .team .affiliation-logos.big a:first-child img { height: 36px; } .team .affiliation-logos.big a:last-child img { height: 26px; }
+}
+.lb-bench-bar { display: flex; flex-direction: column; align-items: center; gap: .9rem; margin-bottom: 1.2rem; }
+.lb-seg.lb-bench { padding: 4px; border-radius: 10px; }
+.lb-seg.lb-bench button { display: flex; flex-direction: column; align-items: center; line-height: 1.15; padding: .45rem 1.6rem; border-radius: 7px; min-width: 150px; }
+.lb-seg.lb-bench button b { font-size: 1rem; letter-spacing: .02em; }
+.lb-seg.lb-bench button small { font-size: .74rem; color: var(--muted); font-weight: 500; }
+.lb-seg.lb-bench button.is-active b { color: var(--accent-text); }
+.lite-card { width: 100%; max-width: 980px; border: 1px solid var(--line); border-radius: 12px; padding: 1rem 1.3rem; background: #fff; }
+.lite-stats { display: flex; justify-content: center; gap: 2.6rem; margin-bottom: .55rem; }
+.lite-stats div { display: flex; flex-direction: column; align-items: center; }
+.lite-stats b { font-size: 1.35rem; color: var(--ink); line-height: 1.1; }
+.lite-stats span { font-size: .74rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.lite-text { text-align: center; color: var(--muted); font-size: .9rem; max-width: 760px; margin: 0 auto .7rem; }
+.lite-tasks { display: flex; flex-direction: column; gap: .35rem; }
+.lite-suite { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem; justify-content: center; }
+.lite-suite-name { font-size: .78rem; font-weight: 600; color: var(--ink); min-width: 150px; text-align: right; margin-right: .3rem; }
+.lite-tag { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .72rem; background: var(--shade); border-radius: 5px; padding: .12rem .45rem; color: #444; }
+@media (max-width: 768px) {
+  .lite-stats { gap: 1.1rem; } .lite-stats b { font-size: 1.1rem; }
+  .lite-suite { justify-content: flex-start; } .lite-suite-name { min-width: 0; width: 100%; text-align: left; }
+  .lb-seg.lb-bench button { min-width: 0; padding: .4rem 1rem; }
+}
+.lb-badge.is-lite { color: #c62828; background: #fdecec; cursor: help; letter-spacing: .02em; }
+.lb-note .lb-badge.is-lite { cursor: default; }
+
+.lb-who { display: flex; flex-direction: column; line-height: 1.2; }
+.lb-main { display: inline-flex; align-items: center; gap: .45rem; font-weight: 600; }
+.lb-sub { color: var(--muted); font-size: .76rem; font-weight: 400; margin-top: .1rem; }
+.lb-ref .lb-main { font-weight: 500; }
+.lb-frontbox { margin-top: .5rem; }
+@media (max-width: 768px) { .lb-sub { font-size: .7rem; } }
+
+.home-how .how-card { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; height: 100%; }
+.home-how .how-card .vid { margin: 0; }
+.home-how .how-title { font-weight: 700; font-size: 1.1rem; margin: .9rem 1.1rem .3rem; color: var(--ink); }
+.home-how .how-text { color: var(--muted); font-size: .95rem; margin: 0 1.1rem 1.1rem; line-height: 1.5; }
+.home-links .home-link { display: flex; flex-direction: column; gap: .35rem; height: 100%; padding: 1.3rem 1.4rem; border: 1px solid var(--line);
+  border-radius: 12px; background: #fff; color: var(--ink); transition: border-color .15s, box-shadow .15s; }
+.home-links .home-link:hover { border-color: var(--accent); box-shadow: 0 2px 10px rgba(230, 62, 62, .1); }
+.home-link-title { font-weight: 700; font-size: 1.1rem; }
+.home-link-text { color: var(--muted); font-size: .95rem; line-height: 1.5; }
+.len-box { max-width: 900px; margin: 2rem auto 0; }
+.len-title { text-align: center; font-weight: 700; font-size: 1.1rem; margin-bottom: .4rem; }
+.len-chart { width: 100%; height: auto; font-size: 13px; fill: var(--muted); }
+.len-chart .len-grid { stroke: var(--line); }
+.len-chart .len-axis { font-size: 13px; }
+.len-chart .len-label { font-size: 13.5px; font-weight: 600; }
+.len-note { text-align: center; color: var(--muted); font-size: .85rem; margin-top: .3rem; }
+.details-hero .details-kicker { margin-bottom: .6rem; font-size: .95rem; }
+.details-hero .title { margin-bottom: .6rem; }
+details.more > summary { cursor: pointer; text-align: center; color: var(--accent-text); font-weight: 600; margin: .4rem 0 1rem; }
+@media (max-width: 768px) { .len-chart .len-label { font-size: 12px; } .home-how .how-title { font-size: 1rem; } }
+.len-box { max-width: 780px; }
+.len-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem 1.3rem; font-size: .9rem; font-weight: 600; color: var(--ink); margin-top: .2rem; }
+.len-legend i { display: inline-block; width: 1.1rem; height: .3rem; border-radius: 2px; margin-right: .4rem; vertical-align: middle; }
+@media (max-width: 768px) { .len-legend { font-size: .8rem; flex-direction: column; align-items: flex-start; padding-left: 1rem; } .len-chart { font-size: 15px; } }
+
+.cost-home { max-width: 1150px; margin: 0 auto; }
+.cost-home .lb-front { font-size: 15px; }
+.cost-home .lb-front .pt-main { font-weight: 700; fill: var(--ink); }
+.cost-home .lb-front .pt-sub { font-weight: 400; fill: var(--muted); font-size: 13px; }
+.lb-front .lb-axis-t { font-size: 14px; fill: var(--muted); }
+.front-key { display: flex; justify-content: center; gap: 1rem; margin-top: .3rem; font-size: .9rem; }
+.cost-findings { margin-top: 1.6rem; }
+#cost .section-subtitle { max-width: 760px; margin-left: auto; margin-right: auto; }
+
+.easy .easy-caption { color: var(--muted); font-size: .9rem; font-style: italic; margin-top: .5rem; text-align: center; }
+.easy-text p { font-size: 1.08rem; line-height: 1.65; margin-bottom: .9rem; color: var(--ink); }
+.easy-text .easy-lead { font-size: 1.9rem; font-weight: 800; line-height: 1.2; margin-bottom: 1rem; }
+.easy-stats { display: flex; gap: 1.2rem; margin-top: 1.3rem; }
+.easy-stats div { flex: 1; border: 1px solid var(--line); border-radius: 12px; padding: .9rem 1rem; background: #fff; border-top: 3px solid var(--accent); }
+.easy-stats b { display: block; font-size: 2rem; color: var(--accent); line-height: 1.1; }
+.easy-stats span { color: var(--muted); font-size: .9rem; line-height: 1.4; }
+@media (max-width: 768px) { .easy-text .easy-lead { font-size: 1.5rem; } .easy-stats { flex-direction: column; } .cost-home .lb-front { font-size: 22px; } .cost-home .lb-front .pt-sub { display: none; } }
+.front-key { align-items: center; }
+.front-key i { display: inline-block; width: .65rem; height: .65rem; border-radius: 50%; margin: 0 .35rem 0 1rem; vertical-align: middle; position: static; }
+@media (max-width: 768px) {
+  
+  .cost-home .lb-frontbox { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .cost-home .lb-front { min-width: 760px; font-size: 15px; }
+  .cost-home .lb-front .pt-sub { display: none; }
+  .cost-home .lb-frontbox::after { content: "swipe to see the whole chart \2192"; display: block; text-align: center; color: var(--muted); font-size: .8rem; }
+  .front-key { flex-wrap: wrap; gap: .3rem .2rem; font-size: .8rem; position: sticky; left: 0; }
+  .front-key i { margin-left: .6rem; }
+}
+.front-key { white-space: nowrap; }
+
+
+.cost-home, .len-box { max-width: 1100px; margin-left: auto; margin-right: auto; }
+.len-box { margin-top: 2.6rem; }
+.len-chart { font-size: 15px; }
+.len-chart .len-axis { font-size: 14px; }
+.len-title { font-size: 1.25rem; margin-bottom: .8rem; }
+.len-legend { font-size: .95rem; gap: .4rem 1.8rem; margin-top: .4rem; }
+
+.lb-note { text-align: center; max-width: 900px; margin-left: auto; margin-right: auto; }
+
+.lb-table.lb-simple { max-width: 860px; margin: 0 auto; }
+.lb-simple th.lb-rank, .lb-simple td.lb-rank { width: 2.6rem; }
+.lb-simple td.lb-left { width: 40%; }
+.lb-simple .lb-main { font-size: 1.08rem; }
+.lb-simple td.lb-score { width: 34%; }
+.lb-simple .lb-scorebox b { font-size: 1.15rem; min-width: 3.2rem; }
+.lb-simple td.lb-money { font-size: 1.08rem; font-weight: 600; white-space: nowrap; }
+.lb-simple th { font-size: .9rem; }
+.lb-bar-top { justify-content: center; }
+.lb-views button { font-size: 1rem; padding: .4rem 1.4rem; }
+.lb-controls { width: 100%; display: flex; justify-content: center; gap: .8rem; flex-wrap: wrap; }
+.lb-controls:empty { display: none; }
+
+.cost-findings .finding, .easy-stats div { text-align: left; }
+.easy-text .easy-lead { font-size: 2.1rem; }
+@media (max-width: 768px) {
+  .lb-simple td.lb-left { width: auto; }
+  .lb-simple .lb-main { font-size: .98rem; }
+  .lb-simple td.lb-money { font-size: .95rem; }
+  .lb-table.lb-simple .lb-meter { display: none; }
+  .lb-views button { padding: .35rem 1rem; }
+  .len-chart { font-size: 22px; } .len-chart .len-axis { font-size: 20px; }
+}
+
+@media (max-width: 768px) {
+  .lb-simple .lb-name i { display: none; }
+  .lb-simple td.lb-score { width: auto; }
+  .lb-simple th.lb-score, .lb-simple th.lb-money { font-size: .78rem; }
+}
+
+.lb-bar-top { display: flex; flex-direction: column; gap: .6rem; margin-bottom: .6rem; }
+.lb-views { display: flex !important; width: 100%; justify-content: space-between; align-items: center; background: none; padding: 0; }
+.lb-views .lb-seg.lb-bench { padding: 3px; border-radius: 8px; }
+.lb-views .lb-seg.lb-bench button { display: inline-block; min-width: 0; padding: .3rem .9rem; font-size: .9rem; line-height: 1.4; }
+.lb-views .lb-seg.lb-bench button.is-active { color: var(--accent-text); }
+.lb-views .lb-more { background: none; border: 0; color: var(--accent-text); font-weight: 600; font-size: .92rem; cursor: pointer; padding: .3rem 0; }
+.lb-views .lb-more:hover { text-decoration: underline; }
+.lb-controls { justify-content: flex-end; }
+.lb-table.lb-simple { max-width: none; }
+.lb-simple td.lb-left { width: 36%; }
+.lb-simple td.lb-score { width: 40%; }
+.lb-simple .lb-meter { width: 70%; }
+.lb-hero .hero-body { padding-bottom: .2rem; }
+.lb-section { padding-top: 1.2rem; }
+@media (max-width: 768px) {
+  .lb-views { flex-wrap: wrap; gap: .4rem; justify-content: center; }
+  .lb-views .lb-seg.lb-bench button { padding: .3rem .6rem; font-size: .82rem; }
+}
+
+.how-quote { font-style: italic; color: var(--muted); font-size: .88rem; line-height: 1.45; margin: .7rem 1.1rem 0; }
+.real-home .how-quote { margin: .6rem 0 0; text-align: center; }
+.real-home .easy-caption { font-style: normal; margin-top: .3rem; }
+.real-box { max-width: 700px; margin: 0 auto; }
+.real-chart { width: 100%; height: auto; font-size: 13px; fill: var(--muted); }
+.real-chart .len-grid { stroke: var(--line); }
+.real-chart .real-x { font-size: 13px; fill: var(--ink); }
+.real-chart .real-robot { font-size: 15px; font-weight: 700; fill: var(--ink); }
+.real-chart .real-sep { stroke: #cbd5e1; stroke-dasharray: 4 4; }
+.lb-note:empty { display: none; }
+@media (max-width: 768px) { .real-chart { font-size: 18px; } .real-chart .real-x { font-size: 17px; } .real-chart .real-robot { font-size: 19px; } }
+.real-home .real-cap { text-align: center; color: var(--muted); font-size: .9rem; }
+.real-home .how-quote { font-size: .85rem; }
+
+.lb-controls { display: flex; flex-direction: column; align-items: center; gap: .5rem; min-height: 0; }
+.lb-row2 { display: flex; gap: .8rem; justify-content: center; flex-wrap: wrap; }
+.lb-seg.is-off { opacity: .35; pointer-events: none; }
+.lb-seg button:disabled { opacity: .4; cursor: not-allowed; }
+.lb-views .lb-more { min-width: 13rem; text-align: right; }
+.lb-note .lb-typekey { display: inline-flex; gap: .3rem; align-items: center; margin-top: .3rem; }
+.lb-note .lb-typekey i { display: inline-block; width: .55rem; height: .55rem; border-radius: 50%; margin: 0 .2rem 0 .7rem; }
+
+.pair-card { max-width: 1100px; margin: 0 auto 2rem; background: #fff; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.pair-heads { display: grid; grid-template-columns: 1fr 1fr; }
+.pair-heads div { padding: .8rem 1.1rem; }
+.pair-heads div + div { border-left: 1px solid var(--line); }
+.pair-heads b { display: block; font-size: 1.05rem; color: var(--ink); }
+.pair-heads span { display: block; font-style: italic; color: var(--muted); font-size: .88rem; line-height: 1.4; margin-top: .15rem; }
+.pair-card .vid { margin: 0; border-radius: 0; }
+.pair-card .vid video { border-radius: 0; }
+.pair-text { padding: .9rem 1.2rem 1.1rem; color: var(--ink); font-size: 1rem; line-height: 1.55; text-align: center; }
+.how-small .how-row { display: flex; gap: 1rem; padding: 1.1rem 1.2rem; align-items: flex-start; }
+.how-small .how-row .how-title, .how-small .how-row .how-text { margin: 0 0 .3rem; }
+.how-icon { flex: none; width: 2.6rem; height: 2.6rem; border-radius: 10px; background: var(--accent-soft, #fdecec); color: var(--accent-text);
+  display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+
+@media (max-width: 768px) {
+  .brand-sub { font-size: 1.05rem !important; padding: 0 .6rem; }
+  .lb-views { flex-direction: column; }
+  .lb-views .lb-more { min-width: 0; text-align: center; }
+  .lb-controls .lb-seg { justify-content: center; }
+  .lb-controls .lb-seg button { font-size: .78rem; padding: .3rem .55rem; }
+  .pair-heads b { font-size: .92rem; } .pair-heads span { font-size: .74rem; } .pair-heads div { padding: .6rem .7rem; }
+  .pair-text { font-size: .92rem; }
+  .how-small .how-row { padding: .9rem; }
+  
+  .len-box, .real-box { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .len-chart { min-width: 640px; }
+  .real-chart { min-width: 520px; }
+  .len-box .len-legend, .real-box .len-legend { position: sticky; left: 0; flex-direction: column; align-items: flex-start; padding-left: .4rem; min-width: 0; }
+  .section { padding: 2.6rem 1rem; }
+  .title.is-3 { font-size: 1.6rem; }
+  .finding-value { font-size: 1.6rem; }
+  .easy-text .easy-lead { font-size: 1.45rem; }
+  .easy-text p { font-size: .98rem; }
+  .lb-simple .lb-sub { font-size: .66rem; }
+}
+
+.lb-controls .lb-seg button, .lb-views .lb-seg button { display: inline-grid; }
+.lb-controls .lb-seg button::after, .lb-views .lb-seg button::after { content: attr(data-label); font-weight: 600; height: 0; visibility: hidden; overflow: hidden; grid-area: 1 / 1; }
+.lb-controls .lb-seg button > span, .lb-views .lb-seg button > span { grid-area: 1 / 1; }
+@media (max-width: 768px) {
+  .lb-controls .lb-seg { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+  .lb-controls .lb-row2 .lb-seg { grid-template-columns: repeat(2, 1fr); }
+  .lb-controls .lb-row2 { width: 100%; flex-direction: column; gap: .4rem; }
+  .lb-controls .lb-row2 .lb-seg:last-child { grid-template-columns: 1fr 1fr; }
+}
+.pair-clip { width: 100%; display: block; object-fit: contain; background: #000; }
+
+@media (max-width: 768px) {
+  
+  .lb-views .lb-seg.lb-bench { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+  .lb-views .lb-seg.lb-bench button { text-align: center; justify-content: center; }
+  
+  .len-box, .real-box { overflow-x: visible; }
+  .len-chart, .real-chart { min-width: 0; }
+  .len-chart { font-size: 30px; } .len-chart .len-axis { font-size: 28px; }
+  .real-chart { font-size: 22px; } .real-chart .real-x { font-size: 20px; } .real-chart .real-robot { font-size: 24px; }
+  
+  .pair-heads span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .lb-simple td.lb-score .lb-scorebox b { font-size: 1.1rem; }
+}
+
+.for-phone { display: none !important; }
+@media (max-width: 768px) {
+  .for-wide { display: none !important; }
+  .for-phone { display: block !important; }
+  .len-chart.for-phone, .real-chart.for-phone { min-width: 0; width: 100%; }
+  .len-chart .len-axis { font-size: inherit; }
+  .real-chart .real-x, .real-chart .real-robot { font-size: inherit; }
+  .real-chart .real-robot { font-weight: 700; }
+  
+  .lb-views .lb-seg.lb-bench button { white-space: nowrap; font-size: .8rem; padding: .35rem .4rem; }
+}
+@media (max-width: 768px) {
+  .cost-home .lb-frontbox { overflow-x: visible; }
+  .cost-home .lb-front.for-phone { min-width: 0; width: 100%; font-size: 17px; }
+  .cost-home .lb-frontbox::after { content: none; }
+  .cost-home .lb-front .lb-axis-t { font-size: 16px; }
+  .front-key { flex-wrap: wrap; justify-content: center; }
+}
+@media (max-width: 768px) {
+  .lb-views .lb-seg button::after, .lb-controls .lb-seg button::after { white-space: normal; }
+  .lb-views .lb-seg.lb-bench button { white-space: normal; min-width: 0; overflow: hidden; }
+}
+@media (max-width: 768px) {
+  .lb-views .lb-seg.lb-bench button { font-size: .76rem; padding: .4rem .3rem; white-space: nowrap; }
+  .front-key { font-size: .78rem; gap: .2rem; }
+  .front-key i { margin-left: .5rem; }
+}
+
+.lb-views { justify-content: flex-end !important; }
+.lb-views > span:empty { display: none; }
+.lb-note b { color: var(--ink); }
+@media (max-width: 768px) { .lb-views { justify-content: center !important; } }
+
+
+.skip-link { position: absolute; left: -9999px; top: 0; z-index: 100; background: #fff; padding: .5rem 1rem; border-radius: 0 0 8px 0; }
+.skip-link:focus { left: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.details-hero .hero-body { padding: 3rem 1.5rem 2.2rem; }
+.details-hero .title.is-2 { margin-bottom: .6rem; }
+.details-toc { display: flex; flex-wrap: wrap; justify-content: center; gap: .45rem; margin-top: 1.4rem; }
+.details-toc a { font-size: .88rem; padding: .3rem .85rem; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); background: #fff; }
+.details-toc a:hover { color: var(--accent-text); border-color: var(--accent); }
+
+.kf { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.kf-item { display: flex; flex-direction: column; background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--accent);
+  border-radius: 12px; padding: 1.1rem 1.2rem 1.1rem; color: var(--ink); transition: border-color .15s, box-shadow .15s; }
+.kf-item:hover { box-shadow: 0 4px 16px rgba(16, 24, 40, .08); color: var(--ink); }
+.kf-num { display: none; }
+.kf-value { font-size: 1.65rem; font-weight: 800; color: var(--accent); line-height: 1.15; }
+.kf-head { font-weight: 700; margin: .45rem 0 .3rem; line-height: 1.3; }
+.kf-text { color: var(--muted); font-size: .9rem; line-height: 1.5; flex: 1; }
+.kf-more { font-size: .85rem; font-weight: 600; color: var(--accent-text); margin-top: .7rem; }
+
+.findings.takeaways { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin: 0 0 2.4rem; }
+.takeaways .finding-value { font-size: 1.45rem; }
+.takeaways .finding-text { color: var(--ink); font-size: .93rem; margin-top: .4rem; }
+.page-details .section-subtitle { max-width: 760px; margin-left: auto; margin-right: auto; }
+.page-details .subhead { margin-top: 3rem; }
+.page-details .table-note { max-width: 900px; margin: .7rem auto 0; line-height: 1.5; }
+.page-details .len-box { margin-top: 3rem; }
+.page-details .stats { margin-bottom: 1.6rem; }
+.page-details .suite-card + * { margin-top: 0; }
+.page-details #benchmark .findings.takeaways { margin-top: 1.6rem; }
+.cat-grid .cat-card img { aspect-ratio: 16 / 8; }
+.cat-grid .cat-body { padding: .7rem .85rem .85rem; }
+.sys-table td, .sys-table th { font-size: .9rem; text-align: left !important; }
+.res-table th .sys-vlm { display: block; font-size: .75rem; color: var(--muted); font-weight: 400; }
+.res-table td, .res-table th { vertical-align: middle; }
+.res-table .pm { font-size: .72rem; color: var(--muted); margin-left: .2rem; }
+.res-table td.mean-cell { position: relative; min-width: 9rem; text-align: left; }
+.res-table .mbar { position: absolute; left: .5rem; top: 50%; height: 1.4rem; transform: translateY(-50%); max-width: calc(100% - 1rem);
+  background: rgba(230,62,62,.13); border-radius: 4px; }
+.res-table .mval { position: relative; padding-left: .3rem; }
+.heat-table td.heat { background: rgba(230,62,62, calc(var(--v) * .5)); font-variant-numeric: tabular-nums; }
+.heat-table th { font-size: .82rem; }
+.chart-title { font-weight: 700; text-align: center; margin-bottom: .4rem; }
+.fail-chart { width: 100%; height: auto; fill: #4b5563; }
+.fail-chart .len-grid { stroke: var(--line); }
+.fail-chart .fail-name { fill: var(--ink); }
+.fail-chart .fail-total { fill: var(--ink); font-weight: 700; }
+.fail-legend { justify-content: center; }
+.fail-box { max-width: 1150px; margin: 0 auto; }
+.page-details .real-results { margin-top: .5rem; }
+.page-details .publication-links.resource-links { margin-top: 1.6rem; }
+@media (max-width: 1100px) { .kf { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 768px) {
+  .kf { grid-template-columns: 1fr; }
+  .details-toc a { font-size: .8rem; }
+  .fail-legend { flex-direction: row !important; flex-wrap: wrap; justify-content: center; padding-left: 0 !important; }
+  .res-table td.mean-cell { min-width: 6rem; }
+}
+
+.publication-authors a, .brand-sub a, .lb-note a, .table-note a, .finding-text a { color: var(--accent-text); text-decoration: underline; text-underline-offset: 2px; }
+.fa-icon { width: 1em; height: 1em; display: inline-block; vertical-align: -.125em; overflow: visible; }
+.resource-icon .fa-icon, .how-icon .fa-icon { width: 1.25em; height: 1.25em; }
+
+.publication-authors a { color: var(--accent-text) !important; }
+
+.lb-view:empty { min-height: 745px; }
+#cost-chart:empty { aspect-ratio: 1100 / 466; }
+@media (max-width: 768px) { .lb-view:empty { min-height: 870px; } #cost-chart:empty { aspect-ratio: auto; min-height: 450px; } }
+
+.suite-card video { width: 100%; aspect-ratio: 16 / 10 !important; object-fit: cover; display: block; background: #000; }
+
+.promo-video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: #000; border-radius: 12px; box-shadow: 0 6px 24px rgba(20, 30, 60, .12); }
+
+.lb-front .lb-pt .lite-mark { fill: #fff; stroke: #7c3aed; stroke-width: 3; }
+.lb-front .lb-pt.is-lite text .pt-main { fill: #7c3aed; }
+.lb-front .lb-pt .pt-lite { font-weight: 500; fill: #7c3aed; }
+.front-key i.lite-key { width: .7rem; height: .7rem; border-radius: 0; transform: rotate(45deg); background: #fff; border: 2px solid #7c3aed; margin-left: 1.2rem; }
+.lb-front .lb-pt .pt-lead { stroke: #9aa0aa; stroke-width: 1; }
+
+.lb-table td.lb-date { white-space: nowrap; font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.lb-when { display: none; }
+@media (max-width: 768px) {
+  .lb-table:not(.lb-grid) .lb-num.lb-date { display: none; }
+  .lb-when { display: block; font-size: .72rem; color: var(--muted); margin: .15rem 0 0 1.1rem; }
+}
+@media (max-width: 768px) { .lb-table td.lb-files, .lb-table th.lb-files { display: none; } }
+
+@media (max-width: 768px) {
+  
+  .lb-table:not(.lb-simple):not(.lb-grid) td.lb-left { max-width: 10.5rem; }
+  .lb-table:not(.lb-grid) .lb-main .lb-badge { white-space: nowrap; }
+}
+@media (max-width: 768px) { .lb-table:not(.lb-simple):not(.lb-grid) td.lb-left { max-width: 9.8rem; } .lb-table:not(.lb-simple):not(.lb-grid) .lb-main { overflow-wrap: anywhere; } }
+
+.lb-table td.lb-files, .lb-table th.lb-files { white-space: nowrap; }
+a.lb-view-link { color: var(--accent-text); font-weight: 600; font-size: .85rem; }
+a.lb-view-link:hover { text-decoration: underline; }
+@media (max-width: 768px) { .lb-when { margin-left: .9rem; } .lb-when a.lb-view-link { font-size: .72rem; } }
+
+.topnav-links a.nav-contact { border: 1px solid var(--line); border-radius: 999px; padding: .15rem .8rem; color: var(--ink); }
+.topnav-links a.nav-contact:hover { border-color: var(--accent); color: var(--accent-text); }
+
+.topnav-links { flex-wrap: nowrap; align-items: center; white-space: nowrap; }
+@media (max-width: 960px) { .topnav-links a[href^="#"]:not([href="#leaderboard"]) { display: none; } }
+
+@media (max-width: 768px) {
+  .topnav-links { display: flex !important; gap: .9rem; }
+  .topnav-links a:not(.nav-contact):not(.nav-page) { display: none; }
+  .topnav-links a { font-size: .85rem; }
+  .topnav-links a.nav-contact { font-size: .82rem; padding: .1rem .65rem; }
+}
+
+.lb-table td.lb-scale { white-space: nowrap; font-variant-numeric: tabular-nums; font-size: .88rem; }
+
+.ex { max-width: 1180px; margin: 0 auto; }
+.ex-picker { display: flex; flex-wrap: wrap; justify-content: center; gap: .9rem 1.6rem; margin-bottom: 1.4rem; }
+.ex-group { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; }
+.ex-group-name { width: 100%; font-size: .72rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.ex-pick { font: inherit; font-size: .88rem; cursor: pointer; padding: .35rem .85rem; border-radius: 999px;
+  border: 1px solid var(--line); background: #fff; color: var(--ink); transition: background .15s, border-color .15s, color .15s; }
+.ex-pick:hover { border-color: var(--accent); color: var(--accent-text); }
+.ex-pick.is-active { background: var(--accent-text); border-color: var(--accent-text); color: #fff; font-weight: 600; }
+.ex-stage { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 1rem; align-items: stretch; }
+.ex-video { position: relative; border-radius: 12px; overflow: hidden; background: #000; aspect-ratio: 16 / 9;
+  box-shadow: 0 6px 24px rgba(20, 30, 60, .12); }
+.ex-clip { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ex-layer { position: absolute; inset: 0; pointer-events: none; }
+.ex-box { position: absolute; border: 3px solid #22c55e; border-radius: 6px; opacity: 0; transform: scale(1.15);
+  transition: opacity .3s, transform .3s; box-shadow: 0 0 0 1px rgba(0, 0, 0, .25); }
+.ex-box em { position: absolute; left: -3px; top: -1.55rem; background: #22c55e; color: #052e16; font-style: normal; font-weight: 700;
+  font-size: .78rem; padding: .05rem .45rem; border-radius: 4px; white-space: nowrap; }
+.ex-box.is-on { opacity: 1; transform: none; }
+.ex-point { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: #f43f5e;
+  border: 3px solid #fff; box-shadow: 0 0 0 2px rgba(244, 63, 94, .45); opacity: 0; transform: scale(0); transition: opacity .25s, transform .25s; }
+.ex-point.is-on { opacity: 1; transform: scale(1); animation: ex-pulse 1.4s ease-out infinite; }
+@keyframes ex-pulse { 0% { box-shadow: 0 0 0 2px rgba(244, 63, 94, .6); } 100% { box-shadow: 0 0 0 16px rgba(244, 63, 94, 0); } }
+.ex-path { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ex-path path { fill: none; stroke: #facc15; stroke-width: .5; stroke-linecap: round; stroke-dasharray: 160; stroke-dashoffset: 160;
+  opacity: 0; transition: stroke-dashoffset 1.6s ease, opacity .3s; filter: drop-shadow(0 0 .3px rgba(0, 0, 0, .6)); }
+.ex.show-path .ex-path path { stroke-dashoffset: 0; opacity: .95; }
+.ex-tags { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; padding: 0 1rem 1rem; }
+.ex-caption { background: rgba(17, 24, 39, .82); color: #fff; font-weight: 600; font-size: 1rem; padding: .45rem .9rem; border-radius: 8px;
+  max-width: 100%; text-align: center; backdrop-filter: blur(4px); }
+.ex-play { position: absolute; right: .7rem; top: .7rem; width: 2.4rem; height: 2.4rem; border-radius: 50%; border: 0; cursor: pointer;
+  background: rgba(17, 24, 39, .7); color: #fff; display: flex; align-items: center; justify-content: center; }
+.ex-play:hover { background: rgba(17, 24, 39, .9); }
+.ex-side { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: .8rem; min-width: 0; }
+.ex-task { font-weight: 600; line-height: 1.35; }
+.ex-task span, .ex-flow-label { display: block; font-size: .72rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: .2rem; }
+.ex-steps { list-style: none; margin: 0; padding: 0; display: none; counter-reset: s; }
+.ex.has-steps .ex-steps { display: block; }
+.ex-steps li { counter-increment: s; display: flex; align-items: center; gap: .55rem; font-size: .9rem; padding: .35rem .5rem; border-radius: 8px;
+  color: var(--muted); transition: background .2s, color .2s; }
+.ex-steps li::before { content: counter(s); flex: none; width: 1.4rem; height: 1.4rem; border-radius: 50%; border: 2px solid var(--line);
+  display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 700; }
+.ex-steps li.is-now { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+.ex-steps li.is-now::before { border-color: var(--accent); color: var(--accent-text); }
+.ex-steps li.is-done { color: var(--ink); }
+.ex-steps li.is-done::before { content: "\2713"; background: var(--ok); border-color: var(--ok); color: #fff; }
+.ex-feed { display: flex; flex-direction: column; gap: .4rem; min-height: 9rem; }
+.ex-ev { display: flex; gap: .5rem; align-items: flex-start; font-size: .85rem; line-height: 1.35; padding: .45rem .55rem; border-radius: 8px;
+  background: var(--shade); color: var(--ink); }
+.ex-ev .fa-icon { flex: none; margin-top: .15rem; color: var(--accent-text); }
+.ex-ev.is-new { animation: ex-in .35s ease; }
+.ex-ev:not(.is-new) { opacity: .6; }
+.ex-ev pre { margin: 0; padding: 0; background: none; font-size: .74rem; line-height: 1.45; white-space: pre-wrap; color: var(--ink); }
+.ev-check .fa-icon, .ev-ok .fa-icon, .ev-truth .fa-icon { color: var(--ok); }
+.ev-call span, .ev-goal span { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .8rem; }
+@keyframes ex-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.ex-flow { display: flex; align-items: stretch; justify-content: center; gap: .6rem; margin-top: 1.2rem; }
+.ex-flow-box { flex: 1; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: .8rem 1rem; min-width: 0; }
+.ex-flow-brain { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.ex-flow-box b { font-size: .98rem; }
+.ex-arrow { align-self: center; color: var(--muted); font-size: 1.4rem; }
+.ex-in { display: flex; flex-wrap: wrap; gap: .3rem; }
+.ex-chip { display: inline-flex; align-items: center; gap: .35rem; font-size: .82rem; padding: .15rem .55rem; border-radius: 999px; background: var(--shade); }
+.ex-chip .fa-icon { color: var(--accent-text); }
+.ex-desc { text-align: center; max-width: 760px; margin: 1rem auto 0; color: var(--ink); font-size: 1.02rem; line-height: 1.55; }
+@media (prefers-reduced-motion: reduce) { .ex-point.is-on, .ex-ev.is-new { animation: none; } .ex-box, .ex-path path { transition: none; } }
+@media (max-width: 1000px) {
+  .ex-stage { grid-template-columns: 1fr; }
+  .ex-feed { min-height: 0; }
+}
+@media (max-width: 768px) {
+  .ex-picker { gap: .7rem; }
+  .ex-group { justify-content: center; }
+  .ex-group-name { text-align: center; }
+  .ex-pick { font-size: .8rem; padding: .3rem .7rem; }
+  .ex-flow { flex-direction: column; }
+  .ex-arrow { transform: rotate(90deg); }
+  .ex-caption { font-size: .78rem; padding: .3rem .6rem; }
+  .ex-tags { padding: 0 .5rem .5rem; }
+  .ex-box em { font-size: .62rem; top: -1.2rem; }
+  .ex-box { border-width: 2px; }
+}
+.ex-path { overflow: visible; }
+.ex-path path { stroke-dasharray: 3 1.4; animation: none; }
+.ex.show-path .ex-path path { animation: ex-march 1s linear infinite; }
+@keyframes ex-march { to { stroke-dashoffset: -4.4; } }
+@media (prefers-reduced-motion: reduce) { .ex.show-path .ex-path path { animation: none; } }
+
+.len-box { max-width: 980px; }
+.len-plot { position: relative; }
+.len-chart .len-line { transition: opacity .15s; }
+.len-chart .len-line.is-dim { opacity: .18; }
+.len-chart .len-guide { stroke: #9aa0aa; stroke-dasharray: 4 4; }
+.len-chart circle { stroke: #fff; stroke-width: 2; }
+.len-hit { cursor: crosshair; }
+.len-tip { position: absolute; top: 6px; pointer-events: none; background: #fff; border: 1px solid var(--line); border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(16, 24, 40, .14); padding: .55rem .75rem; font-size: .82rem; min-width: 15rem; z-index: 3; }
+.len-tip b { display: block; margin-bottom: .3rem; color: var(--ink); }
+.len-tip span { display: flex; align-items: center; gap: .45rem; color: var(--ink); line-height: 1.7; }
+.len-tip span.is-focus { font-weight: 700; }
+.len-tip i { width: .65rem; height: .65rem; border-radius: 50%; flex: none; }
+.len-tip em { font-style: normal; font-weight: 700; margin-left: auto; padding-left: 1rem; font-variant-numeric: tabular-nums; }
+.len-legend { gap: .35rem .45rem; font-weight: 500; }
+.len-key { font: inherit; font-size: .85rem; cursor: pointer; display: inline-flex; align-items: center; padding: .2rem .65rem; border-radius: 999px;
+  border: 1px solid var(--line); background: #fff; color: var(--ink); transition: opacity .15s, border-color .15s; }
+.len-key:hover, .len-key.is-focus { border-color: var(--ink); }
+.len-key.is-off { color: #6b7280; border-style: dashed; }
+.len-key.is-off i { background: #c3c8d0 !important; }
+.len-key i { display: inline-block; width: .9rem; height: .3rem; border-radius: 2px; margin-right: .4rem; }
+@media (max-width: 768px) { .len-key { font-size: .75rem; padding: .15rem .5rem; } .len-tip { min-width: 12rem; font-size: .75rem; } }
+@media (max-width: 768px) {
+  .len-box .len-legend { flex-direction: row !important; flex-wrap: wrap; justify-content: center; align-items: center; padding-left: 0; position: static; }
+  .len-tip { min-width: 0; max-width: 92%; }
+  .len-tip span { line-height: 1.45; }
+  .len-tip em { padding-left: .5rem; }
+}
+
+
+:root { --ink: #0f172a; --muted: #5b6474; --line: #e5e7eb; --shade: #f7f8fa; --radius: 14px;
+  --shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 1px 3px rgba(15, 23, 42, .06); --shadow-hover: 0 6px 20px rgba(15, 23, 42, .08); }
+body { color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+.section { padding: 5.5rem 1.5rem; }
+.section .kicker { display: block; text-align: center; text-transform: uppercase; letter-spacing: .12em; font-size: .78rem;
+  font-weight: 600; color: var(--accent-text); margin-bottom: .7rem; }
+.section .title.is-3 { font-size: 2.25rem; font-weight: 700; line-height: 1.15; letter-spacing: -.022em; color: var(--ink); margin-bottom: 0; }
+.section .section-subtitle { font-size: 1.08rem; line-height: 1.6; color: var(--muted); max-width: 680px; margin: 1rem auto 0; }
+.section > .container > .title.is-3 + *, .section > .container > .section-subtitle + * { margin-top: 2.75rem; }
+.subhead.title.is-4 { font-size: 1.4rem; font-weight: 650; letter-spacing: -.015em; color: var(--ink); margin-top: 4rem; }
+.subhead-note { font-size: 1rem; line-height: 1.55; max-width: 680px; }
+.len-title, .chart-title { font-size: 1.15rem !important; font-weight: 650; letter-spacing: -.01em; color: var(--ink); }
+.details-hero .title.is-2 { font-size: 2.75rem; font-weight: 700; letter-spacing: -.025em; color: var(--ink); }
+
+.finding, .kf-item, .easy-stats div, .stat, .suite-card, .cat-card, .how-card, .home-link, .pair-card {
+  border: 1px solid var(--line) !important; border-radius: var(--radius) !important; box-shadow: var(--shadow) !important; background: #fff; }
+.finding, .kf-item { padding: 1.35rem 1.4rem 1.4rem; }
+.kf-item, .home-link { transition: box-shadow .15s, transform .15s; }
+.kf-item:hover, .home-link:hover { box-shadow: var(--shadow-hover) !important; transform: translateY(-1px); }
+.finding-value, .kf-value { font-size: 1.6rem !important; font-weight: 700 !important; letter-spacing: -.02em; line-height: 1.15; }
+.takeaways .finding-value { font-size: 1.45rem !important; }
+.finding-head, .kf-head { font-size: 1rem; font-weight: 650; margin: .55rem 0 .3rem; }
+.finding-text, .kf-text { font-size: .94rem; line-height: 1.55; }
+.findings, .kf { gap: 1.25rem; }
+.stat-value { font-weight: 700; letter-spacing: -.02em; }
+
+.easy-text p { font-size: 1.1rem; line-height: 1.7; color: #334155; }
+.easy-stats { gap: 1rem; margin-top: 1.6rem; }
+.easy-stats div { padding: 1.1rem 1.2rem; }
+.easy-stats b { font-size: 1.75rem; font-weight: 700; letter-spacing: -.02em; }
+.easy .easy-caption, .how-quote { font-size: .88rem; line-height: 1.5; color: var(--muted); font-style: normal; }
+.teaser-clip { border-radius: 12px; box-shadow: none; }
+
+.pair-card { max-width: 1160px; padding: 1.25rem; overflow: visible; }
+.pair-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.pair-head { font-size: .95rem; color: var(--muted); margin-bottom: .6rem; }
+.pair-head b { color: var(--ink); font-weight: 650; }
+.pair-card .vid, .pair-card .vid video { border-radius: 10px; overflow: hidden; }
+.pair-clip { aspect-ratio: 16 / 9 !important; object-fit: cover; }
+.pair-quote { font-size: .88rem; line-height: 1.5; color: var(--muted); margin-top: .6rem; }
+.pair-text { border-top: 1px solid var(--line); margin-top: 1.25rem; padding: 1.1rem .5rem 0; font-size: 1rem; line-height: 1.6; color: #334155; }
+.home-how { margin-top: 1rem; }
+
+table.results thead th { border-bottom: 1px solid #cbd5e1; color: var(--muted); font-weight: 600; font-size: .85rem; }
+table.results th, table.results td { border-bottom-color: #eef0f3; }
+
+.publication-links .button.is-dark { background: var(--ink); border-radius: 999px; }
+@media (max-width: 768px) {
+  .section { padding: 3.5rem 1.1rem; }
+  .section .title.is-3 { font-size: 1.7rem; }
+  .section .section-subtitle { font-size: 1rem; }
+  .section > .container > .title.is-3 + *, .section > .container > .section-subtitle + * { margin-top: 1.9rem; }
+  .subhead.title.is-4 { font-size: 1.2rem; margin-top: 3rem; }
+  .details-hero .title.is-2 { font-size: 2rem; }
+  .pair-card { padding: .9rem; }
+  .pair-grid { grid-template-columns: 1fr; gap: 1.4rem; }
+  .finding-value, .kf-value { font-size: 1.4rem !important; }
+  .easy-text p { font-size: 1rem; }
+}
+.section > .container > .title.is-3 + .section-subtitle { margin-top: .9rem; }
+.promo-section { padding-top: 4rem; padding-bottom: 1rem; }
+.cost-findings { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 1000px; margin-left: auto; margin-right: auto; }
+@media (max-width: 768px) { .cost-findings { grid-template-columns: 1fr; } .promo-section { padding-top: 2.5rem; padding-bottom: 0; } }
+
+.easy-text .easy-lead { font-size: 1.45rem !important; font-weight: 700; letter-spacing: -.015em; line-height: 1.25; color: var(--ink); margin-bottom: .8rem; }
+@media (max-width: 768px) { .easy-text .easy-lead { font-size: 1.2rem !important; } }
+
+.research-hero .hero-body { padding: 3.5rem 1.5rem 1.5rem; }
+.research-hero .publication-title { font-size: 2.6rem; font-weight: 700; line-height: 1.2; color: var(--ink); margin-bottom: 1.2rem !important; }
+.research-hero .publication-authors { font-size: 1.15rem; }
+.research-hero .publication-links { margin-top: 1.4rem; }
+.section.research-teaser { padding-top: 1.5rem; }
+.research-teaser .abstract-title.title.is-3 { font-size: 1.6rem; margin-top: 2.5rem; margin-bottom: 1rem; }
+.research-teaser .abstract p { font-size: 1.02rem; line-height: 1.7; }
+@media (max-width: 768px) { .research-hero .publication-title { font-size: 1.7rem; } .research-hero .publication-authors { font-size: 1rem; } .research-hero .hero-body { padding-top: 2.2rem; } }
+
+
+.chart-tip { position: absolute; z-index: 50; pointer-events: none; background: #fff; border: 1px solid var(--line); border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .14); padding: .55rem .75rem; font-size: .82rem; min-width: 13rem; max-width: 22rem; color: var(--ink); }
+.chart-tip b { display: block; margin-bottom: .3rem; }
+.chart-tip span { display: flex; align-items: center; gap: .45rem; line-height: 1.6; }
+.chart-tip i { width: .65rem; height: .65rem; border-radius: 2px; flex: none; }
+.chart-tip em { font-style: normal; font-weight: 700; margin-left: auto; padding-left: 1rem; font-variant-numeric: tabular-nums; }
+.tip-target { cursor: pointer; outline: none; }
+.tip-hit { fill: transparent; }
+g.tip-target:hover .tip-hit, g.tip-target.is-tip .tip-hit, g.tip-target:focus-visible .tip-hit { fill: rgba(15, 23, 42, .05); }
+td.tip-target:hover, td.tip-target.is-tip, td.tip-target:focus-visible { box-shadow: inset 0 0 0 2px var(--ink); }
+.finding-head, .kf-head { font-size: 1.1rem; font-weight: 700; margin: 0 0 .4rem; line-height: 1.3; color: var(--ink); }
+.finding-text b { color: var(--ink); }
+.bench-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 0 0 2rem; }
+.bench-facts div { background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--accent); border-radius: var(--radius, 12px); padding: 1rem 1.1rem; }
+.bench-facts dt { font-weight: 700; color: var(--ink); margin-bottom: .25rem; }
+.bench-facts dd { margin: 0; color: var(--muted); font-size: .92rem; line-height: 1.5; }
+.fail-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem 1.6rem; margin-top: .6rem; font-size: .85rem; }
+.fail-stage { display: flex; flex-direction: column; gap: .15rem; }
+.fail-stage b { font-size: .8rem; text-transform: none; color: var(--ink); }
+.fail-stage span { display: flex; align-items: center; gap: .4rem; color: var(--muted); }
+.fail-stage i { width: .8rem; height: .8rem; border-radius: 2px; flex: none; }
+@media (max-width: 768px) { .fail-legend { justify-content: flex-start; } .chart-tip { min-width: 0; font-size: .78rem; } }
+.section-lead { text-align: center; max-width: 760px; margin: .8rem auto 0; font-size: 1.08rem; line-height: 1.6; color: var(--ink); }
+.section-lead + .section-subtitle { margin-top: .4rem; }
+.bibtex-box { position: relative; }
+.copy-btn { position: absolute; top: .55rem; right: .55rem; display: inline-flex; align-items: center; gap: .35rem; border: 1px solid var(--line);
+  background: #fff; color: var(--ink); border-radius: 8px; padding: .3rem .65rem; font: inherit; font-size: .82rem; font-weight: 600; cursor: pointer; }
+.copy-btn:hover { border-color: var(--accent); color: var(--accent-text); }
+.copy-btn .fa-icon { width: .85em; height: .85em; }
+.copy-btn.is-done { border-color: var(--ok, #1f9d55); color: #0a7d2c; }
+.bibtex-box pre { padding-right: 5.5rem; }
+.lb-front .lb-pt.tip-target:hover circle, .lb-front .lb-pt.is-tip circle { stroke: var(--ink); stroke-width: 2.5; }
+.lb-front .lb-pt.tip-target:hover .pt-main, .lb-front .lb-pt.is-tip .pt-main { text-decoration: underline; }
+.lb-grid td.tip-target:hover, .lb-grid td.tip-target.is-tip { box-shadow: inset 0 0 0 2px var(--ink); }
+
+a { color: var(--accent-text); }
+a:hover { color: var(--accent-text); }
+.tabs li.is-active a { border-bottom-color: var(--accent); color: var(--accent-text); }
+.button:focus, .input:focus, .select select:focus { border-color: var(--accent); }
+.button:focus:not(:active), .input:focus, .select select:focus { box-shadow: 0 0 0 .125em rgba(230, 62, 62, .25); }
+
+
+.lb-hero .hero-body { padding: 2rem 1.5rem 0; }
+.section.lb-section { padding-top: 1.4rem; }
+.section { padding-top: 4.5rem; padding-bottom: 4.5rem; }
+
+.section:not(.shade):not(.promo-section):not(.lb-section) + .section:not(.shade) { padding-top: 0; }
+
+.section > .container > .section-lead + :not(.section-subtitle) { margin-top: 2.25rem; }
+.bibtex-box { max-width: 900px; margin: 0 auto; }
+.select:not(.is-multiple):not(.is-loading)::after { border-color: var(--ink); }
+.cost-table tbody tr:first-child { background: none; }
+.easy-stats .easy-head { display: block; font-size: 1.05rem; font-weight: 700; color: var(--ink); letter-spacing: -.01em; line-height: 1.3; margin-bottom: .3rem; }
+.easy-stats span b { display: inline; font-size: inherit; color: var(--ink); letter-spacing: 0; }
+@media (max-width: 768px) {
+  .lb-hero .hero-body { padding: 1.6rem 1rem 0; }
+  .section { padding-top: 3rem; padding-bottom: 3rem; }
+  .section.lb-section { padding-top: 1rem; }
+}
+.promo-section + .section { padding-top: 3.5rem; }
+@media (max-width: 768px) { .promo-section + .section { padding-top: 2.5rem; } }
+
+.ex-picker { display: grid; grid-template-columns: max-content max-content; justify-content: center; align-items: center;
+  gap: .55rem 1.1rem; margin: 0 auto 1.6rem; padding: .9rem 1.4rem; width: max-content; max-width: 100%;
+  background: #fff; border: 1px solid var(--line); border-radius: var(--radius, 14px); }
+.ex-group { display: contents; }
+.ex-group-name { width: auto; text-align: right; white-space: nowrap; }
+.ex-group-items { display: flex; flex-wrap: wrap; gap: .35rem; }
+.ex-pick { font-size: .84rem; padding: .32rem .75rem; white-space: nowrap; }
+@media (max-width: 768px) {
+  .ex-picker { display: flex; flex-direction: column; align-items: stretch; width: auto; gap: .35rem; padding: .8rem; }
+  .ex-group-name { text-align: left; margin-top: .55rem; }
+  .ex-group-name:first-child { margin-top: 0; }
+  .ex-group-items { justify-content: flex-start; }
+}
+
+@media (max-width: 768px) {
+  #benchmark .columns.is-multiline, #rollouts .columns.is-multiline, #real-world .tab-pane .columns.is-multiline {
+    display: flex; flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+    gap: .8rem; margin: 0 -1.1rem; padding: .25rem 1.1rem 1rem; scroll-padding: 0 1.1rem; scrollbar-width: thin; }
+  #benchmark .columns.is-multiline > .column, #rollouts .columns.is-multiline > .column, #real-world .tab-pane .columns.is-multiline > .column {
+    flex: 0 0 84%; width: 84%; max-width: 340px; padding: 0; scroll-snap-align: start; }
+  #benchmark .columns.is-multiline > .column > *, #rollouts .columns.is-multiline > .column > *, #real-world .tab-pane .columns.is-multiline > .column > * { height: 100%; }
+}
+</style>
+  <link rel="icon" href="./static/images/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="./static/images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="./static/images/favicon-192.png" sizes="192x192" type="image/png">
+  <script defer src="./static/js/site.js?v=08e6b1dbd9"></script>
+  <script defer src="./static/js/leaderboard.js?v=c8abc2e870"></script>
+  <script defer src="./static/js/logo.js?v=d03b3c6d62"></script>
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+<nav class="topnav" aria-label="Main"><div class="topnav-inner"><div class="brand-block"><a class="brand" href="./" aria-label="LADDER home"><img src="static/images/logo/ladder-mark.svg" alt="" width="14" height="22">LADDER</a>
+<span class="brand-by">by <a href="https://insait.ai" target="_blank" rel="noopener"><img class="by-insait" src="static/images/logos/insait-wordmark.svg" alt="INSAIT (opens in a new tab)"></a>
+<a href="https://www.nvidia.com" target="_blank" rel="noopener"><img class="by-nvidia" src="static/images/logos/nvidia.svg" alt="NVIDIA (opens in a new tab)"></a></span></div><div class="topnav-links"><a href="#leaderboard">Leaderboard</a><a href="#cost">Cost</a><a href="#how">How it works</a><a class="nav-page" href="research">Research</a><a class="nav-contact" href="https://insait.ai/contact/" target="_blank" rel="noopener">Contact</a></div></div></nav>
+
+<main id="main" class="page-index">
+
+<section class="hero lb-hero" id="top">
+  <div class="hero-body">
+    <div class="container is-max-desktop has-text-centered">
+      <h1 class="brand-hero" aria-label="LADDER"><svg class="mark" viewBox="0 -18 120 170" aria-hidden="true"><line x1="30" y1="146" x2="30" y2="14" stroke="#111111" stroke-width="7" stroke-linecap="round"/>
+  <line x1="90" y1="146" x2="90" y2="14" stroke="#111111" stroke-width="7" stroke-linecap="round"/>
+  <line x1="30" y1="134" x2="90" y2="134" stroke="#111111" stroke-width="5" stroke-linecap="round"/>
+  <line x1="30" y1="108" x2="90" y2="108" stroke="#111111" stroke-width="5" stroke-linecap="round"/>
+  <line x1="30" y1="82" x2="90" y2="82" stroke="#111111" stroke-width="5" stroke-linecap="round"/>
+  <line x1="30" y1="56" x2="90" y2="56" stroke="#111111" stroke-width="5" stroke-linecap="round"/>
+  <line x1="30" y1="30" x2="90" y2="30" stroke="#e63e3e" stroke-width="5" stroke-linecap="round"/>
+  <g transform="translate(60,24) scale(1.15)"><rect x="-15.6" y="2" width="6" height="14" rx="3" fill="#111111"/><rect x="9.6" y="2" width="6" height="14" rx="3" fill="#111111"/><rect x="-17" y="-22" width="34" height="26" rx="10" fill="#111111"/><circle cx="-6" cy="-10" r="3.2" fill="#ffffff"/><circle cx="6" cy="-10" r="3.2" fill="#ffffff"/><line x1="0" y1="-22" x2="0" y2="-30" stroke="#111111" stroke-width="3" stroke-linecap="round"/><circle cx="0" cy="-32" r="3.5" fill="#e63e3e"/></g></svg><span class="wordmark" aria-hidden="true"><span>L</span><span>A</span><span>D</span><span>D</span><span>E</span><span>R</span></span></h1>
+      <p class="brand-sub">How well can today&rsquo;s best AI models control a robot?</p>
+    </div>
+  </div>
+</section>
+<section class="section lb-section" id="leaderboard">
+  <div class="container is-max-widescreen">
+    <div class="lb">
+      <div class="lb-bar-top">
+        <div class="lb-seg lb-views"></div>
+        <div class="lb-controls"></div>
+      </div>
+      <div class="lb-view"></div>
+      <p class="lb-note"></p>
+    </div>
+    <script id="lb-data" type="application/json">{"suites": [{"id": "rl", "name": "RoboLab-Long", "episodes": 352.0}, {"id": "se", "name": "SimplerEnv-Long", "episodes": 1296.0}, {"id": "ra", "name": "RobotArena-&infin;-Long", "episodes": 376.0}], "groups": [{"id": "e2e", "name": "End-to-end"}, {"id": "orch", "name": "Orchestrated low-level policy"}, {"id": "tool", "name": "Tool selection"}, {"id": "ref", "name": "Privileged reference"}], "systems": [{"name": "Low-level policy", "group": "e2e", "vlm": "", "evaluated": ["2026-09-11", "2026-09-13"], "rollouts": "low_level_policy", "scale": {"tasks": 145, "episodes": 2024}, "policy": "Bridge / &pi;<sub>0.5<\/sub>", "inputs": "RGB, proprioception", "mean": {"v": 13.1, "pm": 1.8}, "suites": {"se": {"v": 8.7, "pm": 1.7}, "ra": {"v": 10.9, "pm": 3.6}, "rl": {"v": 19.6, "pm": 4.5}}, "pooled": {"v": 11.0, "pm": 1.4}, "progress": {"mean": 31.8, "se": 25.3, "ra": 13.5, "rl": 56.6}, "calls": {"se": 0.0, "ra": 0.0, "rl": 0.0}, "cost": {"se": 0.0, "ra": 0.0, "rl": 0.0}, "cost_ep": 0.0, "cost_succ": 0.0, "type": "Policy"}, {"name": "Periodic trigger", "group": "orch", "vlm": "", "evaluated": ["2026-09-13", "2026-09-14"], "rollouts": "periodic_trigger", "scale": {"tasks": 145, "episodes": 2024}, "policy": "Bridge / &pi;<sub>0.5<\/sub>", "inputs": "RGB, proprioception", "mean": {"v": 19.4, "pm": 2.1}, "suites": {"se": {"v": 17.4, "pm": 2.2}, "ra": {"v": 15.2, "pm": 4.0}, "rl": {"v": 25.6, "pm": 4.8}}, "pooled": {"v": 18.4, "pm": 1.7}, "progress": {"mean": 41.8, "se": 39.9, "ra": 28.3, "rl": 57.1}, "calls": {"se": 0.0, "ra": 0.0, "rl": 0.0}, "cost": {"se": 0.0, "ra": 0.0, "rl": 0.0}, "cost_ep": 0.0, "cost_succ": 0.0, "type": "Orchestrator"}, {"name": "Proprioceptive trigger", "group": "orch", "vlm": "", "evaluated": ["2026-09-13", "2026-09-14"], "rollouts": "proprioceptive_trigger", "scale": {"tasks": 145, "episodes": 2024}, "policy": "Bridge / &pi;<sub>0.5<\/sub>", "inputs": "RGB, proprioception", "mean": {"v": 21.9, "pm": 2.1}, "suites": {"se": {"v": 21.5, "pm": 2.3}, "ra": {"v": 16.2, "pm": 4.1}, "rl": {"v": 28.1, "pm": 4.9}}, "pooled": {"v": 21.7, "pm": 1.8}, "progress": {"mean": 44.5, "se": 45.8, "ra": 28.9, "rl": 58.9}, "calls": {"se": 0.0, "ra": 0.0, "rl": 0.0}, "cost": {"se": 0.0, "ra": 0.0, "rl": 0.0}, "cost_ep": 0.0, "cost_succ": 0.0, "type": "Orchestrator"}, {"name": "Proprioceptive verifier", "group": "orch", "vlm": "Gemini 3.7 Flash", "evaluated": ["2026-09-13", "2026-09-14"], "rollouts": "proprioceptive_verifier", "scale": {"tasks": 145, "episodes": 2024}, "policy": "Bridge / &pi;<sub>0.5<\/sub>", "inputs": "RGB, proprioception", "mean": {"v": 25.0, "pm": 2.2}, "suites": {"se": {"v": 25.2, "pm": 2.4}, "ra": {"v": 24.2, "pm": 4.6}, "rl": {"v": 25.6, "pm": 4.8}}, "pooled": {"v": 25.0, "pm": 1.9}, "progress": {"mean": 46.9, "se": 51.0, "ra": 33.7, "rl": 56.1}, "calls": {"se": 12.7, "ra": 9.3, "rl": 9.3}, "cost": {"se": 0.046, "ra": 0.032, "rl": 0.054}, "cost_ep": 0.0448, "cost_succ": 0.179, "type": "Orchestrator"}, {"name": "VoLo", "group": "orch", "vlm": "Gemini 3.7 Flash", "evaluated": ["2026-09-13", "2026-09-14"], "rollouts": "volo", "scale": {"tasks": 145, "episodes": 2024}, "policy": "Bridge / &pi;<sub>0.5<\/sub>", "inputs": "RGB, proprioception", "mean": {"v": 25.3, "pm": 2.2}, "suites": {"se": {"v": 25.5, "pm": 2.4}, "ra": {"v": 21.3, "pm": 4.4}, "rl": {"v": 29.0, "pm": 4.9}}, "pooled": {"v": 25.3, "pm": 1.9}, "progress": {"mean": 47.4, "se": 48.3, "ra": 31.8, "rl": 62.0}, "calls": {"se": 24.8, "ra": 26.4, "rl": 19.2}, "cost": {"se": 0.161, "ra": 0.162, "rl": 0.191}, "cost_ep": 0.1664, "cost_succ": 0.657, "type": "Orchestrator"}, {"name": "CaP-X", "group": "tool", "vlm": "Gemini 3.7 Flash", "evaluated": ["2026-09-10", "2026-09-12"], "rollouts": "cap_x", "scale": {"tasks": 145, "episodes": 2024}, "policy": "", "inputs": "RGB, depth, camera calibration", "mean": {"v": 21.9, "pm": 2.1}, "suites": {"se": {"v": 28.7, "pm": 2.5}, "ra": {"v": 16.2, "pm": 4.1}, "rl": {"v": 20.7, "pm": 4.5}}, "pooled": {"v": 25.0, "pm": 1.9}, "progress": {"mean": 39.3, "se": 45.9, "ra": 29.5, "rl": 42.4}, "calls": {"se": 3.8, "ra": 5.6, "rl": 6.3}, "cost": {"se": 0.034, "ra": 0.054, "rl": 0.061}, "cost_ep": 0.0424, "cost_succ": 0.17, "type": "Agent"}, {"name": "TiPToP", "group": "tool", "vlm": "Gemini 3.7 Flash", "evaluated": ["2026-09-13", "2026-09-14"], "rollouts": "tiptop", "scale": {"tasks": 145, "episodes": 2024}, "policy": "", "inputs": "RGB, depth, camera calibration", "mean": {"v": 11.7, "pm": 1.8}, "suites": {"se": {"v": 6.7, "pm": 1.5}, "ra": {"v": 11.2, "pm": 3.6}, "rl": {"v": 17.3, "pm": 4.3}}, "pooled": {"v": 9.4, "pm": 1.3}, "progress": {"mean": 14.0, "se": 7.1, "ra": 12.6, "rl": 22.4}, "calls": {"se": 1.0, "ra": 1.0, "rl": 1.0}, "cost": {"se": 0.007, "ra": 0.006, "rl": 0.006}, "cost_ep": 0.0066, "cost_succ": 0.071, "type": "Agent"}, {"name": "PSP-Agent", "group": "tool", "vlm": "Gemini 3.7 Flash", "evaluated": ["2026-09-21", "2026-09-22"], "rollouts": "psp_agent", "scale": {"tasks": 145, "episodes": 2024}, "policy": "", "inputs": "RGB, depth, camera calibration", "mean": {"v": 42.8, "pm": 2.6}, "suites": {"se": {"v": 37.1, "pm": 2.7}, "ra": {"v": 39.9, "pm": 5.0}, "rl": {"v": 51.4, "pm": 5.2}}, "pooled": {"v": 40.1, "pm": 2.2}, "progress": {"mean": 63.3, "se": 58.2, "ra": 50.2, "rl": 81.6}, "calls": {"se": 18.0, "ra": 20.2, "rl": 31.8}, "cost": {"se": 0.119, "ra": 0.123, "rl": 0.196}, "cost_ep": 0.1331, "cost_succ": 0.332, "type": "Agent"}, {"name": "GPT-Policy", "group": "tool", "vlm": "GPT-6 Astra", "evaluated": ["2026-09-22", "2026-09-24"], "rollouts": "gpt_policy", "scale": {"tasks": 145, "episodes": 2024}, "policy": "", "inputs": "RGB, depth, camera calibration", "mean": {"v": 63.3, "pm": 2.5}, "suites": {"se": {"v": 60.3, "pm": 2.7}, "ra": {"v": 66.8, "pm": 4.9}, "rl": {"v": 62.8, "pm": 5.2}}, "pooled": {"v": 62.0, "pm": 2.1}, "progress": {"mean": 81.8, "se": 83.3, "ra": 83.4, "rl": 78.7}, "calls": {"se": 50.1, "ra": 41.7, "rl": 70.8}, "cost": {"se": 3.861, "ra": 3.177, "rl": 5.501}, "cost_ep": 4.0192, "cost_succ": 6.489, "type": "Agent"}, {"name": "Privileged verifier", "group": "ref", "vlm": "", "evaluated": ["2026-09-12", "2026-09-14"], "rollouts": "privileged_verifier", "scale": {"tasks": 145, "episodes": 2024}, "policy": "Bridge / &pi;<sub>0.5<\/sub>", "inputs": "RGB, ground-truth simulator state", "mean": {"v": 29.8, "pm": 2.4}, "suites": {"se": {"v": 29.5, "pm": 2.5}, "ra": {"v": 25.5, "pm": 4.6}, "rl": {"v": 34.4, "pm": 5.1}}, "pooled": {"v": 29.6, "pm": 2.0}, "progress": {"mean": 49.5, "se": 52.4, "ra": 32.7, "rl": 63.3}, "calls": {"se": 0.0, "ra": 0.0, "rl": 0.0}, "cost": {"se": 0.0, "ra": 0.0, "rl": 0.0}, "cost_ep": 0.0, "cost_succ": 0.0, "type": "Reference"}], "horizon": {"success": {"se": {"1 subgoal": {"Low-level policy": 89.6, "Periodic trigger": 91.7, "Proprioceptive trigger": 91.7, "Proprioceptive verifier": 89.6, "VoLo": 93.8, "CaP-X": 87.5, "TiPToP": 72.9, "PSP-Agent": 89.6, "GPT-Policy": 85.4, "Privileged verifier": 85.4}, "2 subgoals": {"Low-level policy": 28.1, "Periodic trigger": 56.2, "Proprioceptive trigger": 62.5, "Proprioceptive verifier": 68.8, "VoLo": 64.1, "CaP-X": 67.2, "TiPToP": 15.1, "PSP-Agent": 74.0, "GPT-Policy": 87.0, "Privileged verifier": 74.5}, "3 subgoals": {"Low-level policy": 6.0, "Periodic trigger": 29.6, "Proprioceptive trigger": 36.1, "Proprioceptive verifier": 40.7, "VoLo": 49.5, "CaP-X": 47.2, "TiPToP": 9.7, "PSP-Agent": 57.4, "GPT-Policy": 75.0, "Privileged verifier": 50.5}, "4 subgoals": {"Low-level policy": 1.8, "Periodic trigger": 4.8, "Proprioceptive trigger": 11.9, "Proprioceptive verifier": 19.0, "VoLo": 18.5, "CaP-X": 26.8, "TiPToP": 1.2, "PSP-Agent": 36.3, "GPT-Policy": 63.7, "Privileged verifier": 22.6}, "5 subgoals": {"Low-level policy": 0.0, "Periodic trigger": 0.6, "Proprioceptive trigger": 7.7, "Proprioceptive verifier": 10.7, "VoLo": 6.0, "CaP-X": 11.3, "TiPToP": 0.0, "PSP-Agent": 25.6, "GPT-Policy": 48.8, "Privileged verifier": 11.9}, "6 subgoals": {"Low-level policy": 0.0, "Periodic trigger": 0.0, "Proprioceptive trigger": 2.1, "Proprioceptive verifier": 6.2, "VoLo": 5.2, "CaP-X": 13.5, "TiPToP": 0.0, "PSP-Agent": 31.2, "GPT-Policy": 58.3, "Privileged verifier": 17.7}, "7 subgoals": {"Low-level policy": 0.0, "Periodic trigger": 0.0, "Proprioceptive trigger": 0.8, "Proprioceptive verifier": 3.3, "VoLo": 5.8, "CaP-X": 8.3, "TiPToP": 0.0, "PSP-Agent": 16.7, "GPT-Policy": 47.5, "Privileged verifier": 3.3}, "8 subgoals": {"Low-level policy": 0.0, "Periodic trigger": 0.0, "Proprioceptive trigger": 0.0, "Proprioceptive verifier": 1.0, "VoLo": 2.1, "CaP-X": 5.2, "TiPToP": 0.0, "PSP-Agent": 4.2, "GPT-Policy": 39.6, "Privileged verifier": 6.2}, "9 subgoals": {"Low-level policy": 0.0, "Periodic trigger": 0.0, "Proprioceptive trigger": 1.0, "Proprioceptive verifier": 0.0, "VoLo": 1.0, "CaP-X": 5.2, "TiPToP": 0.0, "PSP-Agent": 10.4, "GPT-Policy": 39.6, "Privileged verifier": 3.1}, "10 subgoals": {"Low-level policy": 0.0, "Periodic trigger": 0.0, "Proprioceptive trigger": 0.0, "Proprioceptive verifier": 2.1, "VoLo": 0.0, "CaP-X": 2.1, "TiPToP": 0.0, "PSP-Agent": 4.2, "GPT-Policy": 35.4, "Privileged verifier": 1.0}, "All tasks": {"Low-level policy": 8.7, "Periodic trigger": 17.4, "Proprioceptive trigger": 21.5, "Proprioceptive verifier": 25.2, "VoLo": 25.5, "CaP-X": 28.7, "TiPToP": 6.7, "PSP-Agent": 37.1, "GPT-Policy": 60.3, "Privileged verifier": 29.5}, "_n": {"1 subgoal": 48.0, "2 subgoals": 192.0, "3 subgoals": 216.0, "4 subgoals": 168.0, "5 subgoals": 168.0, "6 subgoals": 96.0, "7 subgoals": 120.0, "8 subgoals": 96.0, "9 subgoals": 96.0, "10 subgoals": 96.0, "All tasks": 1296.0}}, "ra": {"1 subgoal": {"Low-level policy": 71.9, "Periodic trigger": 62.5, "Proprioceptive trigger": 56.2, "Proprioceptive verifier": 62.5, "VoLo": 50.0, "CaP-X": 40.6, "TiPToP": 21.9, "PSP-Agent": 59.4, "GPT-Policy": 90.6, "Privileged verifier": 68.8}, "2 subgoals": {"Low-level policy": 13.4, "Periodic trigger": 25.9, "Proprioceptive trigger": 31.2, "Proprioceptive verifier": 42.0, "VoLo": 40.2, "CaP-X": 24.1, "TiPToP": 19.6, "PSP-Agent": 63.4, "GPT-Policy": 82.1, "Privileged verifier": 40.2}, "3 subgoals": {"Low-level policy": 3.8, "Periodic trigger": 8.8, "Proprioceptive trigger": 8.8, "Proprioceptive verifier": 22.5, "VoLo": 16.2, "CaP-X": 16.2, "TiPToP": 16.2, "PSP-Agent": 51.2, "GPT-Policy": 76.2, "Privileged verifier": 23.8}, "4 subgoals": {"Low-level policy": 0.0, "Periodic trigger": 2.5, "Proprioceptive trigger": 2.5, "Proprioceptive verifier": 15.0, "VoLo": 12.5, "CaP-X": 12.5, "TiPToP": 0.0, "PSP-Agent": 25.0, "GPT-Policy": 62.5, "Privileged verifier": 20.0}, "5 subgoals": {"Low-level policy": 0.0, "Periodic trigger": 0.0, "Proprioceptive trigger": 0.0, "Proprioceptive verifier": 0.0, "VoLo": 4.2, "CaP-X": 0.0, "TiPToP": 0.0, "PSP-Agent": 20.8, "GPT-Policy": 54.2, "Privileged verifier": 8.3}, "6 subgoals": {"Low-level policy": 0.0, "Periodic trigger": 0.0, "Proprioceptive trigger": 0.0, "Proprioceptive verifier": 0.0, "VoLo": 0.0, "CaP-X": 7.5, "TiPToP": 0.0, "PSP-Agent": 7.5, "GPT-Policy": 27.5, "Privileged verifier": 0.0}, "7 subgoals": {"Low-level policy": 0.0, "Periodic trigger": 0.0, "Proprioceptive trigger": 0.0, "Proprioceptive verifier": 0.0, "VoLo": 0.0, "CaP-X": 0.0, "TiPToP": 0.0, "PSP-Agent": 6.2, "GPT-Policy": 56.2, "Privileged verifier": 0.0}, "8 subgoals": {"Low-level policy": 0.0, "Periodic trigger": 0.0, "Proprioceptive trigger": 0.0, "Proprioceptive verifier": 0.0, "VoLo": 0.0, "CaP-X": 0.0, "TiPToP": 0.0, "PSP-Agent": 0.0, "GPT-Policy": 31.2, "Privileged verifier": 0.0}, "9 subgoals": {"Low-level policy": 0.0, "Periodic trigger": 0.0, "Proprioceptive trigger": 0.0, "Proprioceptive verifier": 0.0, "VoLo": 0.0, "CaP-X": 0.0, "TiPToP": 0.0, "PSP-Agent": 0.0, "GPT-Policy": 12.5, "Privileged verifier": 0.0}, "10 subgoals": {"Low-level policy": 0.0, "Periodic trigger": 0.0, "Proprioceptive trigger": 0.0, "Proprioceptive verifier": 0.0, "VoLo": 0.0, "CaP-X": 0.0, "TiPToP": 0.0, "PSP-Agent": 0.0, "GPT-Policy": 62.5, "Privileged verifier": 0.0}, "All tasks": {"Low-level policy": 10.9, "Periodic trigger": 15.2, "Proprioceptive trigger": 16.2, "Proprioceptive verifier": 24.2, "VoLo": 21.3, "CaP-X": 16.2, "TiPToP": 11.2, "PSP-Agent": 39.9, "GPT-Policy": 66.8, "Privileged verifier": 25.5}, "_n": {"1 subgoal": 32.0, "2 subgoals": 112.0, "3 subgoals": 80.0, "4 subgoals": 40.0, "5 subgoals": 24.0, "6 subgoals": 40.0, "7 subgoals": 16.0, "8 subgoals": 16.0, "9 subgoals": 8.0, "10 subgoals": 8.0, "All tasks": 376.0}}, "rl": {"1 subgoal": {"Low-level policy": 100.0, "Periodic trigger": 100.0, "Proprioceptive trigger": 100.0, "Proprioceptive verifier": 87.5, "VoLo": 93.8, "CaP-X": 81.2, "TiPToP": 87.5, "PSP-Agent": 93.8, "GPT-Policy": 100.0, "Privileged verifier": 87.5}, "2 subgoals": {"Low-level policy": 46.9, "Periodic trigger": 68.8, "Proprioceptive trigger": 73.4, "Proprioceptive verifier": 56.2, "VoLo": 68.8, "CaP-X": 48.4, "TiPToP": 39.1, "PSP-Agent": 78.1, "GPT-Policy": 92.2, "Privileged verifier": 78.1}, "3 subgoals": {"Low-level policy": 22.5, "Periodic trigger": 20.0, "Proprioceptive trigger": 30.0, "Proprioceptive verifier": 37.5, "VoLo": 32.5, "CaP-X": 15.0, "TiPToP": 30.0, "PSP-Agent": 50.0, "GPT-Policy": 85.0, "Privileged verifier": 40.0}, "4 subgoals": {"Low-level policy": 14.6, "Periodic trigger": 22.9, "Proprioceptive trigger": 29.2, "Proprioceptive verifier": 27.1, "VoLo": 35.4, "CaP-X": 33.3, "TiPToP": 16.7, "PSP-Agent": 77.1, "GPT-Policy": 72.9, "Privileged verifier": 43.8}, "5 subgoals": {"Low-level policy": 0.0, "Periodic trigger": 0.0, "Proprioceptive trigger": 12.5, "Proprioceptive verifier": 0.0, "VoLo": 0.0, "CaP-X": 0.0, "TiPToP": 0.0, "PSP-Agent": 45.8, "GPT-Policy": 70.8, "Privileged verifier": 8.3}, "6 subgoals": {"Low-level policy": 10.4, "Periodic trigger": 14.6, "Proprioceptive trigger": 14.6, "Proprioceptive verifier": 16.7, "VoLo": 18.8, "CaP-X": 6.2, "TiPToP": 2.1, "PSP-Agent": 39.6, "GPT-Policy": 47.9, "Privileged verifier": 18.8}, "7 subgoals": {"Low-level policy": 0.0, "Periodic trigger": 0.0, "Proprioceptive trigger": 0.0, "Proprioceptive verifier": 0.0, "VoLo": 0.0, "CaP-X": 0.0, "TiPToP": 4.2, "PSP-Agent": 45.8, "GPT-Policy": 37.5, "Privileged verifier": 0.0}, "8 subgoals": {"Low-level policy": 0.0, "Periodic trigger": 6.2, "Proprioceptive trigger": 0.0, "Proprioceptive verifier": 3.1, "VoLo": 6.2, "CaP-X": 6.2, "TiPToP": 0.0, "PSP-Agent": 28.1, "GPT-Policy": 37.5, "Privileged verifier": 15.6}, "9 subgoals": {"Low-level policy": 0.0, "Periodic trigger": 0.0, "Proprioceptive trigger": 0.0, "Proprioceptive verifier": 4.2, "VoLo": 4.2, "CaP-X": 0.0, "TiPToP": 0.0, "PSP-Agent": 8.3, "GPT-Policy": 8.3, "Privileged verifier": 4.2}, "10 subgoals": {"Low-level policy": 6.2, "Periodic trigger": 6.2, "Proprioceptive trigger": 0.0, "Proprioceptive verifier": 6.2, "VoLo": 3.1, "CaP-X": 6.2, "TiPToP": 0.0, "PSP-Agent": 21.9, "GPT-Policy": 43.8, "Privileged verifier": 9.4}, "All tasks": {"Low-level policy": 19.6, "Periodic trigger": 25.6, "Proprioceptive trigger": 28.1, "Proprioceptive verifier": 25.6, "VoLo": 29.0, "CaP-X": 20.7, "TiPToP": 17.3, "PSP-Agent": 51.4, "GPT-Policy": 62.8, "Privileged verifier": 34.4}, "_n": {"1 subgoal": 16.0, "2 subgoals": 64.0, "3 subgoals": 40.0, "4 subgoals": 48.0, "5 subgoals": 24.0, "6 subgoals": 48.0, "7 subgoals": 24.0, "8 subgoals": 32.0, "9 subgoals": 24.0, "10 subgoals": 32.0, "All tasks": 352.0}}}, "progress": {"se": {"1 subgoal": {"Low-level policy": 89.6, "Periodic trigger": 91.7, "Proprioceptive trigger": 91.7, "Proprioceptive verifier": 89.6, "VoLo": 93.8, "CaP-X": 87.5, "TiPToP": 72.9, "PSP-Agent": 89.6, "GPT-Policy": 85.4, "Privileged verifier": 85.4}, "2 subgoals": {"Low-level policy": 49.2, "Periodic trigger": 73.7, "Proprioceptive trigger": 77.9, "Proprioceptive verifier": 81.8, "VoLo": 76.0, "CaP-X": 78.9, "TiPToP": 29.9, "PSP-Agent": 83.1, "GPT-Policy": 92.7, "Privileged verifier": 83.6}, "3 subgoals": {"Low-level policy": 37.2, "Periodic trigger": 62.0, "Proprioceptive trigger": 65.9, "Proprioceptive verifier": 66.0, "VoLo": 69.0, "CaP-X": 69.8, "TiPToP": 29.2, "PSP-Agent": 76.4, "GPT-Policy": 89.8, "Privileged verifier": 70.2}, "4 subgoals": {"Low-level policy": 29.9, "Periodic trigger": 43.3, "Proprioceptive trigger": 48.2, "Proprioceptive verifier": 54.2, "VoLo": 54.9, "CaP-X": 56.0, "TiPToP": 11.3, "PSP-Agent": 67.3, "GPT-Policy": 87.5, "Privileged verifier": 54.5}, "5 subgoals": {"Low-level policy": 30.7, "Periodic trigger": 38.2, "Proprioceptive trigger": 46.9, "Proprioceptive verifier": 51.2, "VoLo": 46.3, "CaP-X": 43.2, "TiPToP": 1.8, "PSP-Agent": 61.5, "GPT-Policy": 84.8, "Privileged verifier": 49.0}, "6 subgoals": {"Low-level policy": 25.3, "Periodic trigger": 41.0, "Proprioceptive trigger": 48.1, "Proprioceptive verifier": 50.2, "VoLo": 47.2, "CaP-X": 46.4, "TiPToP": 0.0, "PSP-Agent": 66.8, "GPT-Policy": 88.2, "Privileged verifier": 59.5}, "7 subgoals": {"Low-level policy": 25.2, "Periodic trigger": 31.4, "Proprioceptive trigger": 42.3, "Proprioceptive verifier": 47.1, "VoLo": 46.7, "CaP-X": 41.1, "TiPToP": 1.9, "PSP-Agent": 55.1, "GPT-Policy": 83.7, "Privileged verifier": 50.4}, "8 subgoals": {"Low-level policy": 17.2, "Periodic trigger": 31.1, "Proprioceptive trigger": 37.6, "Proprioceptive verifier": 46.2, "VoLo": 38.9, "CaP-X": 32.8, "TiPToP": 2.2, "PSP-Agent": 46.1, "GPT-Policy": 78.3, "Privileged verifier": 44.1}, "9 subgoals": {"Low-level policy": 14.8, "Periodic trigger": 34.5, "Proprioceptive trigger": 35.0, "Proprioceptive verifier": 42.2, "VoLo": 39.1, "CaP-X": 39.5, "TiPToP": 0.9, "PSP-Agent": 48.6, "GPT-Policy": 78.6, "Privileged verifier": 39.2}, "10 subgoals": {"Low-level policy": 12.5, "Periodic trigger": 26.8, "Proprioceptive trigger": 32.6, "Proprioceptive verifier": 39.7, "VoLo": 35.9, "CaP-X": 29.9, "TiPToP": 0.0, "PSP-Agent": 41.2, "GPT-Policy": 76.0, "Privileged verifier": 43.8}, "All tasks": {"Low-level policy": 25.3, "Periodic trigger": 39.9, "Proprioceptive trigger": 45.8, "Proprioceptive verifier": 51.0, "VoLo": 48.3, "CaP-X": 45.9, "TiPToP": 7.1, "PSP-Agent": 58.2, "GPT-Policy": 83.3, "Privileged verifier": 52.4}, "_n": {"1 subgoal": 48.0, "2 subgoals": 192.0, "3 subgoals": 216.0, "4 subgoals": 168.0, "5 subgoals": 168.0, "6 subgoals": 96.0, "7 subgoals": 120.0, "8 subgoals": 96.0, "9 subgoals": 96.0, "10 subgoals": 96.0, "All tasks": 1296.0}}, "ra": {"1 subgoal": {"Low-level policy": 71.9, "Periodic trigger": 62.5, "Proprioceptive trigger": 56.2, "Proprioceptive verifier": 62.5, "VoLo": 50.0, "CaP-X": 40.6, "TiPToP": 21.9, "PSP-Agent": 59.4, "GPT-Policy": 90.6, "Privileged verifier": 68.8}, "2 subgoals": {"Low-level policy": 28.1, "Periodic trigger": 51.3, "Proprioceptive trigger": 51.8, "Proprioceptive verifier": 57.1, "VoLo": 56.2, "CaP-X": 35.3, "TiPToP": 32.6, "PSP-Agent": 75.4, "GPT-Policy": 88.8, "Privileged verifier": 53.1}, "3 subgoals": {"Low-level policy": 22.1, "Periodic trigger": 40.4, "Proprioceptive trigger": 44.2, "Proprioceptive verifier": 42.5, "VoLo": 39.2, "CaP-X": 42.9, "TiPToP": 30.8, "PSP-Agent": 74.6, "GPT-Policy": 91.7, "Privileged verifier": 47.9}, "4 subgoals": {"Low-level policy": 6.9, "Periodic trigger": 23.1, "Proprioceptive trigger": 25.0, "Proprioceptive verifier": 38.1, "VoLo": 37.5, "CaP-X": 28.1, "TiPToP": 5.0, "PSP-Agent": 49.4, "GPT-Policy": 86.9, "Privileged verifier": 40.0}, "5 subgoals": {"Low-level policy": 8.3, "Periodic trigger": 29.2, "Proprioceptive trigger": 30.0, "Proprioceptive verifier": 29.2, "VoLo": 28.3, "CaP-X": 15.0, "TiPToP": 3.3, "PSP-Agent": 51.7, "GPT-Policy": 84.2, "Privileged verifier": 30.0}, "6 subgoals": {"Low-level policy": 7.1, "Periodic trigger": 21.2, "Proprioceptive trigger": 22.1, "Proprioceptive verifier": 27.5, "VoLo": 24.2, "CaP-X": 20.4, "TiPToP": 1.7, "PSP-Agent": 43.8, "GPT-Policy": 73.8, "Privileged verifier": 18.8}, "7 subgoals": {"Low-level policy": 3.6, "Periodic trigger": 11.6, "Proprioceptive trigger": 11.6, "Proprioceptive verifier": 19.6, "VoLo": 13.4, "CaP-X": 33.9, "TiPToP": 3.6, "PSP-Agent": 32.1, "GPT-Policy": 80.4, "Privileged verifier": 17.9}, "8 subgoals": {"Low-level policy": 2.3, "Periodic trigger": 9.4, "Proprioceptive trigger": 9.4, "Proprioceptive verifier": 12.5, "VoLo": 14.1, "CaP-X": 27.3, "TiPToP": 0.0, "PSP-Agent": 20.3, "GPT-Policy": 75.0, "Privileged verifier": 15.6}, "9 subgoals": {"Low-level policy": 4.2, "Periodic trigger": 16.7, "Proprioceptive trigger": 8.3, "Proprioceptive verifier": 19.4, "VoLo": 18.1, "CaP-X": 8.3, "TiPToP": 5.6, "PSP-Agent": 19.4, "GPT-Policy": 73.6, "Privileged verifier": 16.7}, "10 subgoals": {"Low-level policy": 3.8, "Periodic trigger": 8.8, "Proprioceptive trigger": 8.8, "Proprioceptive verifier": 13.8, "VoLo": 17.5, "CaP-X": 36.2, "TiPToP": 0.0, "PSP-Agent": 22.5, "GPT-Policy": 87.5, "Privileged verifier": 8.8}, "All tasks": {"Low-level policy": 13.5, "Periodic trigger": 28.3, "Proprioceptive trigger": 28.9, "Proprioceptive verifier": 33.7, "VoLo": 31.8, "CaP-X": 29.5, "TiPToP": 12.6, "PSP-Agent": 50.2, "GPT-Policy": 83.4, "Privileged verifier": 32.7}, "_n": {"1 subgoal": 32.0, "2 subgoals": 112.0, "3 subgoals": 80.0, "4 subgoals": 40.0, "5 subgoals": 24.0, "6 subgoals": 40.0, "7 subgoals": 16.0, "8 subgoals": 16.0, "9 subgoals": 8.0, "10 subgoals": 8.0, "All tasks": 376.0}}, "rl": {"1 subgoal": {"Low-level policy": 100.0, "Periodic trigger": 100.0, "Proprioceptive trigger": 100.0, "Proprioceptive verifier": 87.5, "VoLo": 93.8, "CaP-X": 81.2, "TiPToP": 87.5, "PSP-Agent": 93.8, "GPT-Policy": 100.0, "Privileged verifier": 87.5}, "2 subgoals": {"Low-level policy": 68.8, "Periodic trigger": 77.3, "Proprioceptive trigger": 84.4, "Proprioceptive verifier": 73.4, "VoLo": 80.5, "CaP-X": 68.8, "TiPToP": 61.7, "PSP-Agent": 90.6, "GPT-Policy": 96.1, "Privileged verifier": 87.5}, "3 subgoals": {"Low-level policy": 63.3, "Periodic trigger": 54.2, "Proprioceptive trigger": 70.0, "Proprioceptive verifier": 64.2, "VoLo": 70.0, "CaP-X": 44.2, "TiPToP": 58.3, "PSP-Agent": 76.7, "GPT-Policy": 91.7, "Privileged verifier": 72.5}, "4 subgoals": {"Low-level policy": 66.7, "Periodic trigger": 65.6, "Proprioceptive trigger": 69.3, "Proprioceptive verifier": 65.1, "VoLo": 73.4, "CaP-X": 61.5, "TiPToP": 46.4, "PSP-Agent": 92.7, "GPT-Policy": 86.5, "Privileged verifier": 77.6}, "5 subgoals": {"Low-level policy": 63.3, "Periodic trigger": 49.2, "Proprioceptive trigger": 60.8, "Proprioceptive verifier": 45.0, "VoLo": 50.8, "CaP-X": 47.5, "TiPToP": 52.5, "PSP-Agent": 86.7, "GPT-Policy": 90.8, "Privileged verifier": 60.8}, "6 subgoals": {"Low-level policy": 49.7, "Periodic trigger": 50.0, "Proprioceptive trigger": 57.3, "Proprioceptive verifier": 59.4, "VoLo": 67.7, "CaP-X": 37.5, "TiPToP": 18.8, "PSP-Agent": 76.4, "GPT-Policy": 80.2, "Privileged verifier": 55.2}, "7 subgoals": {"Low-level policy": 44.6, "Periodic trigger": 52.4, "Proprioceptive trigger": 50.6, "Proprioceptive verifier": 51.2, "VoLo": 52.4, "CaP-X": 24.4, "TiPToP": 17.3, "PSP-Agent": 87.5, "GPT-Policy": 78.6, "Privileged verifier": 49.4}, "8 subgoals": {"Low-level policy": 48.0, "Periodic trigger": 56.2, "Proprioceptive trigger": 51.6, "Proprioceptive verifier": 45.3, "VoLo": 55.9, "CaP-X": 32.8, "TiPToP": 0.0, "PSP-Agent": 83.6, "GPT-Policy": 73.4, "Privileged verifier": 58.6}, "9 subgoals": {"Low-level policy": 53.2, "Periodic trigger": 56.0, "Proprioceptive trigger": 56.9, "Proprioceptive verifier": 63.4, "VoLo": 56.0, "CaP-X": 37.5, "TiPToP": 5.1, "PSP-Agent": 67.1, "GPT-Policy": 47.2, "Privileged verifier": 53.2}, "10 subgoals": {"Low-level policy": 60.3, "Periodic trigger": 56.2, "Proprioceptive trigger": 48.8, "Proprioceptive verifier": 46.9, "VoLo": 56.2, "CaP-X": 40.6, "TiPToP": 0.0, "PSP-Agent": 80.6, "GPT-Policy": 80.9, "Privileged verifier": 67.5}, "All tasks": {"Low-level policy": 56.6, "Periodic trigger": 57.1, "Proprioceptive trigger": 58.9, "Proprioceptive verifier": 56.1, "VoLo": 62.0, "CaP-X": 42.4, "TiPToP": 22.4, "PSP-Agent": 81.6, "GPT-Policy": 78.7, "Privileged verifier": 63.5}, "_n": {"1 subgoal": 16.0, "2 subgoals": 64.0, "3 subgoals": 40.0, "4 subgoals": 48.0, "5 subgoals": 24.0, "6 subgoals": 48.0, "7 subgoals": 24.0, "8 subgoals": 32.0, "9 subgoals": 24.0, "10 subgoals": 32.0, "All tasks": 352.0}}}}, "category": {"success": {"se": {"Single destination": {"Low-level policy": 9.6, "Periodic trigger": 18.8, "Proprioceptive trigger": 22.7, "Proprioceptive verifier": 26.9, "VoLo": 27.1, "CaP-X": 23.8, "TiPToP": 11.7, "PSP-Agent": 41.2, "GPT-Policy": 54.4, "Privileged verifier": 30.0}, "Transfer": {"Low-level policy": 9.2, "Periodic trigger": 8.3, "Proprioceptive trigger": 7.5, "Proprioceptive verifier": 9.2, "VoLo": 22.5, "CaP-X": 44.2, "TiPToP": 1.7, "PSP-Agent": 25.8, "GPT-Policy": 67.5, "Privileged verifier": 21.7}, "Split destination": {"Low-level policy": 12.5, "Periodic trigger": 15.3, "Proprioceptive trigger": 21.5, "Proprioceptive verifier": 23.6, "VoLo": 25.7, "CaP-X": 21.5, "TiPToP": 8.3, "PSP-Agent": 41.7, "GPT-Policy": 61.1, "Privileged verifier": 29.2}, "Relay": {"Low-level policy": 3.2, "Periodic trigger": 13.0, "Proprioceptive trigger": 19.0, "Proprioceptive verifier": 25.5, "VoLo": 18.1, "CaP-X": 39.8, "TiPToP": 0.0, "PSP-Agent": 23.1, "GPT-Policy": 74.5, "Privileged verifier": 28.2}, "Revisit": {"Low-level policy": 0.0, "Periodic trigger": 0.0, "Proprioceptive trigger": 0.0, "Proprioceptive verifier": 0.0, "VoLo": 1.0, "CaP-X": 9.4, "TiPToP": 0.0, "PSP-Agent": 8.3, "GPT-Policy": 39.6, "Privileged verifier": 1.0}, "Exclusion": {"Low-level policy": 0.0, "Periodic trigger": 35.4, "Proprioceptive trigger": 46.9, "Proprioceptive verifier": 46.9, "VoLo": 44.8, "CaP-X": 35.4, "TiPToP": 6.2, "PSP-Agent": 55.2, "GPT-Policy": 70.8, "Privileged verifier": 47.9}, "Ordered": {"Low-level policy": 39.6, "Periodic trigger": 64.6, "Proprioceptive trigger": 62.5, "Proprioceptive verifier": 72.9, "VoLo": 81.2, "CaP-X": 62.5, "TiPToP": 22.9, "PSP-Agent": 87.5, "GPT-Policy": 81.2, "Privileged verifier": 85.4}, "Duplicates": {"Low-level policy": 12.5, "Periodic trigger": 10.4, "Proprioceptive trigger": 14.6, "Proprioceptive verifier": 17.7, "VoLo": 15.6, "CaP-X": 15.6, "TiPToP": 0.0, "PSP-Agent": 40.6, "GPT-Policy": 47.9, "Privileged verifier": 21.9}, "All tasks": {"Low-level policy": 8.7, "Periodic trigger": 17.4, "Proprioceptive trigger": 21.5, "Proprioceptive verifier": 25.2, "VoLo": 25.5, "CaP-X": 28.7, "TiPToP": 6.7, "PSP-Agent": 37.1, "GPT-Policy": 60.3, "Privileged verifier": 29.5}, "_n": {"Single destination": 480.0, "Transfer": 120.0, "Split destination": 144.0, "Relay": 216.0, "Revisit": 96.0, "Exclusion": 96.0, "Ordered": 48.0, "Duplicates": 96.0, "All tasks": 1296.0}}, "ra": {"Single destination": {"Low-level policy": 15.8, "Periodic trigger": 23.7, "Proprioceptive trigger": 19.7, "Proprioceptive verifier": 34.2, "VoLo": 32.2, "CaP-X": 13.8, "TiPToP": 9.2, "PSP-Agent": 46.1, "GPT-Policy": 79.6, "Privileged verifier": 36.2}, "Transfer": {"Low-level policy": 0.0, "Periodic trigger": 0.0, "Proprioceptive trigger": 0.0, "Proprioceptive verifier": 0.0, "VoLo": 0.0, "CaP-X": 50.0, "TiPToP": 25.0, "PSP-Agent": 100.0, "GPT-Policy": 62.5, "Privileged verifier": 0.0}, "Split destination": {"Low-level policy": 0.0, "Periodic trigger": 12.5, "Proprioceptive trigger": 0.0, "Proprioceptive verifier": 18.8, "VoLo": 25.0, "CaP-X": 25.0, "TiPToP": 31.2, "PSP-Agent": 100.0, "GPT-Policy": 56.2, "Privileged verifier": 18.8}, "Relay": {"Low-level policy": 0.0, "Periodic trigger": 3.6, "Proprioceptive trigger": 1.8, "Proprioceptive verifier": 5.4, "VoLo": 5.4, "CaP-X": 17.9, "TiPToP": 1.8, "PSP-Agent": 19.6, "GPT-Policy": 55.4, "Privileged verifier": 10.7}, "Revisit": {"Low-level policy": 0.0, "Periodic trigger": 0.0, "Proprioceptive trigger": 0.0, "Proprioceptive verifier": 0.0, "VoLo": 0.0, "CaP-X": 12.5, "TiPToP": 0.0, "PSP-Agent": 4.2, "GPT-Policy": 58.3, "Privileged verifier": 2.1}, "Exclusion": {"Low-level policy": 1.8, "Periodic trigger": 16.1, "Proprioceptive trigger": 26.8, "Proprioceptive verifier": 30.4, "VoLo": 8.9, "CaP-X": 8.9, "TiPToP": 10.7, "PSP-Agent": 26.8, "GPT-Policy": 32.1, "Privileged verifier": 26.8}, "Ordered": {"Low-level policy": 20.8, "Periodic trigger": 4.2, "Proprioceptive trigger": 20.8, "Proprioceptive verifier": 33.3, "VoLo": 37.5, "CaP-X": 29.2, "TiPToP": 16.7, "PSP-Agent": 66.7, "GPT-Policy": 95.8, "Privileged verifier": 33.3}, "Duplicates": {"Low-level policy": 68.8, "Periodic trigger": 43.8, "Proprioceptive trigger": 62.5, "Proprioceptive verifier": 50.0, "VoLo": 62.5, "CaP-X": 25.0, "TiPToP": 62.5, "PSP-Agent": 75.0, "GPT-Policy": 100.0, "Privileged verifier": 50.0}, "All tasks": {"Low-level policy": 10.9, "Periodic trigger": 15.2, "Proprioceptive trigger": 16.2, "Proprioceptive verifier": 24.2, "VoLo": 21.3, "CaP-X": 16.2, "TiPToP": 11.2, "PSP-Agent": 39.9, "GPT-Policy": 66.8, "Privileged verifier": 25.5}, "_n": {"Single destination": 152.0, "Transfer": 8.0, "Split destination": 16.0, "Relay": 56.0, "Revisit": 48.0, "Exclusion": 56.0, "Ordered": 24.0, "Duplicates": 16.0, "All tasks": 376.0}}, "rl": {"Single destination": {"Low-level policy": 75.0, "Periodic trigger": 80.0, "Proprioceptive trigger": 72.5, "Proprioceptive verifier": 67.5, "VoLo": 72.5, "CaP-X": 57.5, "TiPToP": 42.5, "PSP-Agent": 70.0, "GPT-Policy": 82.5, "Privileged verifier": 70.0}, "Transfer": {"Low-level policy": 81.2, "Periodic trigger": 68.8, "Proprioceptive trigger": 75.0, "Proprioceptive verifier": 68.8, "VoLo": 75.0, "CaP-X": 37.5, "TiPToP": 68.8, "PSP-Agent": 81.2, "GPT-Policy": 81.2, "Privileged verifier": 75.0}, "Split destination": {"Low-level policy": 2.2, "Periodic trigger": 7.4, "Proprioceptive trigger": 15.4, "Proprioceptive verifier": 10.3, "VoLo": 14.7, "CaP-X": 9.6, "TiPToP": 14.0, "PSP-Agent": 54.4, "GPT-Policy": 60.3, "Privileged verifier": 19.9}, "Relay": {"Low-level policy": 0.0, "Periodic trigger": 9.4, "Proprioceptive trigger": 15.6, "Proprioceptive verifier": 21.9, "VoLo": 21.9, "CaP-X": 6.2, "TiPToP": 0.0, "PSP-Agent": 40.6, "GPT-Policy": 81.2, "Privileged verifier": 50.0}, "Revisit": {"Low-level policy": 0.0, "Periodic trigger": 8.3, "Proprioceptive trigger": 8.3, "Proprioceptive verifier": 20.8, "VoLo": 20.8, "CaP-X": 0.0, "TiPToP": 0.0, "PSP-Agent": 0.0, "GPT-Policy": 29.2, "Privileged verifier": 25.0}, "Exclusion": {"Low-level policy": 0.0, "Periodic trigger": 56.2, "Proprioceptive trigger": 43.8, "Proprioceptive verifier": 25.0, "VoLo": 43.8, "CaP-X": 81.2, "TiPToP": 37.5, "PSP-Agent": 87.5, "GPT-Policy": 93.8, "Privileged verifier": 62.5}, "Ordered": {"Low-level policy": 11.1, "Periodic trigger": 12.5, "Proprioceptive trigger": 9.7, "Proprioceptive verifier": 11.1, "VoLo": 9.7, "CaP-X": 2.8, "TiPToP": 4.2, "PSP-Agent": 31.9, "GPT-Policy": 44.4, "Privileged verifier": 11.1}, "Duplicates": {"Low-level policy": 93.8, "Periodic trigger": 87.5, "Proprioceptive trigger": 100.0, "Proprioceptive verifier": 87.5, "VoLo": 93.8, "CaP-X": 87.5, "TiPToP": 31.2, "PSP-Agent": 100.0, "GPT-Policy": 81.2, "Privileged verifier": 87.5}, "All tasks": {"Low-level policy": 19.6, "Periodic trigger": 25.6, "Proprioceptive trigger": 28.1, "Proprioceptive verifier": 25.6, "VoLo": 29.0, "CaP-X": 20.7, "TiPToP": 17.3, "PSP-Agent": 51.4, "GPT-Policy": 62.8, "Privileged verifier": 34.4}, "_n": {"Single destination": 40.0, "Transfer": 16.0, "Split destination": 136.0, "Relay": 32.0, "Revisit": 24.0, "Exclusion": 16.0, "Ordered": 72.0, "Duplicates": 16.0, "All tasks": 352.0}}}}, "lite": {"systems": [{"name": "Low-level policy", "group": "e2e", "vlm": "", "evaluated": ["2026-09-11", "2026-09-13"], "rollouts": "low_level_policy", "scale": {"tasks": 10, "episodes": 112}, "policy": "Bridge / &pi;<sub>0.5<\/sub>", "inputs": "RGB, proprioception", "mean": {"v": 10.4, "pm": 5.8}, "suites": {"se": {"v": 0.0, "pm": 0.0}, "ra": {"v": 9.4, "pm": 10.1}, "rl": {"v": 21.9, "pm": 14.3}}, "pooled": {"v": 11.0, "pm": 1.4}, "progress": {"mean": 23.1, "se": 13.8, "ra": 7.3, "rl": 48.3}, "calls": {"se": 0.0, "ra": 0.0, "rl": 0.0}, "cost": {"se": 0.0, "ra": 0.0, "rl": 0.0}, "cost_ep": 0.0, "cost_succ": 0.0, "type": "Policy"}, {"name": "Periodic trigger", "group": "orch", "vlm": "", "evaluated": ["2026-09-13", "2026-09-14"], "rollouts": "periodic_trigger", "scale": {"tasks": 10, "episodes": 112}, "policy": "Bridge / &pi;<sub>0.5<\/sub>", "inputs": "RGB, proprioception", "mean": {"v": 16.3, "pm": 6.9}, "suites": {"se": {"v": 14.6, "pm": 10.0}, "ra": {"v": 9.4, "pm": 10.1}, "rl": {"v": 25.0, "pm": 15.0}}, "pooled": {"v": 18.4, "pm": 1.7}, "progress": {"mean": 38.9, "se": 34.6, "ra": 28.1, "rl": 54.0}, "calls": {"se": 0.0, "ra": 0.0, "rl": 0.0}, "cost": {"se": 0.0, "ra": 0.0, "rl": 0.0}, "cost_ep": 0.0, "cost_succ": 0.0, "type": "Orchestrator"}, {"name": "Proprioceptive trigger", "group": "orch", "vlm": "", "evaluated": ["2026-09-13", "2026-09-14"], "rollouts": "proprioceptive_trigger", "scale": {"tasks": 10, "episodes": 112}, "policy": "Bridge / &pi;<sub>0.5<\/sub>", "inputs": "RGB, proprioception", "mean": {"v": 18.8, "pm": 7.3}, "suites": {"se": {"v": 18.8, "pm": 11.0}, "ra": {"v": 15.6, "pm": 12.6}, "rl": {"v": 21.9, "pm": 14.3}}, "pooled": {"v": 21.7, "pm": 1.8}, "progress": {"mean": 40.3, "se": 44.2, "ra": 31.2, "rl": 45.5}, "calls": {"se": 0.0, "ra": 0.0, "rl": 0.0}, "cost": {"se": 0.0, "ra": 0.0, "rl": 0.0}, "cost_ep": 0.0, "cost_succ": 0.0, "type": "Orchestrator"}, {"name": "Proprioceptive verifier", "group": "orch", "vlm": "Gemini 3.7 Flash", "evaluated": ["2026-09-13", "2026-09-14"], "rollouts": "proprioceptive_verifier", "scale": {"tasks": 10, "episodes": 112}, "policy": "Bridge / &pi;<sub>0.5<\/sub>", "inputs": "RGB, proprioception", "mean": {"v": 26.4, "pm": 8.3}, "suites": {"se": {"v": 29.2, "pm": 12.9}, "ra": {"v": 25.0, "pm": 15.0}, "rl": {"v": 25.0, "pm": 15.0}}, "pooled": {"v": 25.0, "pm": 1.9}, "progress": {"mean": 47.9, "se": 54.6, "ra": 39.6, "rl": 49.4}, "calls": {"se": 12.7, "ra": 9.3, "rl": 9.3}, "cost": {"se": 0.046, "ra": 0.032, "rl": 0.054}, "cost_ep": 0.0443, "cost_succ": 0.165, "type": "Orchestrator"}, {"name": "VoLo", "group": "orch", "vlm": "Gemini 3.7 Flash", "evaluated": ["2026-09-13", "2026-09-14"], "rollouts": "volo", "scale": {"tasks": 10, "episodes": 112}, "policy": "Bridge / &pi;<sub>0.5<\/sub>", "inputs": "RGB, proprioception", "mean": {"v": 25.7, "pm": 8.2}, "suites": {"se": {"v": 27.1, "pm": 12.6}, "ra": {"v": 18.8, "pm": 13.5}, "rl": {"v": 31.2, "pm": 16.1}}, "pooled": {"v": 25.3, "pm": 1.9}, "progress": {"mean": 47.2, "se": 50.0, "ra": 30.2, "rl": 61.4}, "calls": {"se": 24.8, "ra": 26.4, "rl": 19.2}, "cost": {"se": 0.161, "ra": 0.162, "rl": 0.191}, "cost_ep": 0.1699, "cost_succ": 0.656, "type": "Orchestrator"}, {"name": "CaP-X", "group": "tool", "vlm": "Gemini 3.7 Flash", "evaluated": ["2026-09-10", "2026-09-12"], "rollouts": "cap_x", "scale": {"tasks": 10, "episodes": 112}, "policy": "", "inputs": "RGB, depth, camera calibration", "mean": {"v": 18.8, "pm": 7.2}, "suites": {"se": {"v": 25.0, "pm": 12.2}, "ra": {"v": 12.5, "pm": 11.5}, "rl": {"v": 18.8, "pm": 13.5}}, "pooled": {"v": 25.0, "pm": 1.9}, "progress": {"mean": 37.3, "se": 55.0, "ra": 22.9, "rl": 34.1}, "calls": {"se": 3.8, "ra": 5.6, "rl": 6.3}, "cost": {"se": 0.034, "ra": 0.054, "rl": 0.061}, "cost_ep": 0.0474, "cost_succ": 0.241, "type": "Agent"}, {"name": "TiPToP", "group": "tool", "vlm": "Gemini 3.7 Flash", "evaluated": ["2026-09-13", "2026-09-14"], "rollouts": "tiptop", "scale": {"tasks": 10, "episodes": 112}, "policy": "", "inputs": "RGB, depth, camera calibration", "mean": {"v": 16.7, "pm": 7.1}, "suites": {"se": {"v": 12.5, "pm": 9.4}, "ra": {"v": 18.8, "pm": 13.5}, "rl": {"v": 18.8, "pm": 13.5}}, "pooled": {"v": 9.4, "pm": 1.3}, "progress": {"mean": 17.2, "se": 18.3, "ra": 16.7, "rl": 16.5}, "calls": {"se": 1.0, "ra": 1.0, "rl": 1.0}, "cost": {"se": 0.007, "ra": 0.006, "rl": 0.006}, "cost_ep": 0.0064, "cost_succ": 0.04, "type": "Agent"}, {"name": "PSP-Agent", "group": "tool", "vlm": "Gemini 3.7 Flash", "evaluated": ["2026-09-21", "2026-09-22"], "rollouts": "psp_agent", "scale": {"tasks": 10, "episodes": 112}, "policy": "", "inputs": "RGB, depth, camera calibration", "mean": {"v": 41.0, "pm": 9.2}, "suites": {"se": {"v": 35.4, "pm": 13.5}, "ra": {"v": 37.5, "pm": 16.8}, "rl": {"v": 50.0, "pm": 17.3}}, "pooled": {"v": 40.1, "pm": 2.2}, "progress": {"mean": 63.4, "se": 48.3, "ra": 62.5, "rl": 79.5}, "calls": {"se": 18.0, "ra": 20.2, "rl": 31.8}, "cost": {"se": 0.119, "ra": 0.123, "rl": 0.196}, "cost_ep": 0.1421, "cost_succ": 0.354, "type": "Agent"}, {"name": "GPT-Policy", "group": "tool", "vlm": "GPT-6 Astra", "evaluated": ["2026-09-22", "2026-09-24"], "rollouts": "gpt_policy", "scale": {"tasks": 10, "episodes": 112}, "policy": "", "inputs": "RGB, depth, camera calibration", "mean": {"v": 62.5, "pm": 9.1}, "suites": {"se": {"v": 62.5, "pm": 13.7}, "ra": {"v": 62.5, "pm": 16.8}, "rl": {"v": 62.5, "pm": 16.8}}, "pooled": {"v": 62.0, "pm": 2.1}, "progress": {"mean": 82.2, "se": 85.8, "ra": 80.2, "rl": 80.7}, "calls": {"se": 50.1, "ra": 41.7, "rl": 70.8}, "cost": {"se": 3.861, "ra": 3.177, "rl": 5.501}, "cost_ep": 4.1341, "cost_succ": 6.615, "type": "Agent"}, {"name": "GPT-Policy", "group": "tool", "type": "Agent", "vlm": "Gemini 4 Argon", "policy": "", "inputs": "RGB, depth, camera calibration", "calls": {"se": 32.4, "ra": 26.6, "rl": 55.1}, "cost_note": "For Gemini 4 Argon the gateway omits the output-token count on most calls; those are estimated from the calls of the same run that report it, about 5% of its cost.", "liteOnly": true, "ranked": true, "cost": {"se": null, "ra": null, "rl": null}, "evaluated": ["2026-10-16", "2026-10-16"], "rollouts": "gpt_policy_argon", "partial": null, "scale": {"tasks": 10, "episodes": 112}, "mean": {"v": 55.9, "pm": 9.0}, "suites": {"se": {"v": 77.1, "pm": 11.9}, "ra": {"v": 40.6, "pm": 17.0}, "rl": {"v": 50.0, "pm": 17.3}}, "progress": {"mean": 74.2, "se": 92.1, "ra": 65.6, "rl": 64.8}, "cost_ep": 0.7843, "cost_succ": 1.331}, {"name": "GPT-Policy", "group": "tool", "type": "Agent", "vlm": "Claude Opus 5.5", "policy": "", "inputs": "RGB, depth, camera calibration", "calls": {"se": 53.7, "ra": 44.6, "rl": 90.9}, "cost_note": null, "liteOnly": true, "ranked": true, "cost": {"se": null, "ra": null, "rl": null}, "evaluated": ["2026-10-15", "2026-10-15"], "rollouts": "gpt_policy_opus55", "partial": null, "scale": {"tasks": 10, "episodes": 112}, "mean": {"v": 49.0, "pm": 8.8}, "suites": {"se": {"v": 62.5, "pm": 13.7}, "ra": {"v": 25.0, "pm": 15.0}, "rl": {"v": 59.4, "pm": 17.0}}, "progress": {"mean": 65.6, "se": 86.2, "ra": 45.8, "rl": 64.8}, "cost_ep": 3.5752, "cost_succ": 7.024}, {"name": "Privileged verifier", "group": "ref", "vlm": "", "evaluated": ["2026-09-12", "2026-09-14"], "rollouts": "privileged_verifier", "scale": {"tasks": 10, "episodes": 112}, "policy": "Bridge / &pi;<sub>0.5<\/sub>", "inputs": "RGB, ground-truth simulator state", "mean": {"v": 27.4, "pm": 8.4}, "suites": {"se": {"v": 29.2, "pm": 12.9}, "ra": {"v": 21.9, "pm": 14.3}, "rl": {"v": 31.2, "pm": 16.1}}, "pooled": {"v": 29.6, "pm": 2.0}, "progress": {"mean": 50.9, "se": 57.5, "ra": 35.4, "rl": 59.7}, "calls": {"se": 0.0, "ra": 0.0, "rl": 0.0}, "cost": {"se": 0.0, "ra": 0.0, "rl": 0.0}, "cost_ep": 0.0, "cost_succ": 0.0, "type": "Reference"}], "tasks": {"se": ["relay7e", "split3"], "ra": ["scene36_1goal", "scene45_6goal", "scene54_split_3", "scene76_2goal"], "rl": ["comp_ordered_bin_4", "comp_relay_3", "comp_route_10", "comp_transfer_2"]}, "episodes": {"se": 48, "ra": 32, "rl": 32}, "subgoals": [1, 10]}, "rollouts_url": "https://huggingface.co/datasets/INSAIT-Institute/LADDER-Evaluation-Episodes", "rollouts_suites": {"rl": "robolab_long", "se": "simplerenv_long", "ra": "robotarena_long"}}</script>
+  </div>
+</section>
+
+
+<section class="section shade" id="cost">
+  <div class="container is-max-widescreen">
+    <h2 class="title is-3 has-text-centered">Success vs cost</h2><p class="section-subtitle">Each dot is one AI model. Higher means it finishes more tasks. Further right means it costs more. Models marked Lite are scored on the 10 LADDER-Lite tasks.</p>
+    
+    <div class="cost-home" id="cost-chart"></div>
+    <div class="findings cost-findings">
+      <div class="finding"><p class="finding-head">Success comes at a price</p>
+        <p class="finding-text">GPT-6 Astra costs <b>$6.49</b> per finished task,
+        20 times more than Gemini 3.7 Flash via PSP-Agent, which
+        finishes 42.8% of the tasks.</p></div>
+      <div class="finding"><p class="finding-head">New models on LADDER-Lite</p><p class="finding-text">On LADDER-Lite, Gemini 4 Argon finishes <b>55.9%</b> at $1.33 per finished task; Claude Opus 5.5 finishes <b>49.0%</b> at $7.02 per finished task. GPT-6 Astra finishes 62.5% at $6.62.</p></div>
+    </div>
+  </div>
+</section>
+<section class="section promo-section" id="video" aria-label="LADDER video">
+  <div class="container is-max-widescreen">
+    <video class="promo-video" src="static/videos/gallery/ladder_promo_v26.mp4" data-poster="static/videos/gallery/ladder_promo_v26.jpg"
+      controls muted playsinline preload="none" width="1920" height="1080"></video>
+  </div>
+</section>
+
+<section class="section" id="why">
+  <div class="container is-max-widescreen">
+    <h2 class="title is-3 has-text-centered">Why this matters</h2>
+    
+    <div class="columns is-vcentered easy">
+      <div class="column is-6"><div class="vid"><video class="teaser-clip" src="static/videos/gallery/horizon_robolab_gpt_policy_10_a9689ff2d4.mp4" data-poster="static/videos/gallery/horizon_robolab_gpt_policy_10_a9689ff2d4.jpg" style="aspect-ratio: 640 / 360" muted loop playsinline preload="none" data-autoplay></video><span class="speed-badge">2&times; speed</span></div>
+        <p class="easy-caption">&ldquo;Put the banana, both oranges, the lemon, the lime, the avocado, the onion, the lychee, the pumpkin and the pomegranate in the bin&rdquo;</p></div>
+      <div class="column is-6 easy-text">
+        <p class="easy-lead">Looks easy? Not for robots.</p>
+        <p>Putting ten fruits and vegetables in a bin is child&rsquo;s play for a person. For a robot it is still very
+        hard: it has to find each object, pick it up, carry it and put it down, ten times in a row, without a single mistake.</p>
+        <p>Robots that can reliably handle everyday objects are one of the biggest unsolved challenges in AI. LADDER
+        measures how far today&rsquo;s best AI models have come.</p>
+        <div class="easy-stats">
+          <div><span class="easy-head">Far from solved</span><span>The best AI model we tested finishes <b>63.3%</b> of the tasks.</span></div>
+          <div><span class="easy-head">Longer is harder</span><span>With 8 to 10 objects to move, it finishes <b>34.8%</b>.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section shade" id="how">
+  <div class="container is-max-widescreen">
+    <h2 class="title is-3 has-text-centered">How LADDER works</h2>
+    
+    <div class="pair-card">
+      <div class="pair-grid">
+        <div class="pair-col"><p class="pair-head"><b>Short task</b> &middot; 3 objects</p>
+          <div class="vid"><video class="pair-clip" src="static/videos/gallery/pair_short_robolab.mp4" data-poster="static/videos/gallery/pair_short_robolab.jpg" style="aspect-ratio: 640 / 360" muted loop playsinline preload="none" data-autoplay></video><span class="speed-badge">4&times; speed</span></div><p class="pair-quote">&ldquo;Put the lemon and the lime on the plate and put the orange in the bin&rdquo;</p></div>
+        <div class="pair-col"><p class="pair-head"><b>Long task</b> &middot; 9 objects</p>
+          <div class="vid"><video class="pair-clip" src="static/videos/gallery/pair_long_robolab.mp4" data-poster="static/videos/gallery/pair_long_robolab.jpg" style="aspect-ratio: 640 / 360" muted loop playsinline preload="none" data-autoplay></video><span class="speed-badge">4&times; speed</span></div><p class="pair-quote">&ldquo;Put the banana, the lemon and the lime on the plate and put both oranges, the avocado, the onion, the lychee and the pumpkin in the bin&rdquo;</p></div>
+      </div>
+      <p class="pair-text">The same table and the same two containers. The long task only adds more objects to sort, so any
+      drop in success comes from the length alone. One slip anywhere and the whole task fails. Both clips are
+      GPT-Policy, the best system we tested.</p>
+    </div>
+    <div class="columns home-how how-small">
+      <div class="column is-half">
+        <div class="how-card how-row">
+          <div class="how-icon"><svg class="fa-icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M61.77 401l17.5-20.15a19.92 19.92 0 0 0 5.07-14.19v-3.31C84.34 356 80.5 352 73 352H16a8 8 0 0 0-8 8v16a8 8 0 0 0 8 8h22.83a157.41 157.41 0 0 0-11 12.31l-5.61 7c-4 5.07-5.25 10.13-2.8 14.88l1.05 1.93c3 5.76 6.29 7.88 12.25 7.88h4.73c10.33 0 15.94 2.44 15.94 9.09 0 4.72-4.2 8.22-14.36 8.22a41.54 41.54 0 0 1-15.47-3.12c-6.49-3.88-11.74-3.5-15.6 3.12l-5.59 9.31c-3.72 6.13-3.19 11.72 2.63 15.94 7.71 4.69 20.38 9.44 37 9.44 34.16 0 48.5-22.75 48.5-44.12-.03-14.38-9.12-29.76-28.73-34.88zM496 224H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zm0-160H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16V80a16 16 0 0 0-16-16zm0 320H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zM16 160h64a8 8 0 0 0 8-8v-16a8 8 0 0 0-8-8H64V40a8 8 0 0 0-8-8H32a8 8 0 0 0-7.14 4.42l-8 16A8 8 0 0 0 24 64h8v64H16a8 8 0 0 0-8 8v16a8 8 0 0 0 8 8zm-3.91 160H80a8 8 0 0 0 8-8v-16a8 8 0 0 0-8-8H41.32c3.29-10.29 48.34-18.68 48.34-56.44 0-29.06-25-39.56-44.47-39.56-21.36 0-33.8 10-40.46 18.75-4.37 5.59-3 10.84 2.8 15.37l8.58 6.88c5.61 4.56 11 2.47 16.12-2.44a13.44 13.44 0 0 1 9.46-3.84c3.33 0 9.28 1.56 9.28 8.75C51 248.19 0 257.31 0 304.59v4C0 316 5.08 320 12.09 320z"/></svg></div>
+          <div><p class="how-title">145 everyday tasks</p>
+          <p class="how-text">From 1 to 10 objects: putting things on a plate or in a bin, in a set order, moving them from one
+          place to another, or leaving some where they are.</p></div>
+        </div>
+      </div>
+      <div class="column is-half">
+        <div class="how-card how-row">
+          <div class="how-icon"><svg class="fa-icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M505 174.8l-39.6-39.6c-9.4-9.4-24.6-9.4-33.9 0L192 374.7 80.6 263.2c-9.4-9.4-24.6-9.4-33.9 0L7 302.9c-9.4 9.4-9.4 24.6 0 34L175 505c9.4 9.4 24.6 9.4 33.9 0l296-296.2c9.4-9.5 9.4-24.7.1-34zm-324.3 106c6.2 6.3 16.4 6.3 22.6 0l208-208.2c6.2-6.3 6.2-16.4 0-22.6L366.1 4.7c-6.2-6.3-16.4-6.3-22.6 0L192 156.2l-55.4-55.5c-6.2-6.3-16.4-6.3-22.6 0L68.7 146c-6.2 6.3-6.2 16.4 0 22.6l112 112.2z"/></svg></div>
+          <div><p class="how-title">Checked automatically</p>
+          <p class="how-text">Every task runs in a robot simulator that checks where each object ends up. A task only counts when
+          everything is in the right place.</p></div>
+        </div>
+      </div>
+    </div><div class="len-box" data-len="len"><p class="len-title">The longer the task, the more often robots fail</p><div class="len-plot"><svg viewBox="0 0 1100 440" class="len-chart" role="img" aria-label="The longer the task, the more often robots fail"><line x1="72" x2="1070" y1="392.0" y2="392.0" class="len-grid"/><text x="64" y="397.25" text-anchor="end">0%</text><line x1="72" x2="1070" y1="298.0" y2="298.0" class="len-grid"/><text x="64" y="303.25" text-anchor="end">25%</text><line x1="72" x2="1070" y1="204.0" y2="204.0" class="len-grid"/><text x="64" y="209.25" text-anchor="end">50%</text><line x1="72" x2="1070" y1="110.0" y2="110.0" class="len-grid"/><text x="64" y="115.25" text-anchor="end">75%</text><line x1="72" x2="1070" y1="16.0" y2="16.0" class="len-grid"/><text x="64" y="21.25" text-anchor="end">100%</text><text x="72.0" y="414.5" text-anchor="middle">1</text><text x="321.5" y="414.5" text-anchor="middle">2&#8211;3</text><text x="571.0" y="414.5" text-anchor="middle">4&#8211;5</text><text x="820.5" y="414.5" text-anchor="middle">6&#8211;7</text><text x="1070.0" y="414.5" text-anchor="middle">8&#8211;10</text><text x="571.0" y="436" text-anchor="middle" class="len-axis">objects to move in one task</text><polyline points="72.0,46.1 321.5,79.2 571.0,156.6 820.5,226.2 1070.0,261.2" fill="none" stroke="#e63e3e" stroke-width="3.5" stroke-linejoin="round"/><polyline points="72.0,87.8 321.5,152.9 571.0,240.5 820.5,301.8 1070.0,358.5" fill="none" stroke="#16a34a" stroke-width="3.5" stroke-linejoin="round"/><polyline points="72.0,91.6 321.5,220.5 571.0,339.0 820.5,372.4 1070.0,384.9" fill="none" stroke="#e08a1e" stroke-width="3.5" stroke-linejoin="round"/><polyline points="72.0,64.1 321.5,312.7 571.0,378.8 820.5,383.4 1070.0,389.0" fill="none" stroke="#9aa0aa" stroke-width="3.5" stroke-linejoin="round"/></svg><div class="len-tip" hidden></div></div><div class="len-legend"><button type="button" class="len-key" data-id="GPT-Policy" aria-pressed="true"><i style="background:#e63e3e"></i>GPT-6 Astra (GPT-Policy)</button><button type="button" class="len-key" data-id="PSP-Agent" aria-pressed="true"><i style="background:#16a34a"></i>Gemini 3.7 Flash (PSP-Agent)</button><button type="button" class="len-key is-off" data-id="Privileged verifier" aria-pressed="false"><i style="background:#111827"></i>Privileged verifier (reference)</button><button type="button" class="len-key is-off" data-id="VoLo" aria-pressed="false"><i style="background:#a855f7"></i>VoLo</button><button type="button" class="len-key" data-id="Proprioceptive verifier" aria-pressed="true"><i style="background:#e08a1e"></i>Proprioceptive verifier</button><button type="button" class="len-key is-off" data-id="Proprioceptive trigger" aria-pressed="false"><i style="background:#0ea5e9"></i>Proprioceptive trigger</button><button type="button" class="len-key is-off" data-id="CaP-X" aria-pressed="false"><i style="background:#0f766e"></i>CaP-X</button><button type="button" class="len-key is-off" data-id="Periodic trigger" aria-pressed="false"><i style="background:#94a3b8"></i>Periodic trigger</button><button type="button" class="len-key" data-id="Low-level policy" aria-pressed="true"><i style="background:#9aa0aa"></i>Robotics-only model</button><button type="button" class="len-key is-off" data-id="TiPToP" aria-pressed="false"><i style="background:#a16207"></i>TiPToP</button></div><p class="len-note">Share of tasks finished, the three simulators weighed equally. Hover the chart to read the values. Click a name to show or hide it.</p><script type="application/json" class="len-data">{"groups": ["1", "2–3", "4–5", "6–7", "8–10"], "axis": "objects to move in one task", "series": [{"id": "GPT-Policy", "name": "GPT-6 Astra (GPT-Policy)", "colour": "#e63e3e", "on": true, "ref": false, "values": [92.0, 83.2, 62.6, 44.1, 34.8]}, {"id": "PSP-Agent", "name": "Gemini 3.7 Flash (PSP-Agent)", "colour": "#16a34a", "on": true, "ref": false, "values": [80.9, 63.6, 40.3, 24.0, 8.9]}, {"id": "Privileged verifier", "name": "Privileged verifier (reference)", "colour": "#111827", "on": false, "ref": true, "values": [80.6, 52.9, 21.6, 7.4, 4.6]}, {"id": "VoLo", "name": "VoLo", "colour": "#a855f7", "on": false, "ref": false, "values": [79.2, 47.1, 15.1, 6.0, 1.9]}, {"id": "Proprioceptive verifier", "name": "Proprioceptive verifier", "colour": "#e08a1e", "on": true, "ref": false, "values": [79.9, 45.6, 14.1, 5.2, 1.9]}, {"id": "Proprioceptive trigger", "name": "Proprioceptive trigger", "colour": "#0ea5e9", "on": false, "ref": false, "values": [82.6, 42.4, 11.7, 3.7, 0.1]}, {"id": "CaP-X", "name": "CaP-X", "colour": "#0f766e", "on": false, "ref": false, "values": [69.8, 37.7, 16.4, 6.7, 2.9]}, {"id": "Periodic trigger", "name": "Periodic trigger", "colour": "#94a3b8", "on": false, "ref": false, "values": [84.7, 37.0, 6.5, 3.2, 1.5]}, {"id": "Low-level policy", "name": "Robotics-only model", "colour": "#9aa0aa", "on": true, "ref": false, "values": [87.2, 21.1, 3.5, 2.3, 0.8]}, {"id": "TiPToP", "name": "TiPToP", "colour": "#a16207", "on": false, "ref": false, "values": [60.8, 22.0, 3.9, 0.9, 0.0]}]}</script></div>
+  </div>
+</section>
+
+<section class="section" id="real">
+  <div class="container is-max-widescreen">
+    <h2 class="title is-3 has-text-centered">Simulation matches the real world</h2><p class="section-subtitle">We ran the same kinds of tasks on two real robots. The models rank in the same order as in simulation.</p>
+    
+    <div class="columns is-vcentered real-home">
+      <div class="column is-5"><div class="vid"><video class="teaser-clip" src="static/videos/gallery/franka_4_5c66bbd7ad.mp4" data-poster="static/videos/gallery/franka_4_5c66bbd7ad.jpg" style="aspect-ratio: 640 / 480" muted loop playsinline preload="none" data-autoplay></video><span class="speed-badge">2&times; speed</span></div>
+        <p class="how-quote">&ldquo;First put the blue cup in the bowl, then put the carrot in the bowl, then put the eggplant in the bowl&rdquo;</p>
+        <p class="easy-caption real-cap">A real Franka robot in our lab, controlled by Gemini 3.7 Flash via PSP-Agent.</p></div>
+      <div class="column is-7"><div class="real-box"><svg viewBox="0 0 660 340" class="real-chart for-wide" style="font-size:13px" role="img" aria-label="Task success in simulation and on real robots"><line x1="62" x2="650" y1="280.0" y2="280.0" class="len-grid"/><text x="56" y="284.55" text-anchor="end">0%</text><line x1="62" x2="650" y1="217.5" y2="217.5" class="len-grid"/><text x="56" y="222.05" text-anchor="end">25%</text><line x1="62" x2="650" y1="155.0" y2="155.0" class="len-grid"/><text x="56" y="159.55" text-anchor="end">50%</text><line x1="62" x2="650" y1="92.5" y2="92.5" class="len-grid"/><text x="56" y="97.05" text-anchor="end">75%</text><line x1="62" x2="650" y1="30.0" y2="30.0" class="len-grid"/><text x="56" y="34.55" text-anchor="end">100%</text><g class="tip-target" data-tip="{&quot;h&quot;: &quot;Franka, simulation&quot;, &quot;r&quot;: [[&quot;#9aa0aa&quot;, &quot;Robotics-only model&quot;, &quot;19.6%&quot;]]}" tabindex="0"><rect x="79.6" y="30" width="37.2" height="250.0" class="tip-hit"/><rect x="79.6" y="231.0" width="32.0" height="49.0" rx="3" fill="#9aa0aa"/></g><g class="tip-target" data-tip="{&quot;h&quot;: &quot;Franka, simulation&quot;, &quot;r&quot;: [[&quot;#e08a1e&quot;, &quot;Proprioceptive verifier&quot;, &quot;25.6%&quot;]]}" tabindex="0"><rect x="116.9" y="30" width="37.2" height="250.0" class="tip-hit"/><rect x="116.9" y="216.0" width="32.0" height="64.0" rx="3" fill="#e08a1e"/></g><g class="tip-target" data-tip="{&quot;h&quot;: &quot;Franka, simulation&quot;, &quot;r&quot;: [[&quot;#16a34a&quot;, &quot;Gemini 3.7 Flash via PSP-Agent&quot;, &quot;51.4%&quot;]]}" tabindex="0"><rect x="154.1" y="30" width="37.2" height="250.0" class="tip-hit"/><rect x="154.1" y="151.5" width="32.0" height="128.5" rx="3" fill="#16a34a"/></g><text x="135.5" y="296.9" text-anchor="middle" class="real-x">Simulation</text><g class="tip-target" data-tip="{&quot;h&quot;: &quot;Franka, real robot&quot;, &quot;r&quot;: [[&quot;#9aa0aa&quot;, &quot;Robotics-only model&quot;, &quot;5.6% (2 of 36 episodes)&quot;]]}" tabindex="0"><rect x="226.6" y="30" width="37.2" height="250.0" class="tip-hit"/><rect x="226.6" y="266.1" width="32.0" height="13.9" rx="3" fill="#9aa0aa"/></g><g class="tip-target" data-tip="{&quot;h&quot;: &quot;Franka, real robot&quot;, &quot;r&quot;: [[&quot;#e08a1e&quot;, &quot;Proprioceptive verifier&quot;, &quot;58.3% (21 of 36 episodes)&quot;]]}" tabindex="0"><rect x="263.9" y="30" width="37.2" height="250.0" class="tip-hit"/><rect x="263.9" y="134.2" width="32.0" height="145.8" rx="3" fill="#e08a1e"/></g><g class="tip-target" data-tip="{&quot;h&quot;: &quot;Franka, real robot&quot;, &quot;r&quot;: [[&quot;#16a34a&quot;, &quot;Gemini 3.7 Flash via PSP-Agent&quot;, &quot;75.0% (27 of 36 episodes)&quot;]]}" tabindex="0"><rect x="301.1" y="30" width="37.2" height="250.0" class="tip-hit"/><rect x="301.1" y="92.5" width="32.0" height="187.5" rx="3" fill="#16a34a"/></g><text x="282.5" y="296.9" text-anchor="middle" class="real-x">Real</text><g class="tip-target" data-tip="{&quot;h&quot;: &quot;WidowX, simulation&quot;, &quot;r&quot;: [[&quot;#9aa0aa&quot;, &quot;Robotics-only model&quot;, &quot;9.8%&quot;]]}" tabindex="0"><rect x="373.6" y="30" width="37.2" height="250.0" class="tip-hit"/><rect x="373.6" y="255.5" width="32.0" height="24.5" rx="3" fill="#9aa0aa"/></g><g class="tip-target" data-tip="{&quot;h&quot;: &quot;WidowX, simulation&quot;, &quot;r&quot;: [[&quot;#e08a1e&quot;, &quot;Proprioceptive verifier&quot;, &quot;24.7%&quot;]]}" tabindex="0"><rect x="410.9" y="30" width="37.2" height="250.0" class="tip-hit"/><rect x="410.9" y="218.2" width="32.0" height="61.8" rx="3" fill="#e08a1e"/></g><g class="tip-target" data-tip="{&quot;h&quot;: &quot;WidowX, simulation&quot;, &quot;r&quot;: [[&quot;#16a34a&quot;, &quot;Gemini 3.7 Flash via PSP-Agent&quot;, &quot;38.5%&quot;]]}" tabindex="0"><rect x="448.1" y="30" width="37.2" height="250.0" class="tip-hit"/><rect x="448.1" y="183.8" width="32.0" height="96.2" rx="3" fill="#16a34a"/></g><text x="429.5" y="296.9" text-anchor="middle" class="real-x">Simulation</text><g class="tip-target" data-tip="{&quot;h&quot;: &quot;WidowX, real robot&quot;, &quot;r&quot;: [[&quot;#9aa0aa&quot;, &quot;Robotics-only model&quot;, &quot;15.7% (17 of 108 episodes)&quot;]]}" tabindex="0"><rect x="520.6" y="30" width="37.2" height="250.0" class="tip-hit"/><rect x="520.6" y="240.6" width="32.0" height="39.4" rx="3" fill="#9aa0aa"/></g><g class="tip-target" data-tip="{&quot;h&quot;: &quot;WidowX, real robot&quot;, &quot;r&quot;: [[&quot;#e08a1e&quot;, &quot;Proprioceptive verifier&quot;, &quot;40.7% (44 of 108 episodes)&quot;]]}" tabindex="0"><rect x="557.9" y="30" width="37.2" height="250.0" class="tip-hit"/><rect x="557.9" y="178.1" width="32.0" height="101.9" rx="3" fill="#e08a1e"/></g><g class="tip-target" data-tip="{&quot;h&quot;: &quot;WidowX, real robot&quot;, &quot;r&quot;: [[&quot;#16a34a&quot;, &quot;Gemini 3.7 Flash via PSP-Agent&quot;, &quot;81.5% (88 of 108 episodes)&quot;]]}" tabindex="0"><rect x="595.1" y="30" width="37.2" height="250.0" class="tip-hit"/><rect x="595.1" y="76.3" width="32.0" height="203.7" rx="3" fill="#16a34a"/></g><text x="576.5" y="296.9" text-anchor="middle" class="real-x">Real</text><text x="209.0" y="316.4" text-anchor="middle" class="real-robot">Franka</text><text x="503.0" y="316.4" text-anchor="middle" class="real-robot">WidowX</text><line x1="356.0" x2="356.0" y1="20" y2="336" class="real-sep"/></svg><svg viewBox="0 0 400 320" class="real-chart for-phone" style="font-size:14px" role="img" aria-label="Task success in simulation and on real robots"><line x1="46" x2="394" y1="262.0" y2="262.0" class="len-grid"/><text x="40" y="266.9" text-anchor="end">0%</text><line x1="46" x2="394" y1="201.5" y2="201.5" class="len-grid"/><text x="40" y="206.4" text-anchor="end">25%</text><line x1="46" x2="394" y1="141.0" y2="141.0" class="len-grid"/><text x="40" y="145.9" text-anchor="end">50%</text><line x1="46" x2="394" y1="80.5" y2="80.5" class="len-grid"/><text x="40" y="85.4" text-anchor="end">75%</text><line x1="46" x2="394" y1="20.0" y2="20.0" class="len-grid"/><text x="40" y="24.9" text-anchor="end">100%</text><g class="tip-target" data-tip="{&quot;h&quot;: &quot;Franka, simulation&quot;, &quot;r&quot;: [[&quot;#9aa0aa&quot;, &quot;Robotics-only model&quot;, &quot;19.6%&quot;]]}" tabindex="0"><rect x="56.4" y="20" width="22.0" height="242.0" class="tip-hit"/><rect x="56.4" y="214.6" width="19.0" height="47.4" rx="3" fill="#9aa0aa"/></g><g class="tip-target" data-tip="{&quot;h&quot;: &quot;Franka, simulation&quot;, &quot;r&quot;: [[&quot;#e08a1e&quot;, &quot;Proprioceptive verifier&quot;, &quot;25.6%&quot;]]}" tabindex="0"><rect x="78.5" y="20" width="22.0" height="242.0" class="tip-hit"/><rect x="78.5" y="200.0" width="19.0" height="62.0" rx="3" fill="#e08a1e"/></g><g class="tip-target" data-tip="{&quot;h&quot;: &quot;Franka, simulation&quot;, &quot;r&quot;: [[&quot;#16a34a&quot;, &quot;Gemini 3.7 Flash via PSP-Agent&quot;, &quot;51.4%&quot;]]}" tabindex="0"><rect x="100.5" y="20" width="22.0" height="242.0" class="tip-hit"/><rect x="100.5" y="137.6" width="19.0" height="124.4" rx="3" fill="#16a34a"/></g><text x="89.5" y="280.2" text-anchor="middle" class="real-x">Simulation</text><g class="tip-target" data-tip="{&quot;h&quot;: &quot;Franka, real robot&quot;, &quot;r&quot;: [[&quot;#9aa0aa&quot;, &quot;Robotics-only model&quot;, &quot;5.6% (2 of 36 episodes)&quot;]]}" tabindex="0"><rect x="143.4" y="20" width="22.0" height="242.0" class="tip-hit"/><rect x="143.4" y="248.6" width="19.0" height="13.4" rx="3" fill="#9aa0aa"/></g><g class="tip-target" data-tip="{&quot;h&quot;: &quot;Franka, real robot&quot;, &quot;r&quot;: [[&quot;#e08a1e&quot;, &quot;Proprioceptive verifier&quot;, &quot;58.3% (21 of 36 episodes)&quot;]]}" tabindex="0"><rect x="165.5" y="20" width="22.0" height="242.0" class="tip-hit"/><rect x="165.5" y="120.8" width="19.0" height="141.2" rx="3" fill="#e08a1e"/></g><g class="tip-target" data-tip="{&quot;h&quot;: &quot;Franka, real robot&quot;, &quot;r&quot;: [[&quot;#16a34a&quot;, &quot;Gemini 3.7 Flash via PSP-Agent&quot;, &quot;75.0% (27 of 36 episodes)&quot;]]}" tabindex="0"><rect x="187.5" y="20" width="22.0" height="242.0" class="tip-hit"/><rect x="187.5" y="80.5" width="19.0" height="181.5" rx="3" fill="#16a34a"/></g><text x="176.5" y="280.2" text-anchor="middle" class="real-x">Real</text><g class="tip-target" data-tip="{&quot;h&quot;: &quot;WidowX, simulation&quot;, &quot;r&quot;: [[&quot;#9aa0aa&quot;, &quot;Robotics-only model&quot;, &quot;9.8%&quot;]]}" tabindex="0"><rect x="230.4" y="20" width="22.0" height="242.0" class="tip-hit"/><rect x="230.4" y="238.3" width="19.0" height="23.7" rx="3" fill="#9aa0aa"/></g><g class="tip-target" data-tip="{&quot;h&quot;: &quot;WidowX, simulation&quot;, &quot;r&quot;: [[&quot;#e08a1e&quot;, &quot;Proprioceptive verifier&quot;, &quot;24.7%&quot;]]}" tabindex="0"><rect x="252.5" y="20" width="22.0" height="242.0" class="tip-hit"/><rect x="252.5" y="202.2" width="19.0" height="59.8" rx="3" fill="#e08a1e"/></g><g class="tip-target" data-tip="{&quot;h&quot;: &quot;WidowX, simulation&quot;, &quot;r&quot;: [[&quot;#16a34a&quot;, &quot;Gemini 3.7 Flash via PSP-Agent&quot;, &quot;38.5%&quot;]]}" tabindex="0"><rect x="274.5" y="20" width="22.0" height="242.0" class="tip-hit"/><rect x="274.5" y="168.8" width="19.0" height="93.2" rx="3" fill="#16a34a"/></g><text x="263.5" y="280.2" text-anchor="middle" class="real-x">Simulation</text><g class="tip-target" data-tip="{&quot;h&quot;: &quot;WidowX, real robot&quot;, &quot;r&quot;: [[&quot;#9aa0aa&quot;, &quot;Robotics-only model&quot;, &quot;15.7% (17 of 108 episodes)&quot;]]}" tabindex="0"><rect x="317.4" y="20" width="22.0" height="242.0" class="tip-hit"/><rect x="317.4" y="223.9" width="19.0" height="38.1" rx="3" fill="#9aa0aa"/></g><g class="tip-target" data-tip="{&quot;h&quot;: &quot;WidowX, real robot&quot;, &quot;r&quot;: [[&quot;#e08a1e&quot;, &quot;Proprioceptive verifier&quot;, &quot;40.7% (44 of 108 episodes)&quot;]]}" tabindex="0"><rect x="339.5" y="20" width="22.0" height="242.0" class="tip-hit"/><rect x="339.5" y="163.4" width="19.0" height="98.6" rx="3" fill="#e08a1e"/></g><g class="tip-target" data-tip="{&quot;h&quot;: &quot;WidowX, real robot&quot;, &quot;r&quot;: [[&quot;#16a34a&quot;, &quot;Gemini 3.7 Flash via PSP-Agent&quot;, &quot;81.5% (88 of 108 episodes)&quot;]]}" tabindex="0"><rect x="361.5" y="20" width="22.0" height="242.0" class="tip-hit"/><rect x="361.5" y="64.8" width="19.0" height="197.2" rx="3" fill="#16a34a"/></g><text x="350.5" y="280.2" text-anchor="middle" class="real-x">Real</text><text x="133.0" y="301.2" text-anchor="middle" class="real-robot">Franka</text><text x="307.0" y="301.2" text-anchor="middle" class="real-robot">WidowX</text><line x1="220.0" x2="220.0" y1="10" y2="316" class="real-sep"/></svg><div class="len-legend"><span><i style="background:#9aa0aa"></i>Robotics-only model</span><span><i style="background:#e08a1e"></i>Proprioceptive verifier</span><span><i style="background:#16a34a"></i>Gemini 3.7 Flash via PSP-Agent</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="get-involved">
+  <div class="container is-max-widescreen">
+    <h2 class="title is-3 has-text-centered">Get involved</h2>
+    
+    <div class="columns home-links">
+      <div class="column is-half">
+        <a class="home-link" href="https://github.com/insait-institute/ladder/blob/main/leaderboard/README.md" target="_blank" rel="noopener">
+          <span class="resource-icon"><svg class="fa-icon" viewBox="0 0 576 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M552 64H448V24c0-13.3-10.7-24-24-24H152c-13.3 0-24 10.7-24 24v40H24C10.7 64 0 74.7 0 88v56c0 35.7 22.5 72.4 61.9 100.7 31.5 22.7 69.8 37.1 110 41.7C203.3 338.5 240 360 240 360v72h-48c-35.3 0-64 20.7-64 56v12c0 6.6 5.4 12 12 12h296c6.6 0 12-5.4 12-12v-12c0-35.3-28.7-56-64-56h-48v-72s36.7-21.5 68.1-73.6c40.3-4.6 78.6-19 110-41.7 39.3-28.3 61.9-65 61.9-100.7V88c0-13.3-10.7-24-24-24zM99.3 192.8C74.9 175.2 64 155.6 64 144v-16h64.2c1 32.6 5.8 61.2 12.8 86.2-15.1-5.2-29.2-12.4-41.7-21.4zM512 144c0 16.1-17.7 36.1-35.3 48.8-12.5 9-26.7 16.2-41.8 21.4 7-25 11.8-53.6 12.8-86.2H512v16z"/></svg></span>
+          <span class="home-link-title">Add your model to the leaderboard</span>
+          <span class="home-link-text">Run the tasks with our free code and send us the results. We check every score.</span>
+        </a>
+      </div>
+      <div class="column is-half">
+        <a class="home-link" href="research">
+          <span class="resource-icon"><svg class="fa-icon" viewBox="0 0 576 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M542.22 32.05c-54.8 3.11-163.72 14.43-230.96 55.59-4.64 2.84-7.27 7.89-7.27 13.17v363.87c0 11.55 12.63 18.85 23.28 13.49 69.18-34.82 169.23-44.32 218.7-46.92 16.89-.89 30.02-14.43 30.02-30.66V62.75c.01-17.71-15.35-31.74-33.77-30.7zM264.73 87.64C197.5 46.48 88.58 35.17 33.78 32.05 15.36 31.01 0 45.04 0 62.75V400.6c0 16.24 13.13 29.78 30.02 30.66 49.49 2.6 149.59 12.11 218.77 46.95 10.62 5.35 23.21-1.94 23.21-13.46V100.63c0-5.29-2.62-10.14-7.27-12.99z"/></svg></span>
+          <span class="home-link-title">Want to learn more?</span>
+          <span class="home-link-text">Full results, the list of tasks, tests on real robots, every video, the paper and the code.</span>
+        </a>
+      </div>
+    </div>
+    <div class="publication-links resource-links"><span class="link-block"><a href="https://arxiv.org/abs/2610.18053" class="external-link button is-normal is-rounded is-dark" target="_blank" rel="noopener">
+                <span class="icon"><svg class="fa-icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M369.9 97.9L286 14C277 5 264.8-.1 252.1-.1H48C21.5 0 0 21.5 0 48v416c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V131.9c0-12.7-5.1-25-14.1-34zM332.1 128H256V51.9l76.1 76.1zM48 464V48h160v104c0 13.3 10.7 24 24 24h104v288H48zm250.2-143.7c-12.2-12-47-8.7-64.4-6.5-17.2-10.5-28.7-25-36.8-46.3 3.9-16.1 10.1-40.6 5.4-56-4.2-26.2-37.8-23.6-42.6-5.9-4.4 16.1-.4 38.5 7 67.1-10 23.9-24.9 56-35.4 74.4-20 10.3-47 26.2-51 46.2-3.3 15.8 26 55.2 76.1-31.2 22.4-7.4 46.8-16.5 68.4-20.1 18.9 10.2 41 17 55.8 17 25.5 0 28-28.2 17.5-38.7zm-198.1 77.8c5.1-13.7 24.5-29.5 30.4-35-19 30.3-30.4 35.7-30.4 35zm81.6-190.6c7.4 0 6.7 32.1 1.8 40.8-4.4-13.9-4.3-40.8-1.8-40.8zm-24.4 136.6c9.7-16.9 18-37 24.7-54.7 8.3 15.1 18.9 27.2 30.1 35.5-20.8 4.3-38.9 13.1-54.8 19.2zm131.6-5s-5 6-37.3-7.8c35.1-2.6 40.9 5.4 37.3 7.8z"/></svg></span><span>Paper</span></a></span>
+              <span class="link-block"><a href="https://github.com/insait-institute/ladder" class="external-link button is-normal is-rounded is-dark" target="_blank" rel="noopener">
+                <span class="icon"><svg class="fa-icon" viewBox="0 0 496 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span><span>Code</span></a></span>
+              <span class="link-block"><a href="https://huggingface.co/collections/INSAIT-Institute/ladder-6abbbddc46691080f5d954c8" class="external-link button is-normal is-rounded is-dark" target="_blank" rel="noopener">
+                <span class="icon"><img class="hf-logo" src="static/images/logos/huggingface.svg" alt=""></span><span>Hugging Face</span></a></span>
+      <span class="link-block"><a href="https://insait.ai/contact/" class="external-link button is-normal is-rounded is-dark" target="_blank" rel="noopener">
+        <span class="icon"><svg class="fa-icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M464 64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm0 48v40.805c-22.422 18.259-58.168 46.651-134.587 106.49-16.841 13.247-50.201 45.072-73.413 44.701-23.208.375-56.579-31.459-73.413-44.701C106.18 199.465 70.425 171.067 48 152.805V112h416zM48 400V214.398c22.914 18.251 55.409 43.862 104.938 82.646 21.857 17.205 60.134 55.186 103.062 54.955 42.717.231 80.509-37.199 103.053-54.947 49.528-38.783 82.032-64.401 104.947-82.653V400H48z"/></svg></span><span>Contact</span></a></span></div>
+  </div>
+</section>
+
+<section class="section shade" id="team">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Team</h2>
+    
+    <div class="has-text-centered team">
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Petko Petkov<sup>1</sup></span>,
+            <span class="author-block">Giuliano Albanese<sup>1</sup></span>,
+            <span class="author-block">Nikolay Nikolov<sup>1</sup></span>,
+            <span class="author-block">Luc Van Gool<sup>1</sup></span>,
+            <span class="author-block">Jonathan Tremblay<sup>2,&dagger;</sup></span>,
+            <span class="author-block">Danda Pani Paudel<sup>1,&dagger;</sup></span>
+          </div>
+          <div class="is-size-6 publication-authors">
+            <span class="author-block"><sup>1</sup><a href="https://insait.ai" target="_blank" rel="noopener">Institute for Computer Science, Artificial Intelligence and Technology</a></span>
+            <span class="author-block"><sup>2</sup><a href="https://www.nvidia.com" target="_blank" rel="noopener">NVIDIA</a></span>
+            <span class="author-block"><sup>&dagger;</sup>Equal supervision</span>
+          </div>
+          <div class="affiliation-logos big">
+            <a href="https://insait.ai" target="_blank" rel="noopener"><img src="static/images/logos/insait.svg" alt="INSAIT"></a>
+            <a href="https://www.nvidia.com" target="_blank" rel="noopener"><img src="static/images/logos/nvidia.svg" alt="NVIDIA"></a>
+          </div>
+    </div>
+    <div class="cite"><p class="cite-title">Citation</p>
+    <div class="bibtex-box">
+      <button type="button" class="copy-btn" data-copy="cite-code" aria-label="Copy citation"><svg class="fa-icon" viewBox="0 0 448 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M433.941 65.941l-51.882-51.882A48 48 0 0 0 348.118 0H176c-26.51 0-48 21.49-48 48v48H48c-26.51 0-48 21.49-48 48v320c0 26.51 21.49 48 48 48h224c26.51 0 48-21.49 48-48v-48h80c26.51 0 48-21.49 48-48V99.882a48 48 0 0 0-14.059-33.941zM266 464H54a6 6 0 0 1-6-6V150a6 6 0 0 1 6-6h74v224c0 26.51 21.49 48 48 48h96v42a6 6 0 0 1-6 6zm128-96H182a6 6 0 0 1-6-6V54a6 6 0 0 1 6-6h106v88c0 13.255 10.745 24 24 24h88v202a6 6 0 0 1-6 6zm6-256h-64V48h9.632c1.591 0 3.117.632 4.243 1.757l48.368 48.368a6 6 0 0 1 1.757 4.243V112z"/></svg><span>Copy</span></button>
+      <pre class="bibtex"><code id="cite-code">@article{ladder2026,
+  title   = {{LADDER}: A Long-Horizon Robot Manipulation Benchmark},
+  author  = {Petkov, Petko and Albanese, Giuliano and Nikolov, Nikolay and Van Gool, Luc and Tremblay, Jonathan and Paudel, Danda Pani},
+  journal = {arXiv preprint arXiv:2610.18053},
+  year    = {2026},
+  url     = {https://arxiv.org/abs/2610.18053}
+}</code></pre>
+    </div></div>
+  </div>
+</section>
+</main>
+<!-- Website template adapted from Nerfies (https://github.com/nerfies/nerfies.github.io), licensed under CC BY-SA 4.0 (http://creativecommons.org/licenses/by-sa/4.0/). -->
+</body>
+</html>

@@ -1,0 +1,3 @@
+import: ../../../api/client/hlc/configs/vlm.yaml
+model: gemini-4-argon
+send_temperature: false
