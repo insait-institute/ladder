@@ -2,9 +2,8 @@
 # and weights. Split out of MODULE.bazel (include()d from there) to keep the module file readable
 # as these pins grew; same pattern as the pip-*.MODULE.bazel segments.
 #
-# Everything we may redistribute is on the repository's assets-v1 release, so the build downloads it
-# from one place. CUDA, the WidowX model and GPT-Policy are not licensed for redistribution and come
-# from upstream; each says so where it is pinned.
+# Everything comes from the repository's assets-v1 release, except the few archives that may not be
+# redistributed, which are marked where they are pinned.
 
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")

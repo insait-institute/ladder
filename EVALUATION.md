@@ -120,24 +120,6 @@ and those of the other methods in `models/{capx,tiptop,harness,gpt_policy}/confi
 
 ## Licenses of external components
 
-The build downloads these components. Each keeps its own license, and some allow non-commercial
-use only, so the full benchmark is for research and evaluation.
-
-- RoboLab: code under Apache-2.0, assets mostly under CC BY-NC-SA 4.0 (non-commercial).
-- RobotArena: code under MIT, scene data under CC BY 4.0.
-- SimplerEnv Bridge assets: MIT.
-- ManiSkill3, Genesis, openpi, VoLo, SAM 2: Apache-2.0.
-- SAPIEN's PhysX library and Isaac Lab: BSD-3-Clause.
-- cuTAMP, cuRobo, M2T2: the NVIDIA License (non-commercial).
-- SAM 3: the SAM License.
-- Isaac Sim and CUDA: NVIDIA's licenses.
-- GPT-Policy: no license. Its author publishes it for review and evaluation.
-
-Most components are on the
-[`assets-v1`](https://github.com/insait-institute/ladder/releases/tag/assets-v1) release, each
-archive with its license files. Isaac Sim, CUDA, the Python packages, the ManiSkill3 WidowX model
-and GPT-Policy are downloaded from their own sources, because they are not licensed for
-redistribution.
-
-The asset bundles hold the upstream files that the tasks load, unchanged, except for RoboLab's
-Franka robot model, whose physical properties are corrected (see `NOTICE` in the archive).
+The build downloads third-party code and assets, each under its own license, which is included
+in its archive. Some of them, such as RoboLab's assets, cuRobo, M2T2 and cuTAMP, allow
+non-commercial use only.

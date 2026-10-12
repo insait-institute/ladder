@@ -38,6 +38,6 @@ and server interfaces.
    publishes the GitHub Release with that changelog section and the source archive (plus its
    sha256).
 
-Files that the build downloads (simulation assets, vendored sources, weights) are attached to their own release (`assets-v1`)
+Files that the build downloads (simulation assets) are attached to their own release (`assets-v1`)
 and pinned by checksum. They are never replaced in place: a changed file gets a new tag, and the
 pins in `http-assets.MODULE.bazel` move to it in a pull request.
