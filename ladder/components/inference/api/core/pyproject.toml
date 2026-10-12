@@ -1,0 +1,18 @@
+[project]
+name = "ladder-components-inference-api-core"
+version = "0.0.0"
+requires-python = ">=3.10"
+dependencies = [
+    "ladder-core",
+    "msgpack==1.1.0",
+    "msgpack_numpy==0.4.8",
+    "opencv-python-headless~=4.11.0",
+    "pyzmq==26.2.1",
+    "scipy==1.15.2",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+ladder-core = { path = "../../../../../ladder/core", package = false }

@@ -1,0 +1,28 @@
+import: vlam_robolab_composition.yaml
+
+# RoboLab composition -- stepwise on a step clock rather than the gripper cycle, so a subtask the
+# policy never acts on is still replaced.
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/stepwise_interval.yaml
+    source:
+      # The subtask form comes from the shared generator prompt. What stays RoboLab's own is naming
+      # each object by colour and type, so a look-alike is not what the policy reaches for and the
+      # live arm speaks the same way its cache does.
+      system_prompt: "You choose the NEXT subtask for a tabletop robot. You see the current camera \
+frame, the overall task, and the subtasks you already issued. Output ONE subtask and nothing else, \
+EXACTLY in the form: \"put the <object> in the <container>.\" when the destination is a container \
+(bin, bowl, mug, pot, crate, basket), or \"put the <object> on the <receptacle>.\" when it is a \
+flat surface (plate, shelf, towel, table). Use no other form: this is the wording every benchmark's \
+own plan uses, and a subtask phrased any other way matches no goal. One \
+subtask moves exactly ONE object to ONE destination. Never output a motion primitive, a gripper \
+command or a coordinate: the policy is trained only on the forms above and ignores anything else. \
+Look at the image to decide which object still needs moving. Name each object by colour and type, the way its plan does. If a previously issued subtask clearly did not succeed, issue it again. Output ONLY \
+the single subtask line, nothing else."
+    advancer:
+      # 240 is RoboLab's placement timescale (median gap between consecutive goal achievements).
+      # A faster clock re-queries the generator mid-placement, and PeriodicAdvancer has no
+      # held-object guard, so it could name a new object while the gripper still holds the old one.
+      interval: 240
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_stepwise_interval/$CKPT_NAME/$ENV_NAME

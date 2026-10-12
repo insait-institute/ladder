@@ -1,0 +1,22 @@
+policy_config:
+  autoclass: ladder.components.inference.api.client.test.test_simpler_episode_runner.MockPolicy
+  translation_step: 0.01
+  gripper_action: 0.5
+
+runner_config:
+  autoclass: ladder.components.inference.api.client.simpler_episode_runner.SimplerEpisodeRunner
+  env_config:
+    ip: 127.0.0.1
+    port: 5556
+    raise_on_server_error: True
+    min_period: 0.0
+  recorder_config:
+    output_path: /tmp/simpler_episode_runner_test
+    fps: 5
+    rerun_enabled: False
+    video_enabled: False
+  instruction_override:
+    test_env:
+      - "pick up the red block"
+
+seed: 987654321

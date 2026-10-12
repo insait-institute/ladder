@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Page not found | LADDER</title>
+  <link rel="stylesheet" href="/static/fonts/fonts.css?v=8943be38d7">
+  <link rel="stylesheet" href="/static/css/bulma.min.css?v=a504e551c2">
+  <link rel="stylesheet" href="/static/css/index.css?v=1885f3ebe6">
+  <link rel="stylesheet" href="/static/css/site.css?v=2aeb6860d3">
+  <link rel="icon" href="/static/images/favicon.svg">
+  <script>
+    // near misses of a real page (trailing slash, .html, capitals, the old /details) go to that page
+    (function () {
+      var pages = {"": ["/", ""], "index": ["/", ""], "research": ["/research", ""], "details": ["/research", ""], "leaderboard": ["/", "#leaderboard"]};
+      var p = location.pathname.toLowerCase().replace(/\/+$/, "").replace(/\.html$/, "").replace(/^\/+/, "");
+      if (Object.prototype.hasOwnProperty.call(pages, p)) location.replace(pages[p][0] + location.search + (location.hash || pages[p][1]));
+    })();
+  </script>
+</head>
+<body>
+<nav class="topnav"><div class="topnav-inner"><a class="brand" href="/">LADDER</a></div></nav>
+<section class="section">
+  <div class="container is-max-desktop has-text-centered">
+    <h1 class="title is-3">Page not found</h1>
+    <p>This page does not exist. Go to the <a href="/">LADDER leaderboard</a>.</p>
+  </div>
+</section>
+</body>
+</html>

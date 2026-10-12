@@ -1,0 +1,31 @@
+import: vlam_robolab_composition.yaml
+
+# RoboLab composition -- _plan_verifier with every VLM role served in-process (Qwen3-VL) instead of by
+# an API, so the arm needs no credentials and no network.
+#
+# This imports the shared plan_verifier_local.yaml rather than the RoboLab _plan_verifier for the same
+# reason that shared file is written out instead of importing plan_verifier: replace_with_auto_config
+# merges the PARENT's fields into the new type, so OpenAIVLM's base_url / default_headers would follow
+# the swap and LocalVLMConfig rejects them. The advancer block below therefore duplicates
+# _plan_verifier's -- keep the two in step.
+#
+# VRAM: this arm's VLM roles resolve to vlm_served.yaml, i.e. ServedVLM, which asks the run's OWN
+# batch inference server, so there is ONE copy of the model for every lane sharing it. The cost is
+# server(~7G) + VLM(~17G) + LANES * sim(~14G). Do not size it as vlm_local.yaml, which loads one
+# model copy per lane.
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/plan_verifier_local.yaml
+    source:
+      cache_path: ladder/components/inference/robots/robolab/composition/decomp_cache.json
+    advancer:
+      attempt_stall_steps: 300
+      ordered_provisional: true
+      auto_schedule: true
+      verifier:
+        # Both views. RoboLab's "main" is an over-shoulder camera in which the bin is a small box at
+        # the frame edge, often occluded by the arm, so a verifier reading `main` alone has very low
+        # recall. The wrist camera looks into the bin, where the placement is plain to see.
+        image_cameras: [main, wrist]
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_plan_verifier_local/$CKPT_NAME/$ENV_NAME

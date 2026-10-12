@@ -1,0 +1,7 @@
+import: ../../../external/openpi/configs/robolab/composition/openpi_robolab_composition.yaml
+
+# Your orchestrator instructing pi0.5: scripts/eval.sh --orchestrator path/to/file.py:ClassName
+runner_config:
+  hlc_config:
+    autoclass: ladder.components.inference.api.client.plugin.orchestrator.PluginOrchestrator
+    system: ""

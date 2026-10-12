@@ -1,0 +1,9 @@
+import: vlam_simpler_composition.yaml
+
+# SimplerEnv composition -- no plan at all: each gripper cycle generates the next subtask from the
+# current frame. The arm that isolates planning ahead from reacting to what is actually on the table.
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/stepwise_gripper.yaml
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/simpler_composition_stepwise_gripper/$CKPT_NAME/$ENV_NAME

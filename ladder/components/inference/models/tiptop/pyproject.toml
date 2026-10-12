@@ -1,0 +1,43 @@
+[project]
+name = "ladder-components-inference-models-tiptop"
+version = "0.0.0"
+requires-python = "~=3.12.0"
+dependencies = [
+    "build-support-python",
+    "ladder-components-inference-api-client",
+    "torch @ https://download.pytorch.org/whl/cu128/torch-2.7.1%2Bcu128-cp312-cp312-manylinux_2_28_x86_64.whl",
+    "torchvision @ https://download.pytorch.org/whl/cu128/torchvision-0.22.1%2Bcu128-cp312-cp312-manylinux_2_28_x86_64.whl",
+    "numpy==2.2.6",
+    "scikit-learn",
+    "setuptools",
+    "pyzmq",
+    "msgpack-numpy",
+    "filelock",
+    "einops",
+    "hydra-core",
+    "iopath",
+    "jaxtyping",
+    "omegaconf",
+    "open3d",
+    "opencv-python-headless~=4.11.0",
+    "openai",
+    "pillow",
+    "pyyaml",
+    "requests",
+    "roma",
+    "yourdfpy",
+    "scipy",
+    "trimesh",
+    "tqdm",
+    "warp-lang==1.12.0",
+    "rerun-sdk==0.23.1",
+    "nvidia-cuda-nvcc-cu12",
+    "ninja",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+build-support-python = { path = "../../../../../build_support/python", package = false }
+ladder-components-inference-api-client = { path = "../../../../../ladder/components/inference/api/client", package = false }

@@ -1,0 +1,25 @@
+import: ../../../../vlams/configs/robot_arena/composition/vlam_robot_arena_composition.yaml
+
+policy_config: !overwrite
+  autoclass: ladder.components.inference.models.harness.policy.HarnessPolicy
+  robot: WidowX 250 robot arm
+  vlm:
+    import: ../../../../../api/client/hlc/configs/vlm.yaml
+  scene:
+    camera: main
+    support_z_m: 0.0
+  arm:
+    tool_offset_m: 0.016
+    max_span_m: 0.074
+    max_translation_per_step_m: 0.03
+    move_steps: 25
+    open_gripper_steps: 10
+    close_gripper_steps: 18
+    arrive_tolerance_m: 0.015
+    settle_tolerance_m: 0.04
+
+runner_config:
+  recorder_config:
+    video_enabled: true
+    rerun_enabled: false
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robot_arena_composition_harness/$CKPT_NAME/$ENV_NAME

@@ -1,0 +1,31 @@
+[project]
+name = "ladder-components-inference-robots-simpler"
+version = "0.0.0"
+requires-python = ">=3.10"
+dependencies = [
+    "ladder-components-inference-api-server",
+    "mani_skill==3.0.1",  # ManiSkill3 (GPU-vectorized envs); SAPIEN3
+    "sapien==3.0.3",
+    "gymnasium",
+    "numpy",
+    "opencv-python-headless",
+    "scipy",
+    "transforms3d",
+    "trimesh",
+    "torch==2.12.1",
+]
+
+[tool.uv]
+package = false
+environments = [
+    "sys_platform == 'linux' and platform_machine == 'x86_64'",
+]
+
+[tool.uv.sources]
+ladder-components-inference-api-server = { path = "../../../../../ladder/components/inference/api/server", package = false }
+torch = { index = "pytorch-cu130" }
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true

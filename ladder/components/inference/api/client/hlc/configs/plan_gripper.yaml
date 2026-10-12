@@ -1,0 +1,10 @@
+autoclass: ladder.components.inference.api.client.hlc.controller.SubtaskController
+source:
+  autoclass: ladder.components.inference.api.client.hlc.sources.decomposers.Decomposer
+  cache_path: ""  # the benchmark points this at its tracked plans; unset = decompose at reset
+  vlm:
+    import: vlm.yaml
+  max_tokens: 8192  # a reasoning model's hidden thinking tokens count against this
+advancer:
+  autoclass: ladder.components.inference.api.client.hlc.advancers.gripper.GripperAdvancer
+  advance_cooldown_steps: 8  # ignore re-fires while the gripper settles

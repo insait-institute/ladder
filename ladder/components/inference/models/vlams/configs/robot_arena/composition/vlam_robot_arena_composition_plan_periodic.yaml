@@ -1,0 +1,11 @@
+import: vlam_robot_arena_composition.yaml
+
+# RobotArena composition -- the plan walked on a fixed step clock, no feedback. The control arm for
+# _plan_gripper and _plan_verifier: a gap to this one is what makes their feedback worth its cost.
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/plan_periodic.yaml
+    source:
+      cache_path: ladder/components/inference/robots/robot_arena/composition/decomp_cache.json
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robot_arena_composition_plan_periodic/$CKPT_NAME/$ENV_NAME

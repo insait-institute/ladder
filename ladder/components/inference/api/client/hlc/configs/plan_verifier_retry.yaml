@@ -1,0 +1,6 @@
+import: plan_verifier.yaml
+
+# Explicitly the default scheduling, kept as a named configuration so an experiment can say which
+# arm it ran. Pair with plan_verifier_skip.yaml for the comparison.
+advancer:
+  retry_in_place: True

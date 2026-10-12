@@ -1,0 +1,33 @@
+[project]
+# CaP-X, on the inference client plus the packages its own perception needs: SAM3 is vendored
+# (see http-assets.MODULE.bazel), so the packages its code imports are declared here.
+name = "ladder-components-inference-models-capx"
+version = "0.0.0"
+requires-python = "~=3.10.0"
+dependencies = [
+    "ladder-components-inference-api-client",
+    "numpy==2.2.4",
+    "pillow==10.2.0",
+    "scipy==1.15.2",
+    "torch @ https://download.pytorch.org/whl/cu128/torch-2.7.0%2Bcu128-cp310-cp310-manylinux_2_28_x86_64.whl",
+    "torchvision @ https://download.pytorch.org/whl/cu128/torchvision-0.22.0%2Bcu128-cp310-cp310-manylinux_2_28_x86_64.whl",
+    # SAM3 is vendored and needs the next four.
+    "timm==1.0.15",
+    "einops==0.8.1",
+    "ftfy==6.1.1",
+    "iopath==0.1.10",
+    # SAM3's text encoder and weight fetch.
+    "regex==2026.9.3",
+    "huggingface-hub==0.36.2",
+    # SAM3's video predictor imports it at module scope even on the image path.
+    "psutil==5.9.7",
+    # Not on SAM3's inference path, but three of its modules import it at module scope.
+    "pycocotools==2.0.8",
+    "opencv-python-headless==4.11.0.86",
+]
+
+[tool.uv.sources]
+ladder-components-inference-api-client = { path = "../../api/client", package = false }
+
+[tool.uv]
+package = false

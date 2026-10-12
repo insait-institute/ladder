@@ -1,0 +1,16 @@
+import: widowx_batched_unified.yaml
+
+# K=8 composition probe: one 8-episode batch per composition task (2x4 object-offset grid).
+# batch_size_per_scene is also passed by the launcher (--test_config.batch_size_per_scene
+# $ENVS_PER_SCENE); the offsets list must match that K, hence the !overwrite.
+test_config:
+  batch_size_per_scene: 8
+  object_variation_offsets_m: !overwrite
+    - [-0.030000, -0.020000]
+    - [-0.030000, +0.020000]
+    - [-0.010000, -0.020000]
+    - [-0.010000, +0.020000]
+    - [+0.010000, -0.020000]
+    - [+0.010000, +0.020000]
+    - [+0.030000, -0.020000]
+    - [+0.030000, +0.020000]

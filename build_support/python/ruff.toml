@@ -1,0 +1,113 @@
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+# Same as Black.
+line-length = 110
+indent-width = 4
+
+# Assume Python 3.10
+target-version = "py310"
+
+[lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+select = [
+    "F",  # pyflakes
+    "E",  # pycodestyle
+    "W",  # pycodestyle: warnings
+    "C90",  # mccabe
+    "I002",  # isort: missing-required-import
+    "N",  # pep8-naming
+    # "UP",  # pyupgrade -> NOT very suitable
+    # "ANN",  # flake8-annotations -> too restrictive
+    "BLE",  # flake8-blind-except
+    "B",  # flake8-bugbear
+    "A",  # flake8-builtins
+    "C4", # flake8-comprehensions
+    "T10",  # flake8-debugger
+    "PIE",  # flake8-pie -> TODO: maybe disable some of these
+    "RET",  # flake8-return
+    "SLF",  # flake8-self
+    # "SIM",  # flake8-simplify -> too restrictive
+    "TID252",  # relative-imports
+    "ARG",  # flake8-unused-arguments
+    "PD",  # pandas-vet
+    "PL",  # pylint
+    "NPY",  # NumPy-specific rules
+    # "RUF",  # Ruff-specific rules
+]
+
+ignore = [
+    "E203",  # E203 Redundant via Black: Whitespace before ':'
+    "E226",  # E226 Redundant via Black: Missing whitespace around arithmetic
+    "E265",  # E265 Redundant via Black: Block comment should start with '# '
+    "E501",  # E501 Redundant via Black: Line too long
+    "F541",  # f-string-missing-placeholders
+    "PD901",  # pandas-df-variable-name: Avoid using the generic variable name df for DataFrames
+    "RET504",  # unnecessary-assign: Unnecessary assignment to {name} before return statement
+    "N806",  # non-lowercase-variable-in-function
+    "N817",  # camelcase-imported-as-acronym
+    "B904",  # raise-without-from-inside-except
+    "C401",  # unnecessary-generator-set: Unnecessary generator (rewrite using set())
+    "C405",  # unnecessary-litetal-set
+    "C408",  # unnecessary-collection-call
+    "C416",  # unnecessary-comprehension
+    "PLR2004",  # magic-value-comparison: Magic value used in comparison, consider replacing {value} with a constant variable
+    "PLR5501",  # collapsible-else-if
+    "PLR0402",  # manual-from-import: Use from {module} import {name} in lieu of alias
+    "PLW2901",  # redefined-loop-name
+    "PLC0206",  # dict-index-missing-items: Extracting value from dictionary without calling .items()
+    "ARG005",  # unused-lambda-argument
+    "N807",  # dunder-function-name: Function name should not start and end with __
+]
+
+pylint.max-args = 15
+pylint.max-returns = 10
+pylint.max-branches = 20
+mccabe.max-complexity = 20
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"

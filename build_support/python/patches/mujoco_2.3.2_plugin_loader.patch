@@ -1,0 +1,12 @@
+--- a/mujoco/__init__.py
++++ b/mujoco/__init__.py
+@@ -54,6 +54,9 @@ PLUGIN_HANDLES = []
+ def _load_all_bundled_plugins():
+   for directory, _, filenames in os.walk(PLUGINS_DIR):
+     for filename in filenames:
++      if not filename.endswith(('.so', '.dylib', '.dll')):
++        continue
++
+       PLUGIN_HANDLES.append(ctypes.CDLL(os.path.join(directory, filename)))
+
+ _load_all_bundled_plugins()

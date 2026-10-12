@@ -1,0 +1,9 @@
+import: vlam_robot_arena_composition.yaml
+
+# RobotArena composition -- plan_verifier with no cache_path, so the planner decomposes the reset
+# frame. The pass that mints a plan for a newly added task.
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/plan_verifier.yaml
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robot_arena_composition_plan_verifier_live/$CKPT_NAME/$ENV_NAME

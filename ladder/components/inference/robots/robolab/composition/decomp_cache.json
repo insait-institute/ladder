@@ -1,0 +1,500 @@
+{
+ "_meta": {
+  "role": "reference plan",
+  "model": "ground_truth",
+  "generated": "2026-09-09",
+  "note": "NOT a model output: the plan per task from specs.decomp_cache_entries(), naming objects by colour and type. Every entry is {subtasks, ordered, revisits}."
+ },
+ "CompBin10Task": {
+  "subtasks": [
+   "put the yellow banana in the grey bin.",
+   "put the orange in the grey bin.",
+   "put the yellow lemon in the grey bin.",
+   "put the green lime in the grey bin.",
+   "put the avocado in the grey bin.",
+   "put the red onion in the grey bin.",
+   "put the lychee in the grey bin.",
+   "put the orange pumpkin in the grey bin.",
+   "put the orange in the grey bin.",
+   "put the red pomegranate in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompBin1Task": {
+  "subtasks": [
+   "put the yellow banana in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompBin2DistractorTask": {
+  "subtasks": [
+   "put the yellow banana in the grey bin.",
+   "put the orange in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompBin2Task": {
+  "subtasks": [
+   "put the yellow banana in the grey bin.",
+   "put the orange in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompBin4DistractorTask": {
+  "subtasks": [
+   "put the yellow banana in the grey bin.",
+   "put the orange in the grey bin.",
+   "put the yellow lemon in the grey bin.",
+   "put the green lime in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompBin6Task": {
+  "subtasks": [
+   "put the yellow banana in the grey bin.",
+   "put the orange in the grey bin.",
+   "put the yellow lemon in the grey bin.",
+   "put the green lime in the grey bin.",
+   "put the avocado in the grey bin.",
+   "put the red onion in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompIdentical2Task": {
+  "subtasks": [
+   "put the orange in the grey bin.",
+   "put the orange in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompIdentical4Task": {
+  "subtasks": [
+   "put the green lime in the grey bin.",
+   "put the green lime in the grey bin.",
+   "put the green lime in the grey bin.",
+   "put the green lime in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompOrderedBin10Task": {
+  "subtasks": [
+   "put the orange pumpkin in the grey bin.",
+   "put the red onion in the grey bin.",
+   "put the green lime in the grey bin.",
+   "put the avocado in the grey bin.",
+   "put the yellow lemon in the grey bin.",
+   "put the red pomegranate in the grey bin.",
+   "put the lychee in the grey bin.",
+   "put the yellow banana in the grey bin.",
+   "put the orange in the grey bin.",
+   "put the orange in the grey bin."
+  ],
+  "ordered": true,
+  "revisits": false
+ },
+ "CompOrderedBin2Task": {
+  "subtasks": [
+   "put the yellow banana in the grey bin.",
+   "put the orange in the grey bin."
+  ],
+  "ordered": true,
+  "revisits": false
+ },
+ "CompOrderedBin3Task": {
+  "subtasks": [
+   "put the yellow banana in the grey bin.",
+   "put the yellow lemon in the grey bin.",
+   "put the orange in the grey bin."
+  ],
+  "ordered": true,
+  "revisits": false
+ },
+ "CompOrderedBin4Task": {
+  "subtasks": [
+   "put the orange in the grey bin.",
+   "put the yellow lemon in the grey bin.",
+   "put the green lime in the grey bin.",
+   "put the yellow banana in the grey bin."
+  ],
+  "ordered": true,
+  "revisits": false
+ },
+ "CompOrderedBin5Task": {
+  "subtasks": [
+   "put the avocado in the grey bin.",
+   "put the orange in the grey bin.",
+   "put the yellow lemon in the grey bin.",
+   "put the green lime in the grey bin.",
+   "put the yellow banana in the grey bin."
+  ],
+  "ordered": true,
+  "revisits": false
+ },
+ "CompOrderedBin6Task": {
+  "subtasks": [
+   "put the avocado in the grey bin.",
+   "put the orange in the grey bin.",
+   "put the yellow lemon in the grey bin.",
+   "put the green lime in the grey bin.",
+   "put the red onion in the grey bin.",
+   "put the yellow banana in the grey bin."
+  ],
+  "ordered": true,
+  "revisits": false
+ },
+ "CompOrderedBin7Task": {
+  "subtasks": [
+   "put the avocado in the grey bin.",
+   "put the orange in the grey bin.",
+   "put the yellow lemon in the grey bin.",
+   "put the green lime in the grey bin.",
+   "put the red onion in the grey bin.",
+   "put the yellow banana in the grey bin.",
+   "put the lychee in the grey bin."
+  ],
+  "ordered": true,
+  "revisits": false
+ },
+ "CompOrderedBin8Task": {
+  "subtasks": [
+   "put the orange in the grey bin.",
+   "put the orange pumpkin in the grey bin.",
+   "put the lychee in the grey bin.",
+   "put the yellow lemon in the grey bin.",
+   "put the green lime in the grey bin.",
+   "put the yellow banana in the grey bin.",
+   "put the red onion in the grey bin.",
+   "put the avocado in the grey bin."
+  ],
+  "ordered": true,
+  "revisits": false
+ },
+ "CompOrderedBin9Task": {
+  "subtasks": [
+   "put the red onion in the grey bin.",
+   "put the orange in the grey bin.",
+   "put the orange pumpkin in the grey bin.",
+   "put the lychee in the grey bin.",
+   "put the yellow lemon in the grey bin.",
+   "put the green lime in the grey bin.",
+   "put the yellow banana in the grey bin.",
+   "put the avocado in the grey bin.",
+   "put the orange in the grey bin."
+  ],
+  "ordered": true,
+  "revisits": false
+ },
+ "CompPlate1Task": {
+  "subtasks": [
+   "put the yellow banana on the white plate."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompRelay2Task": {
+  "subtasks": [
+   "put the yellow lemon on the white plate.",
+   "put the yellow lemon in the grey bin.",
+   "put the green lime on the white plate.",
+   "put the green lime in the grey bin."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "CompRelay3Task": {
+  "subtasks": [
+   "put the yellow lemon on the white plate.",
+   "put the yellow lemon in the grey bin.",
+   "put the green lime on the white plate.",
+   "put the green lime in the grey bin.",
+   "put the yellow banana on the white plate.",
+   "put the yellow banana in the grey bin."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "CompRelay4Task": {
+  "subtasks": [
+   "put the yellow lemon on the white plate.",
+   "put the yellow lemon in the grey bin.",
+   "put the green lime on the white plate.",
+   "put the green lime in the grey bin.",
+   "put the yellow banana on the white plate.",
+   "put the yellow banana in the grey bin.",
+   "put the orange on the white plate.",
+   "put the orange in the grey bin."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "CompRelay5Task": {
+  "subtasks": [
+   "put the yellow lemon on the white plate.",
+   "put the yellow lemon in the grey bin.",
+   "put the green lime on the white plate.",
+   "put the green lime in the grey bin.",
+   "put the yellow banana on the white plate.",
+   "put the yellow banana in the grey bin.",
+   "put the orange on the white plate.",
+   "put the orange in the grey bin.",
+   "put the avocado on the white plate.",
+   "put the avocado in the grey bin."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "CompRevisit1Task": {
+  "subtasks": [
+   "put the yellow lemon in the grey bin.",
+   "put the yellow lemon on the white plate.",
+   "put the yellow lemon in the grey bin."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "CompRevisit2Task": {
+  "subtasks": [
+   "put the yellow lemon in the grey bin.",
+   "put the yellow lemon on the white plate.",
+   "put the yellow lemon in the grey bin.",
+   "put the green lime in the grey bin.",
+   "put the green lime on the white plate.",
+   "put the green lime in the grey bin."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "CompRevisit3Task": {
+  "subtasks": [
+   "put the yellow lemon in the grey bin.",
+   "put the yellow lemon on the white plate.",
+   "put the yellow lemon in the grey bin.",
+   "put the green lime in the grey bin.",
+   "put the green lime on the white plate.",
+   "put the green lime in the grey bin.",
+   "put the yellow banana in the grey bin.",
+   "put the yellow banana on the white plate.",
+   "put the yellow banana in the grey bin."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "CompRoute10Task": {
+  "subtasks": [
+   "put the yellow banana on the white plate.",
+   "put the yellow lemon on the white plate.",
+   "put the green lime on the white plate.",
+   "put the orange in the grey bin.",
+   "put the avocado in the grey bin.",
+   "put the red onion in the grey bin.",
+   "put the lychee in the grey bin.",
+   "put the orange pumpkin in the grey bin.",
+   "put the orange in the grey bin.",
+   "put the red pomegranate in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompRoute2BinfirstTask": {
+  "subtasks": [
+   "put the orange in the grey bin.",
+   "put the yellow lemon on the white plate."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompRoute2Task": {
+  "subtasks": [
+   "put the yellow lemon on the white plate.",
+   "put the orange in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompRoute3Task": {
+  "subtasks": [
+   "put the yellow lemon on the white plate.",
+   "put the green lime on the white plate.",
+   "put the orange in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompRoute4Task": {
+  "subtasks": [
+   "put the yellow lemon on the white plate.",
+   "put the green lime on the white plate.",
+   "put the orange in the grey bin.",
+   "put the avocado in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompRoute5Task": {
+  "subtasks": [
+   "put the yellow lemon on the white plate.",
+   "put the green lime on the white plate.",
+   "put the yellow banana on the white plate.",
+   "put the orange in the grey bin.",
+   "put the avocado in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompRoute6Task": {
+  "subtasks": [
+   "put the yellow lemon on the white plate.",
+   "put the green lime on the white plate.",
+   "put the yellow banana on the white plate.",
+   "put the orange in the grey bin.",
+   "put the avocado in the grey bin.",
+   "put the red onion in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompRoute7Task": {
+  "subtasks": [
+   "put the yellow banana on the white plate.",
+   "put the yellow lemon on the white plate.",
+   "put the green lime on the white plate.",
+   "put the orange in the grey bin.",
+   "put the avocado in the grey bin.",
+   "put the red onion in the grey bin.",
+   "put the lychee in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompRoute8Task": {
+  "subtasks": [
+   "put the yellow banana on the white plate.",
+   "put the yellow lemon on the white plate.",
+   "put the green lime on the white plate.",
+   "put the orange in the grey bin.",
+   "put the avocado in the grey bin.",
+   "put the red onion in the grey bin.",
+   "put the lychee in the grey bin.",
+   "put the orange pumpkin in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompRoute9Task": {
+  "subtasks": [
+   "put the yellow banana on the white plate.",
+   "put the yellow lemon on the white plate.",
+   "put the green lime on the white plate.",
+   "put the orange in the grey bin.",
+   "put the avocado in the grey bin.",
+   "put the red onion in the grey bin.",
+   "put the lychee in the grey bin.",
+   "put the orange pumpkin in the grey bin.",
+   "put the orange in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompSplitPlate2Task": {
+  "subtasks": [
+   "put the avocado on the white plate.",
+   "put the orange in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompSplitPlate3Task": {
+  "subtasks": [
+   "put the avocado on the white plate.",
+   "put the yellow banana on the white plate.",
+   "put the orange in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompSplitPlate4Task": {
+  "subtasks": [
+   "put the avocado on the white plate.",
+   "put the yellow banana on the white plate.",
+   "put the orange in the grey bin.",
+   "put the green lime in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompSplitPlate5Task": {
+  "subtasks": [
+   "put the avocado on the white plate.",
+   "put the yellow banana on the white plate.",
+   "put the orange in the grey bin.",
+   "put the red onion in the grey bin.",
+   "put the lychee in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompSplitPlate6Task": {
+  "subtasks": [
+   "put the avocado on the white plate.",
+   "put the yellow banana on the white plate.",
+   "put the yellow lemon on the white plate.",
+   "put the orange in the grey bin.",
+   "put the green lime in the grey bin.",
+   "put the red onion in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompSplitPlate7Task": {
+  "subtasks": [
+   "put the avocado on the white plate.",
+   "put the yellow banana on the white plate.",
+   "put the yellow lemon on the white plate.",
+   "put the orange in the grey bin.",
+   "put the green lime in the grey bin.",
+   "put the red onion in the grey bin.",
+   "put the lychee in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompSplitPlate8Task": {
+  "subtasks": [
+   "put the avocado on the white plate.",
+   "put the yellow banana on the white plate.",
+   "put the yellow lemon on the white plate.",
+   "put the green lime on the white plate.",
+   "put the orange in the grey bin.",
+   "put the red onion in the grey bin.",
+   "put the lychee in the grey bin.",
+   "put the orange pumpkin in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompTransfer2Task": {
+  "subtasks": [
+   "put the orange in the grey bin.",
+   "put the yellow lemon in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "CompTransfer3Task": {
+  "subtasks": [
+   "put the orange in the grey bin.",
+   "put the yellow lemon in the grey bin.",
+   "put the green lime in the grey bin."
+  ],
+  "ordered": false,
+  "revisits": false
+ }
+}

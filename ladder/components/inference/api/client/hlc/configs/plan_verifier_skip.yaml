@@ -1,0 +1,6 @@
+import: plan_verifier.yaml
+
+# plan_verifier, but a not-done verdict defers the subtask to the round-robin instead of retrying
+# it, so one hard goal or one verifier false negative cannot starve the rest of the plan.
+advancer:
+  retry_in_place: False
