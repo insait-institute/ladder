@@ -1,0 +1,10 @@
+import: vlam_robot_arena_composition.yaml
+
+# RobotArena composition -- verifier-advanced, over this benchmark's tracked plans.
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/plan_verifier.yaml
+    source:
+      cache_path: ladder/components/inference/robots/robot_arena/composition/decomp_cache.json
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robot_arena_composition_plan_verifier/$CKPT_NAME/$ENV_NAME

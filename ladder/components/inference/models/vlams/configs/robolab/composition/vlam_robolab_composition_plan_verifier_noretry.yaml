@@ -1,0 +1,17 @@
+import: vlam_robolab_composition_plan_verifier.yaml
+
+# RoboLab composition -- a not-done verdict does not withhold advancement: the verifier still runs
+# and every verdict is still logged, the controller just moves on, the way a non-verifying rule
+# does. Paired with _plan_verifier this separates the value of TESTING completion from the value of
+# REFUSING to advance, which are otherwise confounded because only a verifying rule produces the
+# judgement that withholds. Imports the RoboLab _plan_verifier so the tuned advancer block is not
+# repeated; the one key below is the whole difference.
+#
+# The comparison is most informative here: RoboLab's verifier arms command only about half their
+# plan before the budget expires, so what withholding costs is largest on this suite.
+runner_config:
+  hlc_config:
+    advancer:
+      withhold_on_not_done: False
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_plan_verifier_noretry/$CKPT_NAME/$ENV_NAME

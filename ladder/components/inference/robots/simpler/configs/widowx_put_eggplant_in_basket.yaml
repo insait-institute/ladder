@@ -1,0 +1,31 @@
+autoclass: ladder.components.inference.robots.simpler.simpler_server.SimplerServer
+env_config:
+  env_name: PutEggplantInBasketScene-v0
+  robot_name: widowx_sink_camera_setup
+  scene_name: bridge_table_1_v2
+  rgb_overlay_path: ladder/components/inference/robots/simpler/maniskill2/data/real_inpainting/bridge_sink.png
+  raytracing: False
+
+  max_episode_steps: 120
+  sim_freq: 500
+  control_freq: 5
+
+  n_envs: 8  # parallel ManiSkill3 envs per scene (batched over object_episode_range)
+
+  # PD pose controller in base frame; PD gripper position controller
+  control_mode: arm_pd_ee_target_base_pose_gripper_pd_joint_pos
+
+init_range_config:
+  robot_init_x_range: [0.127, 0.127, 1]  # [x_min, x_max, x_num]
+  robot_init_y_range: [0.06, 0.06, 1]  # [y_min, y_max, y_num]
+  robot_init_quat_center: [0, 0, 1, 0]  # [x, y, z, w]
+  robot_init_roll_range: [0, 0, 1]  # [roll_min, roll_max, roll_num]
+  robot_init_pitch_range: [0, 0, 1]  # [pitch_min, pitch_max, pitch_num]
+  robot_init_yaw_range: [0, 0, 1]  # [yaw_min, yaw_max, yaw_num]
+  object_variation_mode: episode
+  object_episode_range: [0, 24]  # [start, end]
+
+request_listener_config:
+  req_rep_server_config:
+    autoclass: ladder.components.inference.api.core.request_reply.ZmqRequestReplyServer
+    port: 5556

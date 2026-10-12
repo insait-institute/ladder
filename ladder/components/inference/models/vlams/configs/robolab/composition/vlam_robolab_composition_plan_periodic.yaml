@@ -1,0 +1,18 @@
+import: vlam_robolab_composition.yaml
+
+# RoboLab composition -- plan walked on a fixed step clock, no feedback. The control arm for
+# _plan_gripper (switches on an event the robot produces) and _plan_verifier (on a judgement about
+# the scene): a gap to this one is what makes either feedback signal worth its cost.
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/plan_periodic.yaml
+    source:
+      cache_path: ladder/components/inference/robots/robolab/composition/decomp_cache.json
+    advancer:
+      # The shared 27 is SimplerEnv's median time per subtask. RoboLab's median gap between
+      # consecutive goal achievements is ~250 steps (~7x longer at 15 Hz control), so the clock is
+      # rescaled to match. A faster clock switches subtasks before the placement finishes. Sweep from
+      # the command line (--runner_config.hlc_config.advancer.interval N) rather than adding configs.
+      interval: 250
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_plan_periodic/$CKPT_NAME/$ENV_NAME

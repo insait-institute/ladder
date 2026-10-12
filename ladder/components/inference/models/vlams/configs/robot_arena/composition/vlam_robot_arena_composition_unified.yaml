@@ -1,0 +1,9 @@
+import: ../language/vlam_robot_arena_unified.yaml
+
+# RobotArena composition on the UNIFIED env-block layout (the 137-env server config), as opposed to
+# vlam_robot_arena_composition.yaml's per-task batches. K=8 blocks, every env on the scene default
+# instruction -- the unified 16/121 paraphrase split assumes n_envs=137, which composition does not use.
+runner_config:
+  default_block_size: 8
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robot_arena_composition_unified/$CKPT_NAME/$ENV_NAME

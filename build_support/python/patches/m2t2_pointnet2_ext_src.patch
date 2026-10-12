@@ -1,0 +1,15 @@
+--- a/m2t2/pointnet2_utils.py
++++ b/m2t2/pointnet2_utils.py
+@@ -24,7 +24,11 @@
+ 
+     warnings.warn("Unable to load pointnet2_ops cpp extension. JIT Compiling.")
+ 
+-    _ext_src_root = osp.join(osp.dirname(__file__), "_ext-src")
++    # The cpp sources live in the vendored pointnet2_ops tree, not beside the m2t2 package:
++    # upstream installs them together, Bazel serves them from the pointnet2_ops runfiles.
++    _ext_src_root = osp.join(osp.dirname(__file__), "..", "pointnet2_ops", "pointnet2_ops", "_ext-src")
++    if not osp.isdir(_ext_src_root):
++        _ext_src_root = osp.join(osp.dirname(__file__), "_ext-src")
+     _ext_sources = glob.glob(osp.join(_ext_src_root, "src", "*.cpp")) + glob.glob(
+         osp.join(_ext_src_root, "src", "*.cu")
+     )

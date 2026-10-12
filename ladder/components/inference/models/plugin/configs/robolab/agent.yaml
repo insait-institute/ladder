@@ -1,0 +1,14 @@
+import: ../../../vlams/configs/robolab/composition/vlam_robolab_composition.yaml
+
+# Your agent: scripts/eval.sh --agent path/to/file.py:ClassName. The arm settings are GPT-Policy's for
+# this robot (models/gpt_policy/configs).
+policy_config: !overwrite
+  autoclass: ladder.components.inference.api.client.plugin.agent.PluginAgent
+  system: ""
+  arm:
+    tool_offset_m: 0.168
+    max_step_m: 0.02
+    settle_steps: 25
+    gripper_steps: 30
+    workspace_min_m: [-0.1, -0.5, 0.005]
+    workspace_max_m: [0.75, 0.5, 0.9]

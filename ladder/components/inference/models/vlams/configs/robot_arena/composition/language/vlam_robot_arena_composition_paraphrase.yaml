@@ -1,0 +1,23 @@
+import: ../vlam_robot_arena_composition.yaml
+
+# Paraphrase robustness on the RA composition benchmark: the runner replaces each task's instruction,
+# keyed by the env_name the server reports ("robot_arena_<task>"), with entry 0 the canonical phrasing.
+# A count that divides the batch size gives equal episodes per paraphrase, otherwise it round-robins;
+# set runner_config.default_block_size to keep a canonical control block in the same batch. The two
+# below are the tasks whose wording carries the task -- a quantifier, an exclusion, and a required
+# order -- so a score delta is attributable to reading the words rather than to the layout.
+runner_config:
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robot_arena_composition_paraphrase/$CKPT_NAME/$ENV_NAME
+  instruction_override:
+    robot_arena_scene54_except:
+      - "put everything except the pot on the cloth"
+      - "put everything on the cloth apart from the pot"
+      - "move all the objects except the pot onto the cloth"
+      - "put everything but the pot on the cloth"
+
+    robot_arena_scene76_2goal_ordered:
+      - "put the metal pot on the yellow cloth, then put the mushroom toy on the yellow cloth"
+      - "put the metal pot on the yellow cloth before you put the mushroom toy on the yellow cloth"
+      - "start with the metal pot on the yellow cloth, then the mushroom toy"
+      - "the metal pot goes on the yellow cloth first, then the mushroom toy"

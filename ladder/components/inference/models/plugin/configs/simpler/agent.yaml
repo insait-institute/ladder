@@ -1,0 +1,14 @@
+import: ../../../vlams/configs/simpler/composition/vlam_simpler_composition.yaml
+
+# Your agent: scripts/eval.sh --agent path/to/file.py:ClassName. The arm settings are GPT-Policy's for
+# this robot (models/gpt_policy/configs).
+policy_config: !overwrite
+  autoclass: ladder.components.inference.api.client.plugin.agent.PluginAgent
+  system: ""
+  arm:
+    tool_offset_m: 0.016
+    max_step_m: 0.04
+    settle_steps: 8
+    gripper_steps: 12
+    workspace_min_m: [-0.35, -0.35, 0.0]
+    workspace_max_m: [0.55, 0.35, 0.4]

@@ -1,0 +1,54 @@
+# Client config for the SCRIPTED completability policy on SimplerEnv. Pair it with the server config
+# widowx_composition_scripted.yaml.
+#
+# There is no model, no inference server and no controller: ScriptedPolicy reads the privileged
+# object/goal state the server injects into observation.metadata['privileged'] and emits absolute
+# end-effector waypoints. A task the policy cannot finish here cannot be finished by a learned one,
+# which is what makes this a completability gate rather than a score.
+policy_config:
+  autoclass: ladder.components.inference.api.client.scripted.scripted_policy.ScriptedPolicy
+  # Motion tuned against the composition suites; see the RobotArena twin, which shares these values.
+  max_translation_per_step_m: 0.04
+  approach_height_m: 0.07
+  lift_height_m: 0.08
+  carry_height_m: 0.08
+  # Set the object down at its resting height rather than dropping it from 3 cm: a drop bounces a
+  # cube off a stack and rolls a round object off a small plate.
+  place_clearance_m: 0.005
+  # Confirm a grasp over 2 steps and drop it after 3 steps lost; a descent stalled 1.5 cm above the
+  # grasp height, or jaws that stopped closing, end the attempt early instead of waiting it out.
+  max_grasp_steps: 40
+  grasp_confirm_steps: 2
+  grasp_lost_steps: 3
+  jaw_stall_steps: 3
+  descent_high_tol_m: 0.015
+  # Out of reach at one wrist orientation, try the next (pitch, roll), and after a failed chain too.
+  grasp_orientations_deg: [[0, 0], [0, -30], [-45, -30], [45, -30]]
+  rotate_on_failure: True
+  reach_stall_steps: 6
+  reach_keep_height: True
+  # Keep the wrist inside the arm's reach: past it the IK flips and the arm flails.
+  reach_center_m: [0.0, 0.0, 0.111]
+  reach_radius_m: 0.49
+  wrist_offset_m: 0.158
+  # Objects below this fell off the table; skip them instead of chasing them.
+  fallen_z_m: -0.05
+  # Grasp and goal points past the backdrop wall are pulled back to this y.
+  wall_max_y_m: 0.16
+  # Identical movers are credited by count: pick any instance not yet delivered.
+  retarget_identical: True
+
+runner_config:
+  autoclass: ladder.components.inference.api.client.simpler_episode_runner.SimplerEpisodeRunner
+  env_config:
+    ip: localhost
+    port: 5556
+    raise_on_server_error: True
+    min_period: 0.0
+    recv_timeout_ms: 180000
+  recorder_config:
+    output_path: $SCRIPTED_OUT/$ENV_NAME
+    fps: 5
+    rerun_enabled: False
+
+seed: 987654321

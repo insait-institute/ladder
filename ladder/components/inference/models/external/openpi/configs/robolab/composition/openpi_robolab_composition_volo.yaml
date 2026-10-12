@@ -1,0 +1,13 @@
+import: ../../../../../vlams/configs/robolab/composition/vlam_robolab_composition_volo.yaml
+
+# pi0.5 with VoLo in the orchestrator seat. VoLo reaches the policy only through the instruction, so
+# the benchmark's check_interval and wrist view carry over from the imported config unchanged.
+policy_config: !overwrite
+  autoclass: ladder.components.inference.models.external.openpi.policy.OpenpiPolicy
+  action_space: joint_positions
+  model_config:
+    model_id: pi05_droid_jointpos
+
+runner_config:
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_openpi_volo/$CKPT_NAME/$ENV_NAME

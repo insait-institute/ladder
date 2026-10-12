@@ -1,0 +1,5 @@
+# First import reaches into another directory, second one is a plain sibling: both are written
+# relative to THIS file, so both must resolve that way regardless of import order.
+import: 'nested/nested_import.yaml'
+outer:
+  import: 'cross_dir_sibling.yaml'

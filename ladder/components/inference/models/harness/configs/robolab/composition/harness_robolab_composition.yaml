@@ -1,0 +1,32 @@
+import: ../../../../vlams/configs/robolab/composition/vlam_robolab_composition.yaml
+
+policy_config: !overwrite
+  autoclass: ladder.components.inference.models.harness.policy.HarnessPolicy
+  robot: Franka Emika robot
+  vlm:
+    import: ../../../../../api/client/hlc/configs/vlm.yaml
+  scene:
+    reground_destinations: true
+    camera: scene
+  arm:
+    tool_offset_m: 0.168
+    max_span_m: 0.08
+    arrive_tolerance_rad: 0.25
+    verify_place: true
+    blocking_waypoint: false
+    max_translation_per_step_m: 0.03
+    move_steps: 75
+    open_gripper_steps: 30
+    close_gripper_steps: 45
+    # The Franka's jaws report their width, so they decide what is held: empty reads 0.03
+    # here and a grasped object 0.61, while the depth column errs both ways.
+    grip_from_openness: true
+    min_grip_openness: 0.05
+    workspace_min_m: [0.15, -0.5, 0.005]
+    workspace_max_m: [0.72, 0.5, 0.35]
+
+runner_config:
+  recorder_config:
+    video_enabled: true
+    rerun_enabled: false
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_harness/$CKPT_NAME/$ENV_NAME

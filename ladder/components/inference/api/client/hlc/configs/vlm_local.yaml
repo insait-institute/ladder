@@ -1,0 +1,8 @@
+autoclass: ladder.components.inference.api.client.hlc.vlm.local_hf.LocalVLM
+# In-process VLM: no API key, no hosted endpoint, no network. The alternative to vlm.yaml wherever a
+# run has to stay self-contained (an offline node, or an arm that must not depend on a paid endpoint).
+# 8B rather than 2B because the verifier's judgement is the point of the arm; it shares the GPU with
+# the policy, which a 96 GB card absorbs but a 48 GB one will not.
+model: Qwen/Qwen3-VL-8B-Instruct
+dtype: bfloat16
+device: cuda

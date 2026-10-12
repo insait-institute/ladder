@@ -1,0 +1,23 @@
+import: ../../../../vlams/configs/simpler/composition/vlam_simpler_composition.yaml
+
+policy_config: !overwrite
+  autoclass: ladder.components.inference.models.harness.policy.HarnessPolicy
+  robot: WidowX 250 robot arm
+  vlm:
+    import: ../../../../../api/client/hlc/configs/vlm.yaml
+  scene:
+    camera: main
+  arm:
+    tool_offset_m: 0.016
+    max_span_m: 0.074
+    verify_place: true
+    max_translation_per_step_m: 0.04
+    move_steps: 25
+    open_gripper_steps: 10
+    close_gripper_steps: 15
+
+runner_config:
+  recorder_config:
+    video_enabled: true
+    rerun_enabled: false
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/simpler_composition_harness/$CKPT_NAME/$ENV_NAME

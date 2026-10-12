@@ -1,0 +1,15 @@
+import: vlam_robolab_composition_plan_verifier.yaml
+
+# RoboLab composition -- _plan_verifier with no cache_path, so the planner decomposes the reset frame.
+# The pass that mints a plan for a newly added task, and the only deployable arm that uses no
+# privileged information and no curated plan.
+runner_config:
+  hlc_config:
+    source:
+      cache_path: ""
+      # RoboLab's plans name each object by colour and type, the way its cached plans do, so the
+      # live arm and the curated one describe the same scene the same way. Everything else is the
+      # shared decomposer contract, which already fixes the subtask form.
+      object_attributes: true
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_plan_verifier_live/$CKPT_NAME/$ENV_NAME

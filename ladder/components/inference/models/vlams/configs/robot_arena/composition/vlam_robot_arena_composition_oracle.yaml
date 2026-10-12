@@ -1,0 +1,11 @@
+import: vlam_robot_arena_composition.yaml
+
+# RobotArena composition -- privileged oracle (reference ceiling). Needs no plans: composition.py
+# publishes the ground-truth plan and per-goal achieved flags in metadata["oracle"].
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/oracle.yaml
+    advancer:
+      advance_settle_steps: 10
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robot_arena_composition_oracle/$CKPT_NAME/$ENV_NAME

@@ -1,0 +1,15 @@
+# NOTE: .bazelignore does not support glob patterns; list nested venv paths explicitly.
+ladder/components/dashboard/venv
+ladder/components/inference/api/client/venv
+ladder/components/inference/api/core/venv
+ladder/components/inference/api/server/venv
+ladder/components/inference/models/capx/venv
+ladder/components/inference/models/external/openpi/venv
+ladder/components/inference/models/tiptop/venv
+ladder/components/inference/models/vlams/envs/v0/venv
+ladder/components/inference/robots/robolab/venv
+ladder/components/inference/robots/robot_arena/venv
+ladder/components/inference/robots/simpler/venv
+ladder/core/databib/venv
+ladder/core/venv
+build_support/python/venv

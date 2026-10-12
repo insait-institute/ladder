@@ -1,0 +1,9 @@
+import: gpt_policy_simpler_composition.yaml
+
+policy_config:
+  vlm:
+    import: ../../vlm_opus55.yaml
+
+runner_config:
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/simpler_composition_gpt_policy_opus55/$CKPT_NAME/$ENV_NAME

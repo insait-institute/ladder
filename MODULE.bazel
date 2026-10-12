@@ -1,0 +1,97 @@
+module(
+    name = "ladder",
+    version = "",
+)
+
+# -----------------------------------------------------------------------------
+# Core Bazel dependencies from BCR
+# -----------------------------------------------------------------------------
+
+bazel_dep(name = "aspect_bazel_lib", version = "2.22.0")
+bazel_dep(name = "bazel_skylib", version = "1.8.2")
+bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "rules_pkg", version = "1.0.1")
+
+# -----------------------------------------------------------------------------
+# Load special rules
+# -----------------------------------------------------------------------------
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+# Sim/robot-benchmark http archives (asset + code tarballs) live in their own segment file.
+include("//:http-assets.MODULE.bazel")
+
+# -----------------------------------------------------------------------------
+# Load rules_python repository - contains rules for building python code
+# -----------------------------------------------------------------------------
+
+bazel_dep(name = "rules_python", version = "1.9.0")
+bazel_dep(name = "rules_uv", version = "0.89.2")
+
+# We use our own fork of rules_uv which extends the original with rules for uv export.
+# Pin the commit rather than the tag: bazel treats the sha as the canonical reproducible form. The
+# tag is what keeps the commit reachable, so it must not be deleted.
+archive_override(
+    module_name = "rules_uv",
+    integrity = "sha256-ObU6SXXVaSOxpyWAb1tZm3vPsutGZoRBiyGoYaMUWbM=",
+    strip_prefix = "rules_uv-3928773c",
+    urls = ["https://github.com/insait-institute/ladder/releases/download/assets-v1/rules_uv-3928773c.tar.gz"],
+)
+
+# Set up Python toolchain
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(
+    is_default = True,
+    python_version = "3.10",
+)
+
+# 3.12 toolchain for the RoboLab env only (isaacsim 6.0 ships cp312-only wheels).
+python.toolchain(
+    python_version = "3.12",
+)
+use_repo(python, "python_3_12")
+
+# Set up global transition settings
+# This allows us to pass custom build settings to py_binary/py_test transitions
+config = use_extension("@rules_python//python/extensions:config.bzl", "config")
+config.add_transition_setting(setting = "//build_support/python:pip_env")
+
+# Set up pip dependencies using the new pip extension
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+
+# Set up pip environment configuration using our custom extension
+pip_env = use_extension("//build_support/python:pip_env_ext.bzl", "pip_env")
+use_repo(pip_env, "pip_env_config")
+
+# -----------------------------------------------------------------------------
+# Set up pip environments
+# -----------------------------------------------------------------------------
+
+include("//:pip-patches.MODULE.bazel")
+include("//:pip-core.MODULE.bazel")
+include("//:pip-inference.MODULE.bazel")
+include("//:pip-dashboard.MODULE.bazel")
+
+# -----------------------------------------------------------------------------
+# Install ruff
+# -----------------------------------------------------------------------------
+
+http_archive(
+    name = "ruff-linux",
+    build_file_content = """exports_files(["ruff-x86_64-unknown-linux-gnu/ruff"])""",
+    sha256 = "c4e6591ae1bb4f15c09c9022b7bfc57e1c3a567acdc9cd76021cd1304b5868c3",
+    urls = ["https://github.com/astral-sh/ruff/releases/download/0.8.4/ruff-x86_64-unknown-linux-gnu.tar.gz"],
+)
+
+# -----------------------------------------------------------------------------
+# Load buildifier (for auto formatting bazel files) https://github.com/keith/buildifier-prebuilt
+# -----------------------------------------------------------------------------
+
+bazel_dep(name = "buildifier_prebuilt", version = "8.2.1.1")
+bazel_dep(name = "buildozer", version = "8.2.1")
+
+# -----------------------------------------------------------------------------
+# Load rules_shell
+# -----------------------------------------------------------------------------
+
+bazel_dep(name = "rules_shell", version = "0.6.1")

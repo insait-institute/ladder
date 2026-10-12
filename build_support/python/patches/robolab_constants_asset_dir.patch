@@ -1,0 +1,23 @@
+--- a/robolab/constants.py
++++ b/robolab/constants.py
+@@ -12,7 +12,7 @@
+ 
+ # Get children of package directory
+ DEFAULT_OUTPUT_DIR = os.path.join(PACKAGE_DIR, "output")
+-ASSET_DIR = os.path.join(PACKAGE_DIR, "assets")
++ASSET_DIR = os.environ.get("ROBOLAB_ASSET_DIR") or os.path.join(PACKAGE_DIR, "assets")
+ BACKGROUND_ASSET_DIR = os.path.join(ASSET_DIR, "backgrounds")
+ OBJECT_DIR = os.path.join(ASSET_DIR, "objects")
+ FIXTURE_DIR = os.path.join(ASSET_DIR, "fixtures")
+@@ -47,6 +47,11 @@
+     if os.path.isabs(relative_path):
+         return relative_path
+ 
++    # Catalog paths are stored relative to PACKAGE_DIR with an "assets/" prefix;
++    # remap that prefix onto ASSET_DIR so a separately-hosted asset tree resolves.
++    normalized = relative_path.replace(os.sep, "/")
++    if normalized.startswith("assets/"):
++        return os.path.join(ASSET_DIR, *normalized[len("assets/"):].split("/"))
+     return os.path.join(PACKAGE_DIR, relative_path)
+ 
+ # Output directory

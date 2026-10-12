@@ -1,0 +1,5 @@
+import: 'imported.yaml'
+outer:
+  inner: !overwrite
+    d: 4
+  inner_list: !overwrite [11, 12]

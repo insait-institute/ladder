@@ -1,0 +1,12 @@
+import: ../../../../../vlams/configs/robolab/composition/vlam_robolab_composition_stepwise_interval.yaml
+
+# pi0.5 with the next subtask chosen step by step, advanced on a fixed step interval.
+policy_config: !overwrite
+  autoclass: ladder.components.inference.models.external.openpi.policy.OpenpiPolicy
+  action_space: joint_positions
+  model_config:
+    model_id: pi05_droid_jointpos
+
+runner_config:
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_openpi_stepwise_interval/$CKPT_NAME/$ENV_NAME

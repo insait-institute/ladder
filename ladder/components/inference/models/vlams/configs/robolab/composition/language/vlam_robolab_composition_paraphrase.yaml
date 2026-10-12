@@ -1,0 +1,33 @@
+import: ../vlam_robolab_composition.yaml
+
+# Paraphrase robustness on the composition benchmark: the runner replaces each task's instruction,
+# keyed by the env_name env_server reports (the RoboLab Task CLASS name -- CompBin6Task, not
+# comp_bin_6), with entry 0 the canonical phrasing. A key matching no task is silently ignored, so
+# check names against composition_specs.task_class_name. A count that divides the batch gives equal
+# episodes per paraphrase, otherwise it round-robins.
+#
+# The three below are the tasks whose wording carries the task -- a quantifier, a category exclusion
+# and a required order -- so a score delta is attributable to reading the words rather than the layout.
+# RoboLab also has an env-side instruction axis (INSTRUCTION_TYPE=collective|enumerated, from the
+# spec's own instruction dict); this overrides the text outright and is independent of it.
+runner_config:
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_paraphrase/$CKPT_NAME/$ENV_NAME
+  instruction_override:
+    CompBin6Task:
+      - "Put everything in the bin"
+      - "Move all of the objects into the bin"
+      - "Put each of the items in the bin"
+      - "Clear the table by putting everything in the bin"
+
+    CompBin4DistractorTask:
+      - "Put all the fruit in the bin"
+      - "Put only the fruit in the bin"
+      - "Move every piece of fruit into the bin"
+      - "Put the fruit in the bin and leave everything else alone"
+
+    CompOrderedBin3Task:
+      - "First put the banana in the bin, then put the orange in the bin, then put the lemon in the bin"
+      - "Put the banana in the bin before the orange, and the orange before the lemon"
+      - "Start with the banana in the bin, then the orange, then the lemon"
+      - "The banana goes in the bin first, then the orange, then the lemon"

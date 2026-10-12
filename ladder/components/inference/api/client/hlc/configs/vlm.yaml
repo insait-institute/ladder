@@ -1,0 +1,8 @@
+autoclass: ladder.components.inference.api.client.hlc.vlm.openai_api.OpenAIVLM
+model: ${VLM_MODEL}
+base_url: ${VLM_BASE_URL}
+api_key_env: VLM_API_KEY
+timeout: 600.0
+max_rps: 12.0
+rate_limit_burst: 48
+rate_limit_attempts: 16

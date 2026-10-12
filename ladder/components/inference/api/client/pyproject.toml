@@ -1,0 +1,16 @@
+[project]
+name = "ladder-components-inference-api-client"
+version = "0.0.0"
+requires-python = ">=3.10"
+dependencies = [
+    "ladder-components-inference-api-core",
+    "filelock==3.12.4",
+    "openai>=1.0.0",
+    "rerun-sdk==0.23.1",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+ladder-components-inference-api-core = { path = "../../../../../ladder/components/inference/api/core", package = false }

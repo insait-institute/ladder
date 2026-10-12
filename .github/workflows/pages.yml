@@ -1,0 +1,41 @@
+# Publishes the project page (docs/) with GitHub Pages, with the leaderboard's submitted entries scored
+# from leaderboard/submissions/ (scripts/leaderboard.py build). docs/CNAME names the custom domain
+# (ladderrobotics.ai), but an Actions deployment does not read it: set the same domain in the repository
+# settings (Settings > Pages > Custom domain).
+name: pages
+
+on:
+  push:
+    branches: [main]
+    paths: ["docs/**", "leaderboard/**", "scripts/leaderboard.py"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml==6.0.2
+      - name: Leaderboard entries
+        run: scripts/leaderboard.py build
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs
+      - id: deploy
+        uses: actions/deploy-pages@v5

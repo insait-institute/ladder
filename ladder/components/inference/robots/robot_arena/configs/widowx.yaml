@@ -1,0 +1,22 @@
+autoclass: ladder.components.inference.robots.robot_arena.robot_arena_server.RobotArenaServer
+env_config:
+  # Paths are relative to the Bazel workspace root (resolved via runfiles)
+  data_root: ladder/components/inference/robots/robot_arena/robot_arena_data/examples/data
+  robot_name: widowx
+  scene_name: ""
+  max_episode_steps: 60
+  control_freq: 5
+  sim_freq: 200
+  camera_width: 640
+  camera_height: 480
+
+test_config:
+  test_type: default
+  # Empty scene_names means auto-discover all scenes.
+  # For quick smoke tests, list a subset: ["scene1", "scene2", "scene3"]
+  scene_names: []
+
+request_listener_config:
+  req_rep_server_config:
+    autoclass: ladder.components.inference.api.core.request_reply.ZmqRequestReplyServer
+    port: 5556

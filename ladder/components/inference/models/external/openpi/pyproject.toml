@@ -1,0 +1,42 @@
+[project]
+# The openpi model library and the JAX stack, on Python 3.12. openpi is vendored as source, so the
+# packages its code imports are declared here; versions follow its own lock unless marked.
+name = "ladder-components-inference-models-external-openpi"
+version = "0.0.0"
+requires-python = "~=3.12.0"
+dependencies = [
+    "ladder-components-inference-api-client",
+    "jax[cuda12]==0.5.3",
+    "flax==0.10.2",
+    # openpi's own dependency overrides.
+    "ml-dtypes==0.4.1",
+    "tensorstore==0.1.74",
+    "chex",  # optax imports it without declaring it
+    "ml-collections==1.0.0",
+    "optax",
+    "tyro",
+    "einops==0.8.1",
+    "sentencepiece==0.2.0",
+    "transformers==4.53.2",
+    "augmax==0.3.4",
+    "jaxtyping==0.2.36",
+    "beartype==0.19.0",
+    "numpydantic",
+    "etils[epath]",
+    # Split out of openpi's fsspec[gcs] extra, which is a dependency cycle here. Not 2026.x:
+    # it stalls ~12s per remote object on a credentials probe.
+    "fsspec==2025.3.0",
+    "gcsfs==2025.3.0",
+    "tqdm-loggable",
+    "numpy==2.2.4",  # openpi pins <2 for an extra we do not ship; its code runs on 2.x
+    "pillow==10.2.0",
+    # The CPU builds: openpi's CUDA torch fights jax[cuda12] over the nvidia wheels.
+    "torch @ https://download.pytorch.org/whl/cpu/torch-2.7.1%2Bcpu-cp312-cp312-manylinux_2_28_x86_64.whl",
+    "torchvision @ https://download.pytorch.org/whl/cpu/torchvision-0.22.1%2Bcpu-cp312-cp312-manylinux_2_28_x86_64.whl",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+ladder-components-inference-api-client = { path = "../../../../../../ladder/components/inference/api/client", package = false }

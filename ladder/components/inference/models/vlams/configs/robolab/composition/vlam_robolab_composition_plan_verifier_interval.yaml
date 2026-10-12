@@ -1,0 +1,15 @@
+import: vlam_robolab_composition_plan_verifier.yaml
+
+# RoboLab composition -- verifier-advanced on a step clock instead of the gripper cycle, so a subtask
+# the policy never acts on is still re-checked. Imports the RoboLab _plan_verifier rather than the
+# shared plan_verifier_interval.yaml so the tuned advancer block is not repeated; the two keys below
+# are exactly what that shared file adds.
+runner_config:
+  hlc_config:
+    advancer:
+      gripper_trigger: False
+      # The shared 30 is about one check per SimplerEnv subtask. RoboLab subtasks are longer, so the
+      # same one-check-per-subtask rule gives ~75. A faster clock only costs VLM calls.
+      verify_interval: 75
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_plan_verifier_interval/$CKPT_NAME/$ENV_NAME

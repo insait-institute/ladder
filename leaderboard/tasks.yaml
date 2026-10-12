@@ -1,0 +1,153 @@
+# Every LADDER task: suite, subgoals, category and instruction, as in the paper's task catalogs.
+# Written by the maintainers' tools; scripts/leaderboard.py groups results by it.
+
+simplerenv_long:
+  all10_plate: {subgoals: 10, category: Single destination, instruction: "put the four carrots, the three spoons and the three eggplants on the plate"}
+  all10_towel: {subgoals: 10, category: Single destination, instruction: "put the four carrots, the three spoons and the three eggplants on the blue towel"}
+  all1_plate: {subgoals: 1, category: Single destination, instruction: "put the carrot on the plate."}
+  all1_towel: {subgoals: 1, category: Single destination, instruction: "put the spoon on the blue towel."}
+  all2_plate: {subgoals: 2, category: Single destination, instruction: "put the carrot and the spoon on the plate"}
+  all2_towel: {subgoals: 2, category: Single destination, instruction: "put the carrot and the spoon on the blue towel"}
+  all3_plate: {subgoals: 3, category: Single destination, instruction: "put the carrot, the spoon and the eggplant on the plate"}
+  all3_towel: {subgoals: 3, category: Single destination, instruction: "put the carrot, the spoon and the eggplant on the blue towel"}
+  all4_plate: {subgoals: 4, category: Single destination, instruction: "put both carrots, the spoon and the eggplant on the plate"}
+  all4_towel: {subgoals: 4, category: Single destination, instruction: "put both carrots, the spoon and the eggplant on the blue towel"}
+  all5_plate: {subgoals: 5, category: Single destination, instruction: "put both carrots, both spoons and the eggplant on the plate"}
+  all5_towel: {subgoals: 5, category: Single destination, instruction: "put both carrots, both spoons and the eggplant on the blue towel"}
+  all6_plate: {subgoals: 6, category: Single destination, instruction: "put both carrots, both spoons and both eggplants on the plate"}
+  all6_towel: {subgoals: 6, category: Single destination, instruction: "put both carrots, both spoons and both eggplants on the blue towel"}
+  all7_plate: {subgoals: 7, category: Single destination, instruction: "put the three carrots, both spoons and both eggplants on the plate"}
+  all7_towel: {subgoals: 7, category: Single destination, instruction: "put the three carrots, both spoons and both eggplants on the blue towel"}
+  all8_plate: {subgoals: 8, category: Single destination, instruction: "put the three carrots, the three spoons and both eggplants on the plate"}
+  all8_towel: {subgoals: 8, category: Single destination, instruction: "put the three carrots, the three spoons and both eggplants on the blue towel"}
+  all9_plate: {subgoals: 9, category: Single destination, instruction: "put the three carrots, the three spoons and the three eggplants on the plate"}
+  all9_towel: {subgoals: 9, category: Single destination, instruction: "put the three carrots, the three spoons and the three eggplants on the blue towel"}
+  except_eggplant_2: {subgoals: 2, category: Exclusion, instruction: "put everything except the eggplant on the plate"}
+  except_eggplant_3: {subgoals: 3, category: Exclusion, instruction: "put everything except the eggplant on the plate"}
+  except_eggplant_4: {subgoals: 4, category: Exclusion, instruction: "put everything except the eggplant on the plate"}
+  except_eggplant_5: {subgoals: 5, category: Exclusion, instruction: "put everything except the eggplant on the plate"}
+  move_plate_to_towel_2: {subgoals: 2, category: Transfer, instruction: "move the carrot and the spoon from the plate to the blue towel"}
+  move_plate_to_towel_3: {subgoals: 3, category: Transfer, instruction: "move the carrot, the spoon and the eggplant from the plate to the blue towel"}
+  move_plate_to_towel_4: {subgoals: 4, category: Transfer, instruction: "move both carrots, the spoon and the eggplant from the plate to the blue towel"}
+  move_plate_to_towel_5: {subgoals: 5, category: Transfer, instruction: "move both carrots, both spoons and the eggplant from the plate to the blue towel"}
+  move_towel_to_plate_3: {subgoals: 3, category: Transfer, instruction: "move the carrot, the spoon and the eggplant from the blue towel to the plate"}
+  ordered_plate_2: {subgoals: 2, category: Ordered, instruction: "first put the carrot on the plate, then put the spoon on the plate"}
+  ordered_plate_3: {subgoals: 3, category: Ordered, instruction: "first put the carrot on the plate, then put the spoon on the plate, then put the eggplant on the plate"}
+  relay10e: {subgoals: 10, category: Relay, instruction: "first put the carrot on the plate, then put the carrot on the blue towel, then put the spoon on the plate, then put the spoon on the blue towel, then put the eggplant on the plate, then put the eggplant on the blue towel, then put the carrot on the plate, then put the carrot on the blue towel, then put the spoon on the plate, then put the spoon on the blue towel"}
+  relay2e: {subgoals: 2, category: Relay, instruction: "first put the carrot on the plate, then put the carrot on the blue towel"}
+  relay3e: {subgoals: 3, category: Relay, instruction: "first put the carrot on the plate, then put the carrot on the blue towel, then put the spoon on the plate"}
+  relay4e: {subgoals: 4, category: Relay, instruction: "first put the carrot on the plate, then put the carrot on the blue towel, then put the spoon on the plate, then put the spoon on the blue towel"}
+  relay5e: {subgoals: 5, category: Relay, instruction: "first put the carrot on the plate, then put the carrot on the blue towel, then put the spoon on the plate, then put the spoon on the blue towel, then put the eggplant on the plate"}
+  relay6e: {subgoals: 6, category: Relay, instruction: "first put the carrot on the plate, then put the carrot on the blue towel, then put the spoon on the plate, then put the spoon on the blue towel, then put the eggplant on the plate, then put the eggplant on the blue towel"}
+  relay7e: {subgoals: 7, category: Relay, instruction: "first put the carrot on the plate, then put the carrot on the blue towel, then put the spoon on the plate, then put the spoon on the blue towel, then put the eggplant on the plate, then put the eggplant on the blue towel, then put the carrot on the plate"}
+  relay8e: {subgoals: 8, category: Relay, instruction: "first put the carrot on the plate, then put the carrot on the blue towel, then put the spoon on the plate, then put the spoon on the blue towel, then put the eggplant on the plate, then put the eggplant on the blue towel, then put the carrot on the plate, then put the carrot on the blue towel"}
+  relay9e: {subgoals: 9, category: Relay, instruction: "first put the carrot on the plate, then put the carrot on the blue towel, then put the spoon on the plate, then put the spoon on the blue towel, then put the eggplant on the plate, then put the eggplant on the blue towel, then put the carrot on the plate, then put the carrot on the blue towel, then put the spoon on the plate"}
+  shuttle10: {subgoals: 10, category: Revisit, instruction: "first put the carrot on the plate, then put the spoon on the plate, then put the eggplant on the plate, then put the carrot on the blue towel, then put the spoon on the blue towel, then put the eggplant on the blue towel, then put the carrot on the plate, then put the spoon on the plate, then put the eggplant on the plate, then put the carrot on the blue towel"}
+  shuttle7: {subgoals: 7, category: Revisit, instruction: "first put the carrot on the plate, then put the spoon on the plate, then put the eggplant on the plate, then put the carrot on the blue towel, then put the spoon on the blue towel, then put the eggplant on the blue towel, then put the carrot on the plate"}
+  shuttle8: {subgoals: 8, category: Revisit, instruction: "first put the carrot on the plate, then put the spoon on the plate, then put the eggplant on the plate, then put the carrot on the blue towel, then put the spoon on the blue towel, then put the eggplant on the blue towel, then put the carrot on the plate, then put the spoon on the plate"}
+  shuttle9: {subgoals: 9, category: Revisit, instruction: "first put the carrot on the plate, then put the spoon on the plate, then put the eggplant on the plate, then put the carrot on the blue towel, then put the spoon on the blue towel, then put the eggplant on the blue towel, then put the carrot on the plate, then put the spoon on the plate, then put the eggplant on the plate"}
+  split2: {subgoals: 2, category: Split destination, instruction: "put the carrot on the plate and put the spoon on the blue towel"}
+  split3: {subgoals: 3, category: Split destination, instruction: "put the carrot and the spoon on the plate and put the eggplant on the blue towel"}
+  split4: {subgoals: 4, category: Split destination, instruction: "put one carrot and the spoon on the plate and put the eggplant and one carrot on the blue towel"}
+  split5: {subgoals: 5, category: Split destination, instruction: "put one carrot, one spoon and the eggplant on the plate and put one carrot and one spoon on the blue towel"}
+  split6: {subgoals: 6, category: Split destination, instruction: "put one carrot, one spoon and one eggplant on the plate and put one carrot, one spoon and one eggplant on the blue towel"}
+  split7: {subgoals: 7, category: Split destination, instruction: "put two carrots, one spoon and one eggplant on the plate and put one spoon, one eggplant and one carrot on the blue towel"}
+  spoons2: {subgoals: 2, category: Duplicates, instruction: "put one spoon on the plate and put one spoon on the blue towel"}
+  spoons3: {subgoals: 3, category: Duplicates, instruction: "put two spoons on the plate and put one spoon on the blue towel"}
+  spoons4: {subgoals: 4, category: Duplicates, instruction: "put two spoons on the plate and put two spoons on the blue towel"}
+  spoons5: {subgoals: 5, category: Duplicates, instruction: "put three spoons on the plate and put two spoons on the blue towel"}
+
+robotarena_long:
+  scene36_1goal: {subgoals: 1, category: Single destination, instruction: "put the fork in the pan."}
+  scene36_2goal: {subgoals: 2, category: Single destination, instruction: "put the fork and the corn cob in the pan"}
+  scene45_1goal: {subgoals: 1, category: Single destination, instruction: "put the blue bowl on the purple cloth."}
+  scene45_2goal: {subgoals: 2, category: Single destination, instruction: "put the blue bowl and the sushi toy on the purple cloth"}
+  scene45_3goal: {subgoals: 3, category: Single destination, instruction: "put the blue bowl, the sushi toy and the banana on the purple cloth"}
+  scene45_4goal: {subgoals: 4, category: Single destination, instruction: "put the blue bowl, the sushi toy, the cheese and the banana on the purple cloth"}
+  scene45_5goal: {subgoals: 5, category: Single destination, instruction: "put the blue bowl, the sushi toy, the cheese, the banana and the mushroom on the purple cloth"}
+  scene45_6goal: {subgoals: 6, category: Single destination, instruction: "put the blue bowl, the sushi toy, the cheese, the banana, the mushroom and the corn cob on the purple cloth"}
+  scene45_all_2: {subgoals: 2, category: Single destination, instruction: "put the blue bowl and the sushi toy on the purple cloth"}
+  scene45_all_3: {subgoals: 3, category: Single destination, instruction: "put the blue bowl, the sushi toy and the banana on the purple cloth"}
+  scene45_all_4: {subgoals: 4, category: Single destination, instruction: "put the blue bowl, the sushi toy, the banana and the cheese on the purple cloth"}
+  scene45_all_5: {subgoals: 5, category: Single destination, instruction: "put the blue bowl, the sushi toy, the banana, the cheese and the mushroom on the purple cloth"}
+  scene45_all_6: {subgoals: 6, category: Single destination, instruction: "put the blue bowl, the sushi toy, the banana, the cheese, the mushroom and the corn cob on the purple cloth"}
+  scene45_except_2: {subgoals: 2, category: Exclusion, instruction: "put everything except the small can on the purple cloth"}
+  scene45_except_3: {subgoals: 3, category: Exclusion, instruction: "put everything except the small can on the purple cloth"}
+  scene45_except_4: {subgoals: 4, category: Exclusion, instruction: "put everything except the small can on the purple cloth"}
+  scene45_except_5: {subgoals: 5, category: Exclusion, instruction: "put everything except the small can on the purple cloth"}
+  scene45_except_6: {subgoals: 6, category: Exclusion, instruction: "put everything except the small can on the purple cloth"}
+  scene50_3goal: {subgoals: 3, category: Single destination, instruction: "put the stuffed animal, the blue block and the cheese in the pot"}
+  scene54_1goal: {subgoals: 1, category: Single destination, instruction: "put the spoon on the cloth."}
+  scene54_2goal: {subgoals: 2, category: Single destination, instruction: "put the spoon and the chicken drumstick on the cloth"}
+  scene54_2goal_ordered: {subgoals: 2, category: Ordered, instruction: "first put the chicken drumstick on the cloth, then put the spoon on the cloth"}
+  scene54_3goal: {subgoals: 3, category: Single destination, instruction: "put the spoon, the chicken drumstick and the pot on the cloth"}
+  scene54_3goal_ordered: {subgoals: 3, category: Ordered, instruction: "first put the corn cob on the cloth, then put the spoon on the cloth, then put the chicken drumstick on the cloth"}
+  scene54_duplicates_2: {subgoals: 2, category: Duplicates, instruction: "put both corn cobs on the cloth"}
+  scene54_duplicates_3: {subgoals: 3, category: Duplicates, instruction: "put the three corn cobs on the cloth"}
+  scene54_except: {subgoals: 2, category: Exclusion, instruction: "put everything except the pot on the cloth"}
+  scene54_except_3: {subgoals: 3, category: Exclusion, instruction: "put everything except the pot on the cloth"}
+  scene54_relay_2: {subgoals: 2, category: Relay, instruction: "first put the spoon on the cloth, then put the spoon in the pot"}
+  scene54_relay_4: {subgoals: 4, category: Relay, instruction: "first put the spoon on the cloth, then put the spoon in the pot, then put the chicken drumstick on the cloth, then put the chicken drumstick in the pot"}
+  scene54_revisit_10: {subgoals: 10, category: Revisit, instruction: "first put the spoon on the cloth, then put the spoon in the pot, then put the spoon on the cloth, then put the spoon in the pot, then put the spoon on the cloth, then put the spoon in the pot, then put the spoon on the cloth, then put the spoon in the pot, then put the spoon on the cloth, then put the spoon in the pot"}
+  scene54_revisit_3: {subgoals: 3, category: Revisit, instruction: "first put the spoon on the cloth, then put the spoon in the pot, then put the spoon on the cloth"}
+  scene54_revisit_6: {subgoals: 6, category: Revisit, instruction: "first put the spoon on the cloth, then put the spoon in the pot, then put the spoon on the cloth, then put the chicken drumstick on the cloth, then put the chicken drumstick in the pot, then put the chicken drumstick on the cloth"}
+  scene54_revisit_7: {subgoals: 7, category: Revisit, instruction: "first put the spoon on the cloth, then put the spoon in the pot, then put the spoon on the cloth, then put the spoon in the pot, then put the spoon on the cloth, then put the spoon in the pot, then put the spoon on the cloth"}
+  scene54_revisit_8: {subgoals: 8, category: Revisit, instruction: "first put the spoon on the cloth, then put the spoon in the pot, then put the spoon on the cloth, then put the spoon in the pot, then put the spoon on the cloth, then put the spoon in the pot, then put the spoon on the cloth, then put the spoon in the pot"}
+  scene54_revisit_9: {subgoals: 9, category: Revisit, instruction: "first put the spoon on the cloth, then put the spoon in the pot, then put the spoon on the cloth, then put the chicken drumstick on the cloth, then put the chicken drumstick in the pot, then put the chicken drumstick on the cloth, then put the corn cob on the cloth, then put the corn cob in the pot, then put the corn cob on the cloth"}
+  scene54_route_2: {subgoals: 2, category: Relay, instruction: "first put the spoon in the pot, then put the spoon on the cloth"}
+  scene54_route_4: {subgoals: 4, category: Relay, instruction: "first put the spoon in the pot, then put the spoon on the cloth, then put the chicken drumstick in the pot, then put the chicken drumstick on the cloth"}
+  scene54_route_6: {subgoals: 6, category: Relay, instruction: "first put the spoon in the pot, then put the spoon on the cloth, then put the chicken drumstick in the pot, then put the chicken drumstick on the cloth, then put the corn cob in the pot, then put the corn cob on the cloth"}
+  scene54_route_7: {subgoals: 7, category: Relay, instruction: "first put the spoon in the pot, then put the spoon on the cloth, then put the chicken drumstick in the pot, then put the chicken drumstick on the cloth, then put the corn cob in the pot, then put the corn cob on the cloth, then put the cheese on the cloth"}
+  scene54_route_8: {subgoals: 8, category: Relay, instruction: "first put the spoon in the pot, then put the spoon on the cloth, then put the chicken drumstick in the pot, then put the chicken drumstick on the cloth, then put the corn cob in the pot, then put the corn cob on the cloth, then put the cheese in the pot, then put the cheese on the cloth"}
+  scene54_split_2: {subgoals: 2, category: Split destination, instruction: "put the spoon on the cloth and put the chicken drumstick in the pot"}
+  scene54_split_3: {subgoals: 3, category: Split destination, instruction: "put the spoon and the corn cob on the cloth and put the chicken drumstick in the pot"}
+  scene54_transfer_2: {subgoals: 2, category: Transfer, instruction: "move the spoon and the chicken drumstick from the cloth to the pot"}
+  scene76_1goal: {subgoals: 1, category: Single destination, instruction: "put the metal pot on the yellow cloth."}
+  scene76_2goal: {subgoals: 2, category: Single destination, instruction: "put the metal pot and the mushroom toy on the yellow cloth"}
+  scene76_2goal_ordered: {subgoals: 2, category: Ordered, instruction: "first put the metal pot on the yellow cloth, then put the mushroom toy on the yellow cloth"}
+
+robolab_long:
+  comp_bin_1: {subgoals: 1, category: Single destination, instruction: "put the banana in the bin."}
+  comp_bin_10: {subgoals: 10, category: Single destination, instruction: "put the banana, both oranges, the lemon, the lime, the avocado, the onion, the lychee, the pumpkin and the pomegranate in the bin"}
+  comp_bin_2: {subgoals: 2, category: Single destination, instruction: "put the banana and the orange in the bin"}
+  comp_bin_2_distractor: {subgoals: 2, category: Exclusion, instruction: "put everything except the red block in the bin"}
+  comp_bin_4_distractor: {subgoals: 4, category: Exclusion, instruction: "put everything except the red block and the blue block in the bin"}
+  comp_bin_6: {subgoals: 6, category: Single destination, instruction: "put the banana, the orange, the lemon, the lime, the avocado and the onion in the bin"}
+  comp_identical_2: {subgoals: 2, category: Duplicates, instruction: "put both oranges in the bin"}
+  comp_identical_4: {subgoals: 4, category: Duplicates, instruction: "put the four limes in the bin"}
+  comp_ordered_bin_10: {subgoals: 10, category: Ordered, instruction: "first put the pumpkin in the bin, then put the onion in the bin, then put the lime in the bin, then put the avocado in the bin, then put the lemon in the bin, then put the pomegranate in the bin, then put the lychee in the bin, then put the banana in the bin, then put the orange in the bin, then put the orange in the bin"}
+  comp_ordered_bin_2: {subgoals: 2, category: Ordered, instruction: "first put the banana in the bin, then put the orange in the bin"}
+  comp_ordered_bin_3: {subgoals: 3, category: Ordered, instruction: "first put the banana in the bin, then put the lemon in the bin, then put the orange in the bin"}
+  comp_ordered_bin_4: {subgoals: 4, category: Ordered, instruction: "first put the orange in the bin, then put the lemon in the bin, then put the lime in the bin, then put the banana in the bin"}
+  comp_ordered_bin_5: {subgoals: 5, category: Ordered, instruction: "first put the avocado in the bin, then put the orange in the bin, then put the lemon in the bin, then put the lime in the bin, then put the banana in the bin"}
+  comp_ordered_bin_6: {subgoals: 6, category: Ordered, instruction: "first put the avocado in the bin, then put the orange in the bin, then put the lemon in the bin, then put the lime in the bin, then put the onion in the bin, then put the banana in the bin"}
+  comp_ordered_bin_7: {subgoals: 7, category: Ordered, instruction: "first put the avocado in the bin, then put the orange in the bin, then put the lemon in the bin, then put the lime in the bin, then put the onion in the bin, then put the banana in the bin, then put the lychee in the bin"}
+  comp_ordered_bin_8: {subgoals: 8, category: Ordered, instruction: "first put the orange in the bin, then put the pumpkin in the bin, then put the lychee in the bin, then put the lemon in the bin, then put the lime in the bin, then put the banana in the bin, then put the onion in the bin, then put the avocado in the bin"}
+  comp_ordered_bin_9: {subgoals: 9, category: Ordered, instruction: "first put the onion in the bin, then put the orange in the bin, then put the pumpkin in the bin, then put the lychee in the bin, then put the lemon in the bin, then put the lime in the bin, then put the banana in the bin, then put the avocado in the bin, then put the orange in the bin"}
+  comp_plate_1: {subgoals: 1, category: Single destination, instruction: "put the banana on the plate."}
+  comp_relay_2: {subgoals: 4, category: Relay, instruction: "first put the lemon on the plate, then put the lemon in the bin, then put the lime on the plate, then put the lime in the bin"}
+  comp_relay_3: {subgoals: 6, category: Relay, instruction: "first put the lemon on the plate, then put the lemon in the bin, then put the lime on the plate, then put the lime in the bin, then put the banana on the plate, then put the banana in the bin"}
+  comp_relay_4: {subgoals: 8, category: Relay, instruction: "first put the lemon on the plate, then put the lemon in the bin, then put the lime on the plate, then put the lime in the bin, then put the banana on the plate, then put the banana in the bin, then put the orange on the plate, then put the orange in the bin"}
+  comp_relay_5: {subgoals: 10, category: Relay, instruction: "first put the lemon on the plate, then put the lemon in the bin, then put the lime on the plate, then put the lime in the bin, then put the banana on the plate, then put the banana in the bin, then put the orange on the plate, then put the orange in the bin, then put the avocado on the plate, then put the avocado in the bin"}
+  comp_revisit_1: {subgoals: 3, category: Revisit, instruction: "first put the lemon in the bin, then put the lemon on the plate, then put the lemon in the bin"}
+  comp_revisit_2: {subgoals: 6, category: Revisit, instruction: "first put the lemon in the bin, then put the lemon on the plate, then put the lemon in the bin, then put the lime in the bin, then put the lime on the plate, then put the lime in the bin"}
+  comp_revisit_3: {subgoals: 9, category: Revisit, instruction: "first put the lemon in the bin, then put the lemon on the plate, then put the lemon in the bin, then put the lime in the bin, then put the lime on the plate, then put the lime in the bin, then put the banana in the bin, then put the banana on the plate, then put the banana in the bin"}
+  comp_route_10: {subgoals: 10, category: Split destination, instruction: "put the banana, the lemon and the lime on the plate and put both oranges, the avocado, the onion, the lychee, the pumpkin and the pomegranate in the bin"}
+  comp_route_2: {subgoals: 2, category: Split destination, instruction: "put the lemon on the plate and put the orange in the bin"}
+  comp_route_2_binfirst: {subgoals: 2, category: Split destination, instruction: "put the orange in the bin and put the lemon on the plate"}
+  comp_route_3: {subgoals: 3, category: Split destination, instruction: "put the lemon and the lime on the plate and put the orange in the bin"}
+  comp_route_4: {subgoals: 4, category: Split destination, instruction: "put the lemon and the lime on the plate and put the orange and the avocado in the bin"}
+  comp_route_5: {subgoals: 5, category: Split destination, instruction: "put the lemon, the lime and the banana on the plate and put the orange and the avocado in the bin"}
+  comp_route_6: {subgoals: 6, category: Split destination, instruction: "put the lemon, the lime and the banana on the plate and put the orange, the avocado and the onion in the bin"}
+  comp_route_7: {subgoals: 7, category: Split destination, instruction: "put the banana, the lemon and the lime on the plate and put the orange, the avocado, the onion and the lychee in the bin"}
+  comp_route_8: {subgoals: 8, category: Split destination, instruction: "put the banana, the lemon and the lime on the plate and put the orange, the avocado, the onion, the lychee and the pumpkin in the bin"}
+  comp_route_9: {subgoals: 9, category: Split destination, instruction: "put the banana, the lemon and the lime on the plate and put both oranges, the avocado, the onion, the lychee and the pumpkin in the bin"}
+  comp_split_plate_2: {subgoals: 2, category: Split destination, instruction: "put the avocado on the plate and put the orange in the bin"}
+  comp_split_plate_3: {subgoals: 3, category: Split destination, instruction: "put the avocado and the banana on the plate and put the orange in the bin"}
+  comp_split_plate_4: {subgoals: 4, category: Split destination, instruction: "put the avocado and the banana on the plate and put the orange and the lime in the bin"}
+  comp_split_plate_5: {subgoals: 5, category: Split destination, instruction: "put the avocado and the banana on the plate and put the orange, the onion and the lychee in the bin"}
+  comp_split_plate_6: {subgoals: 6, category: Split destination, instruction: "put the avocado, the banana and the lemon on the plate and put the orange, the lime and the onion in the bin"}
+  comp_split_plate_7: {subgoals: 7, category: Split destination, instruction: "put the avocado, the banana and the lemon on the plate and put the orange, the lime, the onion and the lychee in the bin"}
+  comp_split_plate_8: {subgoals: 8, category: Split destination, instruction: "put the avocado, the banana, the lemon and the lime on the plate and put the orange, the onion, the lychee and the pumpkin in the bin"}
+  comp_transfer_2: {subgoals: 2, category: Transfer, instruction: "move the orange and the lemon from the plate to the bin"}
+  comp_transfer_3: {subgoals: 3, category: Transfer, instruction: "move the orange, the lemon and the lime from the plate to the bin"}

@@ -1,0 +1,17 @@
+import: vlam_robolab_composition.yaml
+
+# RoboLab composition -- VoLo as the orchestrator, for comparison against our own systems on the
+# same scenes, policy and checker. `mode` is a run-time override (see api/client/hlc/README.md), so
+# subgoal, next_goal and passthrough all run from this one file. RoboLab renders a real wrist view
+# alongside the exterior one, and its episodes are long enough for upstream's check clock to fire
+# several times.
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/volo.yaml
+    extra_cameras: [wrist]
+    # 150, transferred from upstream's 80 rather than copied. Upstream derives 80 as ~10 policy
+    # chunks of 8 steps between checks. The invariant is chunks, not steps: RoboLab runs
+    # open_loop_horizon 15, so 10 chunks is 150.
+    check_interval: 150
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_volo/$CKPT_NAME/$ENV_NAME
