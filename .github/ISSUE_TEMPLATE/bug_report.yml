@@ -1,0 +1,38 @@
+name: Bug report
+description: A command from the README or a launcher fails, or a score looks wrong.
+labels: [bug]
+body:
+  - type: input
+    id: command
+    attributes:
+      label: Command
+      description: The exact command you ran, from the repository root.
+    validations:
+      required: true
+  - type: dropdown
+    id: suite
+    attributes:
+      label: Suite
+      options: [SimplerEnv-Long, RobotArena-Long, RoboLab-Long, build / tests only, rollout dataset / dashboard]
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: System and config
+      description: e.g. PSP-Agent, harness_simpler_composition.yaml
+  - type: textarea
+    id: log
+    attributes:
+      label: What happened
+      description: The end of the log (the launcher prints where its logs are), and for a score, the task's results.yaml.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Machine
+      description: OS, GPU and driver (`nvidia-smi`), `bazel --version`, the release or commit you are on.
+    validations:
+      required: true

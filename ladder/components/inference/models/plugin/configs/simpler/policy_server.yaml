@@ -1,0 +1,6 @@
+import: ../../../vlams/configs/simpler/composition/vlam_simpler_composition.yaml
+
+# Your policy, served by examples/policy_server.py: scripts/eval.sh --policy-server HOST:PORT
+policy_config: !overwrite
+  autoclass: ladder.components.inference.api.client.plugin.remote_policy.RemotePolicy
+  address: localhost:8000

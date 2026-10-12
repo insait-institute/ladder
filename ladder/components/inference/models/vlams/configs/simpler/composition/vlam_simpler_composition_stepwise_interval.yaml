@@ -1,0 +1,9 @@
+import: vlam_simpler_composition.yaml
+
+# SimplerEnv composition -- stepwise on a step clock rather than the gripper cycle, so a subtask the
+# policy never acts on is still replaced.
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/stepwise_interval.yaml
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/simpler_composition_stepwise_interval/$CKPT_NAME/$ENV_NAME

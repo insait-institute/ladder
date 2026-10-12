@@ -1,0 +1,15 @@
+import: vlam_robolab_composition_plan_verifier_local.yaml
+
+# RoboLab composition -- the in-process verifier advancing on a step clock instead of the gripper
+# cycle. Imports this benchmark's _plan_verifier_local so neither the served-VLM block nor the tuned
+# advancer (attempt_stall_steps / ordered_provisional / auto_schedule) is repeated.
+runner_config:
+  hlc_config:
+    advancer:
+      gripper_trigger: False
+      # 75, not the shared 30, for the same reason _plan_verifier_interval and _plan_periodic use it
+      # here: RoboLab runs at 15 Hz with placements ~5x longer, and its logged median gap between
+      # consecutive subtask commands is 75 steps. A clock at 30 would spend three checks per subtask.
+      verify_interval: 75
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_plan_verifier_local_interval/$CKPT_NAME/$ENV_NAME

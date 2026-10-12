@@ -1,0 +1,24 @@
+import: ../../../../vlams/configs/robot_arena/composition/vlam_robot_arena_composition.yaml
+
+policy_config: !overwrite
+  autoclass: ladder.components.inference.models.gpt_policy.policy.GptPolicyPolicy
+  robot_name: WidowX 250 robot arm
+  cameras: [main]
+  max_decisions: 300
+  vlm:
+    import: ../../vlm.yaml
+  host:
+    tool_offset_m: 0.016
+    control_hz: 5.0
+    max_translation_per_step_m: 0.03
+    settle_steps: 10
+    gripper_steps: 14
+    max_steps_per_segment: 45
+    workspace_min_m: [-0.35, -0.35, 0.0]
+    workspace_max_m: [0.55, 0.35, 0.4]
+
+runner_config:
+  recorder_config:
+    video_enabled: true
+    rerun_enabled: false
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robot_arena_composition_gpt_policy/$CKPT_NAME/$ENV_NAME

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eval dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <link rel="stylesheet" href="/static/app.css?v={{version}}" />
+</head>
+<body class="font-sans h-screen overflow-hidden" style="background: var(--bg-0); color: var(--text-0);">
+  <header class="flex items-center gap-3 px-3 py-1.5"
+          style="background: var(--bg-1); border-bottom: 1px solid var(--border);">
+    <button id="brand" class="topnav-brand text-lg font-semibold">Eval dashboard</button>
+    <span class="text-xs" style="color: var(--text-2);">RoboLab &middot; SimplerEnv &middot; RobotArena &middot; real robot</span>
+    <div class="flex-1"></div>
+    <button id="refresh" class="topnav-tab" title="Re-scan the result directories">Refresh</button>
+  </header>
+
+  <div class="flex" style="height: calc(100vh - 41px);">
+    <aside class="shrink-0 flex flex-col"
+           style="background: var(--bg-1); border-right: 1px solid var(--border); width: 300px;">
+      <div class="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider"
+           style="color: var(--text-2);">Campaigns</div>
+      <nav id="sidebar" class="flex-1 overflow-y-auto text-sm">
+        <div class="p-3" style="color: var(--text-2);">Loading…</div>
+      </nav>
+      <footer id="roots" class="p-2 text-xs font-mono truncate"
+              style="border-top: 1px solid var(--border); color: var(--text-2);"></footer>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto">
+      <div id="breadcrumb" class="px-6 pt-4 text-xs" style="color: var(--text-2);"></div>
+      <div id="pane" class="p-6"></div>
+    </main>
+  </div>
+  <script src="/static/app.js?v={{version}}"></script>
+</body>
+</html>

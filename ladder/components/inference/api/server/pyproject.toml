@@ -1,0 +1,15 @@
+[project]
+name = "ladder-components-inference-api-server"
+version = "0.0.0"
+requires-python = ">=3.10"
+dependencies = [
+    "ladder-components-inference-api-core",
+    "pyrealsense2~=2.55.1",
+    "pyudev~=0.24.3",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+ladder-components-inference-api-core = { path = "../../../../../ladder/components/inference/api/core", package = false }

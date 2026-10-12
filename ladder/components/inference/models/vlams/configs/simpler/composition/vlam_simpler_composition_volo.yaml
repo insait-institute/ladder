@@ -1,0 +1,13 @@
+import: vlam_simpler_composition.yaml
+
+# SimplerEnv composition -- VoLo as the orchestrator, for comparison against our own systems on the
+# same scenes, policy and checker. `mode` is a run-time override (see api/client/hlc/README.md), so
+# subgoal, next_goal and passthrough all run from this one file. The bridge rig renders a single
+# camera, and episodes are short enough that upstream's 80-step check clock would never fire.
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/volo.yaml
+    extra_cameras: []
+    check_interval: 20
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/simpler_composition_volo/$CKPT_NAME/$ENV_NAME

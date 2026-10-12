@@ -1,0 +1,47 @@
+import: vlam_robolab_composition.yaml
+
+# RoboLab composition -- verifier-advanced, over this benchmark's tracked plans. Needs VLM_API_KEY.
+# The advancer block below is RoboLab's tuning of the shared system and every _plan_verifier_* variant
+# imports it, so a retune lands in one place.
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/plan_verifier.yaml
+    source:
+      cache_path: ladder/components/inference/robots/robolab/composition/decomp_cache.json
+    advancer:
+      # A RoboLab Franka pick-and-place takes ~250 steps (2-goal oracle successes finish at 475-580),
+      # ~5x a SimplerEnv/RA placement, so the 45-step default abandons every goal mid-reach and thrashes
+      # between subtasks (RedDishes 0/8 vs oracle 7/8 before this fix). Matches the oracle's
+      # stuck_patience_steps.
+      # The gripper-cycle knobs, at RoboLab's timescale rather than SimplerEnv's 5 Hz defaults.
+      # min_hold_steps 3 + lift_threshold_m 0.0 counted any 0.2 s closure as a finished attempt:
+      # 62.7% of closures lift under 3 cm, so the trigger fired 6.51x an episode against 2.17 real
+      # grasp-and-lifts. verify_delay_steps 5 then asked the VLM "is it placed?" while the arm had
+      # moved a median of 1.3 cm and still sat within 3 cm of the object 87% of the time; at 35 the
+      # median is 12.7 cm and only 6% are that close. Measured effect on the verdict itself:
+      # precision .790 -> .850, recall .530 -> .607 against the privileged achieved-flags.
+      #
+      # 35 rather than 120: the two are statistically tied (+9.5 vs +10.1 against the direct
+      # instruction, CIs overlapping), so this takes the derived 7x rescale over the number that
+      # happened to score highest. Every other advance-policy variant tried -- no-withhold,
+      # provisional credit on a clean cycle, both delays -- landed between +4.8 and +10.1, i.e. the
+      # arm is bounded by VERDICT QUALITY, not by when or whether it advances.
+      min_hold_steps: 21
+      lift_threshold_m: 0.03
+      verify_delay_steps: 35
+      attempt_stall_steps: 300
+      # Ordered scenes ("banana THEN cube") otherwise stall forever on a single verifier
+      # false-negative for goal 0 (the banana in the bowl is often arm/cube-occluded): strict
+      # sequencing never advances. Provisional ordered advance moves on after a clean lifted
+      # grasp-release cycle and lets the VLM confirm or revoke, instead of gating hard.
+      ordered_provisional: true
+      auto_schedule: true  # distinct plan -> retry_in_place; duplicate objects -> skip-and-return
+      verifier:
+        # BOTH views, as the served-VLM arm already does. RoboLab's "main" is an over-shoulder camera
+        # in which the bin is a ~15 px box at the frame edge, routinely occluded by the arm: this
+        # verifier scored 4% recall from it, against 68%/56% on RobotArena and SimplerEnv whose
+        # tabletop views show the goal plainly. Scoring a verifier on `main` alone measures the
+        # camera, not the model.
+        image_cameras: [main, wrist]
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_plan_verifier/$CKPT_NAME/$ENV_NAME

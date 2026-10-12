@@ -1,0 +1,21 @@
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+
+pip_env = use_extension("//build_support/python:pip_env_ext.bzl", "pip_env")
+
+# -----------------------------------------------------------------------------
+# Set up pip-dashboard environment
+# -----------------------------------------------------------------------------
+pip_env.env(
+    name = "dashboard",
+    paths = ["ladder/components/dashboard"],
+    pyproject = "//ladder/components/dashboard:pyproject.toml",
+    deps = ["inference-client"],
+)
+
+pip.parse(
+    hub_name = "pip-dashboard",
+    python_version = "3.10",
+    requirements_lock = "//:ladder/components/dashboard/requirements.txt.lock",
+)
+
+use_repo(pip, "pip-dashboard")

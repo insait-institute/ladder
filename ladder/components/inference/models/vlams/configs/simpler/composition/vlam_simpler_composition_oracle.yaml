@@ -1,0 +1,9 @@
+import: vlam_simpler_composition.yaml
+
+# SimplerEnv composition -- privileged oracle (reference ceiling). Needs no plans: they come from
+# the env.
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/oracle.yaml
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/simpler_composition_oracle/$CKPT_NAME/$ENV_NAME

@@ -1,0 +1,607 @@
+{
+ "_meta": {
+  "role": "ground truth",
+  "model": "ground_truth",
+  "generated": "2026-09-09",
+  "note": "NOT a model output: the reference plan per task, from specs.SPECS via scene_layout(spec).goals. Every entry is {subtasks, ordered, revisits}."
+ },
+ "all10_plate": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the plate."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "all10_towel": {
+  "subtasks": [
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "all1_plate": {
+  "subtasks": [
+   "put the carrot on the plate."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "all1_towel": {
+  "subtasks": [
+   "put the spoon on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "all2_plate": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "all2_towel": {
+  "subtasks": [
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "all3_plate": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "all3_towel": {
+  "subtasks": [
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "all4_plate": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the plate."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "all4_towel": {
+  "subtasks": [
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "all5_plate": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the plate.",
+   "put the spoon on the plate."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "all5_towel": {
+  "subtasks": [
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "all6_plate": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "all6_towel": {
+  "subtasks": [
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "all7_plate": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the plate."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "all7_towel": {
+  "subtasks": [
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "all8_plate": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the plate.",
+   "put the spoon on the plate."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "all8_towel": {
+  "subtasks": [
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "all9_plate": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "all9_towel": {
+  "subtasks": [
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "except_eggplant_2": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "except_eggplant_3": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the carrot on the plate."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "except_eggplant_4": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the carrot on the plate.",
+   "put the spoon on the plate."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "except_eggplant_5": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the carrot on the plate."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "move_plate_to_towel_2": {
+  "subtasks": [
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "move_plate_to_towel_3": {
+  "subtasks": [
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "move_plate_to_towel_4": {
+  "subtasks": [
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "move_plate_to_towel_5": {
+  "subtasks": [
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "move_towel_to_plate_3": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "ordered_plate_2": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate."
+  ],
+  "ordered": true,
+  "revisits": false
+ },
+ "ordered_plate_3": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate."
+  ],
+  "ordered": true,
+  "revisits": false
+ },
+ "relay10e": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the plate.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the plate.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the plate.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the plate.",
+   "put the spoon on the blue towel."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "relay2e": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the carrot on the blue towel."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "relay3e": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the plate."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "relay4e": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the plate.",
+   "put the spoon on the blue towel."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "relay5e": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the plate.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the plate."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "relay6e": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the plate.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the plate.",
+   "put the eggplant on the blue towel."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "relay7e": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the plate.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the plate.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the plate."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "relay8e": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the plate.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the plate.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the plate.",
+   "put the carrot on the blue towel."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "relay9e": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the plate.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the plate.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the plate.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the plate."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "shuttle10": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the blue towel."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "shuttle7": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the plate."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "shuttle8": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the plate.",
+   "put the spoon on the plate."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "shuttle9": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate."
+  ],
+  "ordered": true,
+  "revisits": true
+ },
+ "split2": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "split3": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "split4": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "split5": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "split6": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the blue towel.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "split7": {
+  "subtasks": [
+   "put the carrot on the plate.",
+   "put the spoon on the plate.",
+   "put the eggplant on the plate.",
+   "put the carrot on the plate.",
+   "put the spoon on the blue towel.",
+   "put the eggplant on the blue towel.",
+   "put the carrot on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "spoons2": {
+  "subtasks": [
+   "put the spoon on the plate.",
+   "put the spoon on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "spoons3": {
+  "subtasks": [
+   "put the spoon on the plate.",
+   "put the spoon on the blue towel.",
+   "put the spoon on the plate."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "spoons4": {
+  "subtasks": [
+   "put the spoon on the plate.",
+   "put the spoon on the plate.",
+   "put the spoon on the blue towel.",
+   "put the spoon on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ },
+ "spoons5": {
+  "subtasks": [
+   "put the spoon on the plate.",
+   "put the spoon on the plate.",
+   "put the spoon on the plate.",
+   "put the spoon on the blue towel.",
+   "put the spoon on the blue towel."
+  ],
+  "ordered": false,
+  "revisits": false
+ }
+}

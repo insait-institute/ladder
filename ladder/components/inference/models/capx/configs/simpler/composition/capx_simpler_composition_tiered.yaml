@@ -1,0 +1,17 @@
+import: ../../../../vlams/configs/simpler/composition/vlam_simpler_composition.yaml
+
+policy_config: !overwrite
+  autoclass: ladder.components.inference.models.capx.policy.CapxPolicy
+  vlm:
+    import: ../../../../../api/client/hlc/configs/vlm.yaml
+    rate_limit_attempts: 16
+  robot: WidowX 250 robot arm
+  scene: camera
+  max_translation_per_step_m: 0.04
+  move_steps: 25
+  open_gripper_steps: 10
+  close_gripper_steps: 15
+
+runner_config:
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/simpler_composition_capx/$CKPT_NAME/$ENV_NAME

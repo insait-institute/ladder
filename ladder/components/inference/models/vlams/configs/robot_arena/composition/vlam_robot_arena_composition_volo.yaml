@@ -1,0 +1,14 @@
+import: vlam_robot_arena_composition.yaml
+
+# RobotArena composition -- VoLo as the orchestrator, for comparison against our own systems on the
+# same scenes, policy and checker. `mode` is a run-time override (see api/client/hlc/README.md); this
+# file carries only the benchmark's deltas: RobotArena's `wrist` key is zeros rather than a rendered
+# view, and the check interval is tightened from upstream's 80.
+runner_config:
+  hlc_config:
+    import: ../../../../../api/client/hlc/configs/volo.yaml
+    extra_cameras: []
+    check_interval: 15
+    stop_on_success: false  # this benchmark runs full episodes (terminate_on_success: False)
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robot_arena_composition_volo/$CKPT_NAME/$ENV_NAME

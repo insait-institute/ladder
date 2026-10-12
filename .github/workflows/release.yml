@@ -1,0 +1,35 @@
+# Publishes a GitHub Release when a version tag (vX.Y.Z) is pushed.
+# The tag must match CITATION.cff's version and have a section in CHANGELOG.md; the release notes
+# are that section. The source archive is attached with its sha256, so a result can always be
+# traced to the exact code that produced it.
+name: release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check the tag against CITATION.cff and CHANGELOG.md
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          grep -qx "version: \"$version\"" CITATION.cff || { echo "CITATION.cff version != $version"; exit 1; }
+          grep -q "^## \[$version\]" CHANGELOG.md || { echo "CHANGELOG.md has no section for $version"; exit 1; }
+          awk -v v="$version" '$0 ~ "^## \\[" v "\\]" {on=1; next} /^## \[/ {on=0} on' CHANGELOG.md > notes.md
+      - name: Build the source archive
+        run: |
+          name="ladder-${GITHUB_REF_NAME}"
+          git archive --format=tar.gz --prefix="$name/" -o "$name.tar.gz" "$GITHUB_REF_NAME"
+          sha256sum "$name.tar.gz" > "$name.tar.gz.sha256"
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" ladder-${GITHUB_REF_NAME}.tar.gz* \
+            --title "LADDER ${GITHUB_REF_NAME}" --notes-file notes.md --verify-tag

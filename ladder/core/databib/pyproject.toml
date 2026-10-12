@@ -1,0 +1,32 @@
+[project]
+name = "ladder-core-databib"
+version = "0.0.0"
+requires-python = ">=3.10"
+dependencies = [
+    "build-support-python",
+    "backports.strenum>=1.3.1",
+    "deepdiff>=6.7.1",
+    "frozendict>=2.4.4",
+    "numpy>=1.26.4",
+    "python-dateutil>=2.8.2",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+ladder-core-databib-optional = [
+    # NOTE: torch is only needed by databib's own config/dataclasses type-check tests.
+    # Keep it optional (test-only) so downstream packages are not forced to install it.
+    "torch==2.12.1",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+"build-support-python" = { path = "../../../build_support/python", package = false }
+torch = { index = "pytorch-cu130" }
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true

@@ -1,0 +1,20 @@
+# One OpenAI-compatible endpoint serving several vendors, addressed as {provider}/{company}/{model}.
+# Additional to vlm.yaml, which keeps the Gemini roles on the Cloudflare gateway and its own key.
+# Needs NVIDIA_API_KEY.
+autoclass: ladder.components.inference.api.client.hlc.vlm.openai_api.OpenAIVLM
+model: switchyard/openai/gpt-5.6-sol
+base_url: https://inference-api.nvidia.com/v1
+api_key_env: NVIDIA_API_KEY
+# This gateway throttles under concurrency, and scoring is not latency-bound.
+timeout: 600.0
+
+# Measured in production 2026-09-01 on the eval node, not from a burst probe: max_rps 4.0 with no
+# slot cap ran at 1-2% refusals and zero breaker trips, while 8.0 gave 10% refusals, 20 trips and a
+# 382s hold. A short saturating probe from a single host reports a far higher ceiling (32 concurrent
+# clean, 64 at 93% refused) than sustained load from several cells sustains -- trust the campaign.
+max_rps: 4.0
+
+# Tokens banked for a spike. Measured on the eval node: sustained demand is 0.60 calls/s but the
+# synchronized burst peaks at 25 in one second, which at 4 tokens would queue ~5s and stall those
+# lanes. Banking 24 absorbs the spike WITHOUT raising sustained pressure.
+rate_limit_burst: 24

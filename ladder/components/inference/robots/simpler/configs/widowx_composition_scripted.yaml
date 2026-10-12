@@ -1,0 +1,14 @@
+import: widowx_composition.yaml
+
+# The composition scenes served to the SCRIPTED completability policy: same tasks, plus the
+# ground-truth geometry the policy solves from. Off everywhere else, so learned-policy runs carry no
+# extra payload. One episode per task is all a completability check needs -- it is a deterministic
+# policy, so extra episodes only re-measure the same layout. The policy reads no image, so nothing is
+# rendered; rendering never touches the physics.
+env_config:
+  expose_privileged: True
+  n_envs: 1
+  render_images: False
+
+init_range_config:
+  object_episode_range: !overwrite [0, 1]

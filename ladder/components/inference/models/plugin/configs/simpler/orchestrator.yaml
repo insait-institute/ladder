@@ -1,0 +1,7 @@
+import: ../../../vlams/configs/simpler/composition/vlam_simpler_composition.yaml
+
+# Your orchestrator instructing the Bridge policy: scripts/eval.sh --orchestrator path/to/file.py:ClassName
+runner_config:
+  hlc_config:
+    autoclass: ladder.components.inference.api.client.plugin.orchestrator.PluginOrchestrator
+    system: ""

@@ -1,0 +1,9 @@
+key_1: value_1
+key_2: 2
+key_3: $MYENVVAR
+key_4: $MYENVVAR1
+
+nested:
+  key_5: $MYENVVAR1
+  nested:
+    key_6: $MYENVVAR

@@ -1,0 +1,60 @@
+[project]
+name = "ladder-components-inference-robots-robolab"
+version = "0.0.0"
+description = "RoboLab benchmark (Isaac Lab 3 / Isaac Sim 6) eval environment"
+requires-python = "==3.12.*"
+dependencies = [
+  # api-core (not api-server, which pulls pyrealsense2 with no cp312 wheel): ZMQ client + msgpack.
+  "ladder-components-inference-api-core",
+  # Isaac stack + torch, pinned to RoboLab's validated Isaac Sim 6 combination.
+  "isaacsim[all,extscache] @ https://pypi.nvidia.com/isaacsim/isaacsim-6.0.0.1-cp312-none-manylinux_2_35_x86_64.whl",
+  "isaaclab[isaacsim]==3.0.0b2",
+  "torch @ https://download.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp312-cp312-manylinux_2_28_x86_64.whl",
+  "torchvision @ https://download.pytorch.org/whl/cu128/torchvision-0.26.0%2Bcu128-cp312-cp312-manylinux_2_28_x86_64.whl",
+  # RoboLab runtime deps NOT already pulled transitively by isaaclab/isaacsim (its source is
+  # vendored via @robolab_repo, so pip installs none of them).
+  "h5py",
+  "imageio",
+  "imageio-ffmpeg",
+  "json_numpy",
+  "matplotlib",
+  "pandas",
+  "python-dotenv",
+  # env_server FK/IK (franka_kinematics.py).
+  "pytorch-kinematics==0.7.6",
+  "requests",
+  "setuptools<81",
+  "tyro",
+  "websockets",
+]
+
+[tool.uv]
+package = false
+# isaacsim-core pulls tinyobjloader==2.0.0rc13 (a pre-release).
+prerelease = "allow"
+# Force single versions where ladder's pins collide with isaaclab 3.0.
+override-dependencies = [
+  # ladder-core's StrEnum backport (py<3.11 only, no 3.12 release) — marker-exclude it here.
+  "backports-strenum==1.3.1; python_version < '3.11'",
+  "pillow==12.1.1",
+  "tqdm==4.67.1",
+  "psutil==5.9.8",
+  "pyyaml==6.0.3",
+  "scipy==1.17.0",
+  "coverage==7.6.1",
+  "opencv-python-headless==4.13.0.90",
+]
+index-strategy = "unsafe-best-match"
+# warp-lang 1.13.0.dev20260418 published only a macOS wheel (from RoboLab's pyproject).
+constraint-dependencies = ["warp-lang != 1.13.0.dev20260418"]
+
+environments = [
+  "sys_platform == 'linux' and platform_machine == 'x86_64'"
+]
+
+[[tool.uv.index]]
+name = "nvidia"
+url = "https://pypi.nvidia.com"
+
+[tool.uv.sources]
+ladder-components-inference-api-core = { path = "../../../../../ladder/components/inference/api/core", package = false }

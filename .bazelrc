@@ -1,0 +1,98 @@
+# Tidy the location of the symlinks created by bazel
+build --symlink_prefix=bzl-build/
+
+# Disable legacy WORKSPACE support
+build --noenable_workspace
+
+# Stop python from using packages that are user-locally installed
+build --action_env="PYTHONNOUSERSITE=1"
+
+# Default to optimised
+build --compilation_mode=opt
+
+# Threads allowed in custom buildrules (nonpositive is default)
+build --action_env="INNER_BUILD_THREADS=-1"
+
+# Print test logs for failed tests
+test --test_output=errors
+
+# Python bytecode interferes with caching
+build --action_env="PYTHONDONTWRITEBYTECODE=true"
+
+# Increase sandbox hermeticity (username = nobody, hostname = localhost)
+build --sandbox_fake_username --sandbox_fake_hostname
+
+build --test_env=PY3NVML_MAX_PROCS=-1
+build --test_env=PY3NVML_MIN_MEMORY_FRACTION=0.00
+
+# Set default encoding to UTF-8
+build --action_env="LC_CTYPE=C.UTF-8"
+
+# general test config
+test --verbose_failures
+
+# run exclusive tests in a sandbox
+test --incompatible_exclusive_test_sandboxed
+
+# Use the new behavior and fix 'Argument list too long' error
+build --noexperimental_python_import_all_repositories
+
+test --test_env=HF_HOME  # Pass HF_HOME variable from the shell
+test --test_env=HF_TOKEN  # Pass HF_TOKEN variable from the shell
+
+# Allow globs that return no files
+build --incompatible_disallow_empty_glob=false
+test --incompatible_disallow_empty_glob=false
+query --incompatible_disallow_empty_glob=false
+
+# Level 1 cache: share 'downloads' cache - raw compressed downloads (.tar.gz, .whl)
+common --repository_cache=~/.cache/shared-ladder
+
+# Level 2 cache: extracted external repos (one dir per repo rule identity, shared across all
+# workspaces and worktrees). We never name it: --repo_contents_cache defaults to
+# <--repository_cache>/contents, so it lives inside the directory above and is by far the largest of
+# the three - it holds the unpacked site-packages of every pip hub.
+#
+# Level 3 cache: share compiled outputs - .o, .pyc, executable files
+build --disk_cache=~/.cache/shared-ladder
+
+# Use hardlinks to avoid copying files (instant 'unzipping', e.g. for pip .whl)
+common --experimental_repository_cache_hardlinks
+
+# How many repository downloads are in flight. The default of 8 leaves most of the link unused
+# when a fresh build fetches its archives and wheels.
+common --http_max_parallel_downloads=32
+
+# CI runs bazel inside a fixed budget: a cgroup for the runner, a slurm allocation for the gpu tests.
+# Bazel sizes its scheduling from the whole node (96 cpus, 1 TB) and cannot see either limit, so it
+# starts far more concurrent work than fits and gets OOM killed. These numbers must stay in line with
+# RUNNER_CPUS/RUNNER_MEMORY in .github/runner/run_runner.sh and the srun flags in build.yml, and the
+# memory budget is deliberately below the hard limit to leave room for the bazel server itself.
+build:ci --local_resources=cpu=16
+build:ci --local_resources=memory=48000
+# The memory budget above is only as good as bazel's estimates, and those come from test size, which
+# says nothing about a test importing torch. Bound the number of concurrent tests directly as well.
+test:ci --local_test_jobs=8
+
+# Drop extracted external repos unused for a week. Age is measured from last use, so anything an
+# active worktree builds against is never collected; this retires the site-packages of an old torch
+# generation once the last worktree using it goes quiet. This is background work the server does once
+# it has been idle for --repo_contents_cache_gc_idle_delay (5m), so a killed server never runs it.
+# Safe to scope: its root is <repository_cache>/contents, a real subdirectory (unlike the disk cache
+# below, whose root is the whole shared directory).
+common --repo_contents_cache_gc_max_age=7d
+
+# Don't eagerly materialize runfiles symlink forests for every target; write them only when a local
+# action, test or run command actually needs one. Our forests are enormous and every symlink costs a
+# full 4 KiB ext4 block (targets are ~240 chars, well past the 60-byte inline limit), so a
+# `bazel test //...` that hits the disk cache would otherwise materialize tens of GB of forests for
+# tests it never runs.
+# NOTE: keep --build_runfile_manifests on; local tests cannot run without the manifests.
+test --nobuild_runfile_links
+
+# Use a modern simplified shell- or python-based script for running py targets
+common --@rules_python//python/config_settings:bootstrap_impl=script
+# Use site-packages venv layout for rules_python
+common --@rules_python//python/config_settings:venvs_site_packages=yes
+# Use bazel's symlink API
+common --@rules_python//python/config_settings:venvs_use_declare_symlink=yes

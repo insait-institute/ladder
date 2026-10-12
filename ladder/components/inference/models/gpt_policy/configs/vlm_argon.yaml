@@ -1,0 +1,7 @@
+import: ../../../api/client/hlc/configs/vlm_gateway.yaml
+model: gemini-4-argon
+send_temperature: false
+timeout: 600.0
+max_rps: 12.0
+rate_limit_burst: 48
+rate_limit_attempts: 16

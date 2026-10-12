@@ -1,0 +1,12 @@
+import: ../../../../../vlams/configs/robolab/composition/vlam_robolab_composition_plan_periodic.yaml
+
+# pi0.5 under a planned subtask stream, advanced on a fixed step interval.
+policy_config: !overwrite
+  autoclass: ladder.components.inference.models.external.openpi.policy.OpenpiPolicy
+  action_space: joint_positions
+  model_config:
+    model_id: pi05_droid_jointpos
+
+runner_config:
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_openpi_plan_periodic/$CKPT_NAME/$ENV_NAME
