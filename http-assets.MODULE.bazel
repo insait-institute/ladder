@@ -1,5 +1,5 @@
-# Hermetic sim/robot-benchmark archives: asset tarballs, benchmark code drops, vendored sources
-# and weights. Split out of MODULE.bazel (include()d from there) to keep the module file readable
+# Hermetic sim/robot-benchmark archives: asset tarballs, benchmark code drops, and vendored
+# sources. Split out of MODULE.bazel (include()d from there) to keep the module file readable
 # as these pins grew; same pattern as the pip-*.MODULE.bazel segments.
 #
 # Everything comes from the repository's assets-v1 release, except the few archives that may not be
@@ -220,7 +220,7 @@ py_library(
 )
 """,
     integrity = "sha256-xSn1Uh7ODAQUvTAW2sdcHMkMQVcR6Wpqpcq8nJWT9jM=",
-    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/cutamp_src.tar.gz",
+    url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/cutamp_fork.tar.gz",
 )
 
 # curobo, pristine upstream (our tree is byte-identical to it): vendored as source so the
