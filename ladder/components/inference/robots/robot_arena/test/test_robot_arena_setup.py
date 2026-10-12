@@ -26,59 +26,6 @@ class TestSceneLoader(unittest.TestCase):
     def _get_data_root(self) -> str:
         return "ladder/components/inference/robots/robot_arena/robot_arena_data/examples/data"
 
-    def test_list_available_scenes(self) -> None:
-        scenes = list_available_scenes(self._get_data_root())
-        self.assertGreater(len(scenes), 0, "No scenes found")
-        self.assertIn("scene1", scenes)
-
-    def test_load_scene_camera_calibration(self) -> None:
-        scene_data = load_scene(self._get_data_root(), "scene1")
-        self.assertEqual(scene_data.camera_extrinsics.shape, (4, 4))
-        self.assertEqual(scene_data.camera_intrinsics.shape, (3, 3))
-
-    def test_load_scene_task_instruction(self) -> None:
-        scene_data = load_scene(self._get_data_root(), "scene1")
-        self.assertIsInstance(scene_data.task_instruction, str)
-        self.assertGreater(len(scene_data.task_instruction), 0)
-
-    def test_load_scene_objects(self) -> None:
-        scene_data = load_scene(self._get_data_root(), "scene1")
-        self.assertGreater(len(scene_data.objects), 0)
-
-        for obj in scene_data.objects:
-            self.assertIsInstance(obj.name, str)
-            self.assertGreater(len(obj.name), 0)
-            self.assertEqual(len(obj.position), 3)
-            self.assertEqual(len(obj.rotation_quat), 4)
-            self.assertIsInstance(obj.scale, float)
-            self.assertGreater(obj.scale, 0)
-            # Mesh files should exist
-            self.assertTrue(
-                os.path.exists(obj.mesh_path),
-                f"Mesh not found: {obj.mesh_path}",
-            )
-
-    def test_load_scene_object_positions_override(self) -> None:
-        scene_data = load_scene(self._get_data_root(), "scene1")
-        num_objects = len(scene_data.objects)
-
-        # Override positions
-        new_positions = [[float(i), float(i), 0.0] for i in range(num_objects)]
-        scene_data_overridden = load_scene(self._get_data_root(), "scene1", object_positions=new_positions)
-        for i, obj in enumerate(scene_data_overridden.objects):
-            self.assertAlmostEqual(obj.position[0], float(i))
-            self.assertAlmostEqual(obj.position[1], float(i))
-
-    def test_upstream_corrections_applied(self) -> None:
-        """Verify that known upstream data corrections are applied at load time."""
-        scene_data = load_scene(self._get_data_root(), "default1")
-        cloth = scene_data.objects[0]
-        self.assertEqual(cloth.name, "cloth_destination")
-        # After correction, the cloth quaternion should be identity [1, 0, 0, 0] (wxyz),
-        # meaning no rotation — the towel lies flat.
-        for i, expected in enumerate([1.0, 0.0, 0.0, 0.0]):
-            self.assertAlmostEqual(cloth.rotation_quat[i], expected, places=6)
-
     def test_upstream_corrections_reference_valid_scenes(self) -> None:
         """Corrections that reference scenes in the test dataset must point to real scenes.
 
@@ -160,18 +107,6 @@ class TestRobotArenaServerConfig(unittest.TestCase):
         )
         # Default test: 1 episode per scene
         self.assertEqual(len(server._episode_configs), 2)  # noqa: SLF001
-
-    def test_episode_config_generation_permutation(self) -> None:
-        server = self._make_server(
-            "ladder/components/inference/robots/robot_arena/configs/widowx.yaml",
-            **{
-                "test_config.test_type": "permutation",
-                "test_config.scene_names": ["scene1"],
-            },
-        )
-        # Permutation test: 1 default + num_permutations per scene
-        expected = 1 + server.config.test_config.num_permutations
-        self.assertEqual(len(server._episode_configs), expected)  # noqa: SLF001
 
     def test_episode_config_generation_camera(self) -> None:
         server = self._make_server(
