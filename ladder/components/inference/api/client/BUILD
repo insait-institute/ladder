@@ -54,7 +54,7 @@ py_library(
     ],
 )
 
-# Cuts subtask-state samples -- frames plus the per-goal ground truth at that instant -- from
+# Cuts subtask-state samples (frames plus the per-goal ground truth at that instant) from
 # recorded eval episodes. Pure harvesting (episode logs + mp4s in, PNGs + subtask_states.json out),
 # so it lives in this env; the scorer that drives a VLM over the samples is
 # //ladder/components/inference/models/vlams:score_subtask_states.

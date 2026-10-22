@@ -25,7 +25,7 @@ def _numpy(value) -> np.ndarray:
 def _quat_to_matrix(quat: np.ndarray) -> np.ndarray:
     """Rotation from an (x, y, z, w) quaternion -- the order this articulation state reports.
 
-    Measured, not assumed: the arm's base sits square on the env origin, reporting [0, 0, 0, 1],
+    Verified against the sim: the arm's base sits square on the env origin, reporting [0, 0, 0, 1],
     and the end effector resolves to the same x and y through forward kinematics as it does in
     env-local coordinates. Reading that quaternion as (w, x, y, z) instead invents a 180 degree yaw,
     which puts the whole scene behind the robot and sends the policy driving out of the workspace.
@@ -92,8 +92,8 @@ def privileged_state(
     world = get_world(env)
     n_envs = int(env.num_envs)
 
-    # A subtask's condition chain is the STAGES of one placement -- the upstream builder emits
-    # object_grabbed before the placement predicate -- not a sequence of destinations. A relay's legs
+    # A subtask's condition chain is the STAGES of one placement (the upstream builder emits
+    # object_grabbed before the placement predicate), not a sequence of destinations. A relay's legs
     # arrive as separate goals already, each latched by the factory, so the geometry to drive to is
     # the last condition that actually names a placement.
     active = [

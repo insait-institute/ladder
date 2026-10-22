@@ -30,15 +30,15 @@ class TestSceneLoader(unittest.TestCase):
         """Corrections that reference scenes in the test dataset must point to real scenes.
 
         The full dataset has 70+ scenes but the bazel test data may only include a
-        subset. We only validate corrections for scenes present in the test data —
-        corrections for scenes outside the test data are not errors, they simply
+        subset. We only validate corrections for scenes present in the test data.
+        Corrections for scenes outside the test data are not errors, they simply
         target scenes in the full dataset.
         """
         available_scenes = set(list_available_scenes(self._get_data_root()))
         for (scene_name, _obj_idx), correction in UPSTREAM_DATA_CORRECTIONS.items():
             if scene_name not in available_scenes:
                 continue
-            # Scene exists in test data — verify the object index is in range
+            # Scene exists in test data; verify the object index is in range
             scene_data = load_scene(self._get_data_root(), scene_name)
             self.assertLess(
                 _obj_idx,

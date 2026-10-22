@@ -108,14 +108,14 @@ class RecorderWrapper(EnvWrapper[RecorderWrapperConfig]):
     ) -> List[RobotObservation]:
         self._log_step_instruction(metadata)
         # Generic per-episode event channel: ANY per-env events a client component put into the
-        # step metadata are accumulated here and saved with the episode -- new event kinds need no
+        # step metadata are accumulated here and saved with the episode, so new event kinds need no
         # recorder changes.
         for env_i, events in ((metadata or {}).get("events") or {}).items():
             self._events.setdefault(env_i, []).extend(events)
         observations = self.env.step_all(actions, metadata=metadata)
 
         # Envs the runner has marked finished (e.g. terminate_on_success) keep stepping in lockstep
-        # with the batch, but their episode is over — stop recording them so each video/metadata ends
+        # with the batch, but their episode is over. Stop recording them so each video/metadata ends
         # at that env's final step. When "finished" is absent, every env records to the batch end.
         finished = (metadata or {}).get("finished")
         for env_i, observation in enumerate(observations):
@@ -132,7 +132,7 @@ class RecorderWrapper(EnvWrapper[RecorderWrapperConfig]):
 
     def end_episode(self) -> None:
         # Each env writes only its own video + rerun files, so finalize them on a thread pool.
-        # sched_getaffinity (not os.cpu_count) so the default respects the Slurm cpuset and K
+        # sched_getaffinity (not os.cpu_count) so the default respects the CPU affinity and K
         # never oversubscribes cores.
         max_workers = self.config.video_encode_workers or len(os.sched_getaffinity(os.getpid()))
         workers = min(self._n_envs, max_workers)
@@ -197,9 +197,9 @@ class RecorderWrapper(EnvWrapper[RecorderWrapperConfig]):
                 log.append({"step": step_val, "instruction": instruction})
 
     def _stream(self, env_i: int, observation: RobotObservation) -> None:
-        """Write this observation's frames straight to disk. Retaining them until the episode ended
-        cost n_envs x steps x frame of host RAM per lane -- enough to OOM-kill the shared inference
-        server on long episodes -- and it happened whether or not video was enabled."""
+        """Write this observation's frames straight to disk. Retaining them until the episode ends
+        costs n_envs x steps x frame of host RAM per lane, enough to OOM-kill a shared inference
+        server on long episodes."""
         if not self.config.video_enabled or not observation.images:
             return
         writers = self._writers[env_i]
@@ -214,7 +214,7 @@ class RecorderWrapper(EnvWrapper[RecorderWrapperConfig]):
     def _close_videos(self, env_i: int) -> None:
         for writer in self._writers[env_i].values():
             writer.close()
-            if not writer.wrote_signal:  # all-zero placeholder camera (e.g. RA wrist)
+            if not writer.wrote_signal:  # all-zero placeholder camera
                 os.remove(writer.output_path)
 
     def _save_episode_metadata(self, env_i: int, success: Optional[bool]) -> None:

@@ -50,7 +50,7 @@ def _match_single_object(  # noqa: C901, PLR0912
     Args:
         reference: Text reference from the instruction (e.g. "spoon").
         objects: List of ObjectConfig from the scene.
-        role: Either "target" or "destination" — used for disambiguation.
+        role: Either "target" or "destination", used for disambiguation.
         exclude_indices: Object indices to skip (already matched to another role).
 
     Returns:
@@ -106,7 +106,7 @@ def _match_single_object(  # noqa: C901, PLR0912
         # Fall back to first match.
         return substring_matches[0]
 
-    # Tier 4: Token overlap — fraction of reference tokens found in object name.
+    # Tier 4: Token overlap, the fraction of reference tokens found in object name.
     # This is asymmetric (not Jaccard) so short references like "yellow knife"
     # can match long object names like "toy knife with yellow handle and white blade".
     best_score = 0.0

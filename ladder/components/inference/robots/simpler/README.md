@@ -13,9 +13,9 @@ parallel envs) and one `run_model` client. `N_ENVS` must divide the 24 canonical
 
 ## Long-horizon composition benchmark
 
-`composition/specs.py` defines a `{task type × sequence length}` matrix of multi-goal tasks
+`composition/specs.py` defines a `{task type x sequence length}` matrix of multi-goal tasks
 (`composition/envs.py` registers them with ManiSkill; `composition/placement.py` packs their object
-layouts). They run through the SAME launcher as the four canonical scenes — a composition
+layouts). They run through the same launcher as the four canonical scenes. A composition
 `SIM_CONFIG` makes `ENV_NAMES` scene ids instead of config names:
 
 ```bash
@@ -39,14 +39,14 @@ envs, which allow 60 steps to this suite's 100 and publish their own success tes
 
 `SIMPLER_CONFIG` selects the system: `vlam_simpler_composition.yaml` is flat (the model gets only the
 composed instruction), and one `_<system>` variant exists per hierarchical system in
-`api/client/hlc/configs/`, named after it — `_oracle`, `_plan_gripper`, `_plan_periodic`,
+`api/client/hlc/configs/`, named after it: `_oracle`, `_plan_gripper`, `_plan_periodic`,
 `_plan_verifier`, `_plan_verifier_interval`, `_plan_verifier_local`, `_stepwise_gripper`,
 `_stepwise_interval`. `_plan_verifier_live` is not a system of its own: it is `_plan_verifier` with
 `cache_path` omitted (see **Plans** below). Each writes to its own `simpler_composition*/` directory.
 
 The three plan-driven arms are meant to be read together: `_plan_periodic` switches on a clock with no
 feedback, `_plan_gripper` on an event the robot produces, `_plan_verifier` on a judgement about the
-scene. The clock is set to the oracle's median time on a subtask, so it is not a strawman — a gap to
+scene. The clock is set to the oracle's median time on a subtask, so it is not a strawman. A gap to
 it measures what the feedback is worth. `_plan_verifier_local` is `_plan_verifier` with the VLM
 in-process (Qwen3-VL) instead of a hosted API.
 
@@ -56,7 +56,7 @@ task's registered instruction is only a default); a key matching no registered e
 so check names against `composition_manifest`. It lives in `configs/simpler/composition/language/`:
 `vlam_simpler_composition_paraphrase.yaml`.
 
-**Choosing envs.** `ENV_NAMES` is the only control — pass a subset, or enumerate the whole registry.
+**Choosing envs.** `ENV_NAMES` is the only control. Pass a subset, or enumerate the whole registry.
 `composition_manifest` prints `<env-v0>|<max_episode_steps>` per task, straight from the registry:
 
 ```bash
@@ -69,7 +69,7 @@ ENV_NAMES=$(bazel run //ladder/components/inference/robots/simpler:composition_m
             | sort -t'|' -k2 -rn | cut -d'|' -f1 | sed 's/-v0$//' | tr '\n' ' ')
 ```
 
-**Ordering.** Step budgets are 100 per goal, so the registry spans 10× (100 → 1000 steps). A lane
+**Ordering.** Step budgets are 100 per goal, so the registry spans 10x (100 to 1000 steps). A lane
 picks up the next env as soon as any lane frees up, so order barely changes the total; longest-first
 still shortens the tail when the env count is not a multiple of the lane count.
 
@@ -78,16 +78,14 @@ still shortens the tail when the env count is not a multiple of the lane count.
 **Plans are a config concern, not the launcher's.** Only the `_plan_*` systems read
 `composition/decomp_cache.json`, via `hlc_config.source.cache_path` in their YAML. Flat and `_oracle`
 need no plans at all (the oracle's come from the env) and the `_stepwise_*` systems hold none by
-design — each switch generates the next subtask from the current frame. `_plan_verifier_live` just
-omits `cache_path`, so the VLM decomposes the reset frame instead — that is the pass that mints a plan
+design: each switch generates the next subtask from the current frame. `_plan_verifier_live` just
+omits `cache_path`, so the VLM decomposes the reset frame instead. That is the pass that mints a plan
 for a newly added env.
 
-**Repeats.** The batched path was not repeatable until the inference server seeded its own process:
-the model draws its flow start state from the global RNG (`roma.random_unitquat` takes no generator),
-and an unseeded process takes it from the OS, so every launch drew different noise. Measured on two
-identical runs: 14/24 vs 18/24 on carrot_on_plate, with every `episode_log.yaml` differing. Seeded,
-two runs are byte identical, `num_steps` and `success_per_step` included. In-process runs were always
-reproducible -- `run_model` seeds itself at startup. The `_stepwise_*` systems stay the exception:
+**Repeats.** The inference server seeds its own process, because the model draws its flow start
+state from the global RNG (`roma.random_unitquat` takes no generator). Seeded, two identical runs are
+byte identical, `num_steps` and `success_per_step` included. In-process runs are reproducible too,
+since `run_model` seeds itself at startup. The `_stepwise_*` systems stay the exception:
 their subtask source samples (`VLMSource` defaults to `temperature: 0.3` and `subtask_generator.yaml`
 does not override it). Once repeats replay exactly, added confidence comes from more episodes, not
 from more repeats of the same seed; `VLA_SEED` varies it deliberately.
@@ -96,8 +94,8 @@ from more repeats of the same seed; `VLA_SEED` varies it deliberately.
 
 The decomposition benchmark asks one question of a planner, offline: shown a scene's frame and its
 instruction, does it produce the right subtasks? No simulator runs during scoring, so the scenes have
-to be exported first. `export_scenes` renders each scene's reset frame -- env 0 at episode 0, the one
-layout a controller ever decomposes from -- and writes a `scenes.json` beside the frames: one record
+to be exported first. `export_scenes` renders each scene's reset frame, env 0 at episode 0 (the one
+layout a controller ever decomposes from) and writes a `scenes.json` beside the frames: one record
 per scene with its instruction, cached plan, goal count and ordering. That file is the entire interface
 to the scorer, which globs `<frames-dir>/*/scenes.json`
 (`api/client/metrics/tools/score_decomposition.py`); frames are named relative to it so the directory
@@ -108,7 +106,7 @@ bazel run //ladder/components/inference/robots/simpler:export_scenes -- --out-di
 ```
 
 `robots/robot_arena` and `robots/robolab` carry the same target for their own suites, and the
-concatenation of the three `scenes.json` files is the benchmark -- see
+concatenation of the three `scenes.json` files is the benchmark. See
 `api/client/metrics/README.md`.
 
 ## Dependencies / assets

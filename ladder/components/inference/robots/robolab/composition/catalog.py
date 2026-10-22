@@ -97,13 +97,10 @@ FRUIT_LADDER: Tuple[str, ...] = (
     "lychee",
     "pumpkin",
     "orange2",
-    # Last, because it is the one object BOTH policies fail on: over 24 placements into the bin from
-    # an empty table, pi0.5 manages 9 where it places every other catalog object 21-24 times, and this
-    # checkpoint manages 0. At position 6 it multiplied every rung from six up by ~0.38 for the best
-    # policy available -- the six-goal ceiling was 29% against 69% without it -- so a quarter of the
-    # suite was capped by an asset rather than by the horizon it exists to measure. The rest of the
-    # order is left alone: ranking it by THIS checkpoint's per-object rates scores worse for pi0.5 at
-    # every rung from two to five than the order already here.
+    # Last, because it is the one object that policies consistently fail to place. Earlier in the
+    # order it would cap every longer rung by an asset rather than by the horizon the suite exists
+    # to measure. The rest of the order is deliberately not ranked by any one model's per-object
+    # success rates.
     "pomegranate",
 )
 

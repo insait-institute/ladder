@@ -18,7 +18,7 @@ _ENV_TARGET_FLAG = "--env-target"
 
 class TargetLauncher:
     """
-    Automatically deteremines the target inference environment for a model (based on env_metadata.yaml
+    Automatically determines the target inference environment for a model (based on env_metadata.yaml
     in the model bundle) and re-routes to a target py_binary for that environment by launching it via
     `os.execv`. If env_metadata.yaml is missing, falls back to DEFAULT_ENV_VERSION
 

@@ -39,8 +39,8 @@ class Orchestrator(Protocol):
         a system that decomposes from the first frame produces a different plan per episode."""
 
 
-# Sources: WHERE subtasks come from — a fixed per-scene plan or on-the-fly generation from a model,
-# interchangeable behind this interface.
+# Sources: WHERE subtasks come from, either a fixed per-scene plan or on-the-fly generation from a
+# model, interchangeable behind this interface.
 SourceConfigT = TypeVar("SourceConfigT", bound=Config)
 
 
@@ -74,7 +74,7 @@ class SubtaskSource(Configurable[SourceConfigT], Template[SourceConfigT]):
         return [decomposition.subtasks[min(index, last)] for index in indices]
 
 
-# Advancers: WHEN to switch subtasks — each step they return the subtask index to command now
+# Advancers: WHEN to switch subtasks. Each step they return the subtask index to command now
 # (== current means stay). Moving the index emits the next plan entry / a fresh generated subtask,
 # so any advancer composes with any source.
 AdvancerConfigT = TypeVar("AdvancerConfigT", bound=Config)

@@ -31,8 +31,7 @@ class TestEnvDispatch(unittest.TestCase):
 
     def test_resolve_version_defaults_without_a_checkpoint(self):
         # A batched-eval client config carries no ckpt_path at all: the shared batch_inference_server
-        # holds the model. Raising here stopped every RoboLab arm from starting, and the client saw only
-        # "Failed to fetch observation from robot server."
+        # holds the model, so resolution must not raise.
         self.assertEqual(TargetLauncher().resolve_version(["--port", "5555"]), "v0")
 
     def test_resolve_version_from_config_file_with_env_expansion(self):

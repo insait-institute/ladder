@@ -52,9 +52,9 @@ class CompositionTask:
     """A multi-goal task over one scene, as a sequence of :class:`Leg` placements.
 
     :attr:`goals` and :attr:`instruction` are both derived from the legs, so the scoring and the
-    wording cannot drift apart. Movers onto ONE
-    destination are written shorter as :attr:`sources` plus :attr:`destination` -- declaring both
-    forms is an error, since the goal order would then depend on which one won.
+    wording cannot drift apart. Movers onto ONE destination are written shorter as
+    :attr:`sources` plus :attr:`destination`. Declaring both forms is an error, since the goal
+    order would then depend on which one won.
     """
 
     scene: str

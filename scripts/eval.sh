@@ -14,12 +14,13 @@
 #   --name NAME               the name your system's results are filed under (default: the class name)
 #   --task      one or more tasks (TASKS.md lists them), "all", or "lite" (the LADDER-Lite subset).
 #               Default: a 2-subgoal task.
-#   --episodes  episodes per task (default 24 on simplerenv_long, 8 on the other two)
+#   --episodes  episodes per task on robolab_long (default 8); parallel episodes on simplerenv_long (default 24)
 #   --output    results directory (default: out)
 #
 # EVALUATION.md lists the suites and methods, examples/README.md how to plug in a system. Results go
 # to OUTPUT/<suite>/<low-level policy>/<method or name>_c1/, which the dashboard and
-# scripts/leaderboard.py read. Methods that call a vision-language model read VLM_BASE_URL and VLM_API_KEY.
+# scripts/leaderboard.py read. Methods that call a vision-language model read VLM_BASE_URL, VLM_API_KEY and
+# VLM_MODEL (default gemini-3.7-flash, gpt-6-astra for gpt_policy) from any OpenAI-compatible endpoint.
 set -euo pipefail
 usage() { sed -n '2,/^[^#]/p' "$0" | grep '^#' | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
 # FILE:CLASS -> /absolute/FILE:CLASS, resolved where the command was typed
@@ -43,7 +44,7 @@ while [ $# -gt 0 ]; do
 done
 [ -n "$suite" ] && { [ -n "$method" ] || [ -n "$plugin" ]; } || usage 1
 [ -z "$method" ] || [ -z "$plugin" ] || { echo "give either --method or your own system, not both"; exit 1; }
-cd "$(dirname "$0")/.."
+source "$(dirname "$0")/lib/common.sh"
 if [ -n "$plugin" ]; then
   # your system's results are filed under its name, like a method's
   method=${name:-$( [ "$plugin" = policy_server ] && echo policy_server || echo "${spec##*:}" | tr '[:upper:]' '[:lower:]')}
@@ -86,6 +87,8 @@ case "${plugin:-$method}" in
   scripted) learned=0 pkg=scripted;;
   *) echo "unknown method: $method"; usage 1;;
 esac
+[ "$method" = gpt_policy ] && export VLM_MODEL=${VLM_MODEL:-gpt-6-astra}
+export VLM_MODEL=${VLM_MODEL:-gemini-3.7-flash}
 if [ -z "$plugin" ] && [ "$method" != low_level_policy ] && [ "$method" != privileged_verifier ] && [ "$method" != scripted ] && { [ -z "${VLM_BASE_URL:-}" ] || [ -z "${VLM_API_KEY:-}" ]; }; then
   echo "$method calls a vision-language model: export VLM_BASE_URL and VLM_API_KEY first"; exit 1
 fi
@@ -95,7 +98,7 @@ if [ $learned = 1 ] && [ "$suite" = robolab ]; then
   export RUN_MODEL=models/external/openpi:run_model INFERENCE_SERVER=0
 elif [ $learned = 1 ]; then
   policy=bridge config=$M/vlams/configs/$suite/composition/vlam_${suite}_composition$suffix.yaml
-  export SESSIONS_HOME=${SESSIONS_HOME:-$HOME/experiments/vlams/control}
+  export SESSIONS_HOME=${SESSIONS_HOME:-$LADDER_CACHE/policies}
   export SESSION_NAME=sess_bridge_policy CKPT_NAMES=model-checkpoint-ema-030000.pt
   if [ ! -f "$SESSIONS_HOME/$SESSION_NAME/checkpoints/$CKPT_NAMES" ]; then
     echo "Downloading the Bridge policy (11 GB) to $SESSIONS_HOME/$SESSION_NAME"

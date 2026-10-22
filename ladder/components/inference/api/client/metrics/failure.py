@@ -9,15 +9,15 @@ from ladder.components.inference.api.client.metrics.registry import Fraction, me
 
 # Steps without effector motion or a grip change that count as stalled. Absolute rather than a
 # fraction of the episode, so it means the same duration on a 60-step and a 1350-step benchmark;
-# the longest gap any of 96 normally-behaving episodes produced was 28. STALL_SHARE covers the
-# short episode an absolute cut cannot fire on -- an arm parked for all 60 steps stalls for 59.
+# normally-behaving episodes stay well below it. STALL_SHARE covers the short episode an absolute
+# cut cannot fire on (an arm parked for all 60 steps stalls for 59).
 STALL_STEPS = 60
 STALL_SHARE = 0.9
 
 
 @metric
 def failure_stuck(episode: Episode) -> Optional[Fraction]:
-    """Of failed episodes, those where every arm parked — no arm moved for :data:`STALL_STEPS`, or
+    """Of failed episodes, those where every arm parked: no arm moved for :data:`STALL_STEPS`, or
     for :data:`STALL_SHARE` of a shorter episode."""
     if episode.success or not episode.motion_trace:
         return None
@@ -35,7 +35,7 @@ def failure_no_grasp(episode: Episode) -> Optional[Fraction]:
 
 @metric
 def failure_dropped(episode: Episode) -> Optional[Fraction]:
-    """Of failed episodes, those where an arm was still holding something at the end — out of budget
+    """Of failed episodes, those where an arm was still holding something at the end: out of budget
     mid-carry rather than placing badly."""
     if episode.success or not episode.grasps:
         return None
@@ -44,17 +44,16 @@ def failure_dropped(episode: Episode) -> Optional[Fraction]:
 
 @metric
 def grasp_churn(episode: Episode) -> Optional[Fraction]:
-    """Grasp cycles per goal. ~1 is one pick per goal; far above it the gripper is oscillating, which
-    no yes/no metric can see — on RoboLab comp_bin_2 pi0.5 ran 1-4 cycles and a Bridge checkpoint on
-    the same arm ran 152-170, and every yes/no metric called both "grasped, then failed to place"."""
+    """Grasp cycles per goal. ~1 is one pick per goal; far above it the gripper is oscillating,
+    which no yes/no metric can see (both read as "grasped, then failed to place")."""
     goals = episode.goals
     if not goals or not episode.motion_trace:
         return None
     return float(len(episode.grasps)), float(len(goals))
 
 
-# A loss must outlast this to count. Of 971 measured losses 560 lasted a single step and 802 lasted
-# five or fewer: that is the success predicate flickering, not a placement being knocked off.
+# A loss must outlast this to count. Most measured losses last a single step or a few: that is the
+# success predicate flickering, not a placement being knocked off.
 MIN_LOSS_STEPS = 5
 
 

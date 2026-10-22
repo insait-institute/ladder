@@ -3,7 +3,7 @@ from typing import Callable, Dict, Iterable, List, Optional, Tuple
 from ladder.components.inference.api.client.episode import Episode
 
 # Every metric returns (numerator, denominator), so aggregation is always sum/sum and the reported
-# value has the same "k/n" shape the success rate has always had — one reader handles them all.
+# value has the same "k/n" shape the success rate has always had: one reader handles them all.
 # Returning None means the metric does not apply to this episode (no composition goals, no
 # hierarchical controller); it is then skipped, NOT counted as zero, so an unrelated benchmark
 # never drags an average down.
@@ -42,7 +42,7 @@ def aggregate(episodes: Iterable[Episode]) -> Dict[str, str]:
 
 
 def merge(*maps: Dict[str, str]) -> Dict[str, str]:
-    """Sum aggregate maps — parallel lanes appending to one results.yaml, or a re-run of a cell."""
+    """Sum aggregate maps: parallel lanes appending to one results.yaml, or a re-run of a cell."""
     totals: Dict[str, List[float]] = {}
     for values in maps:
         for name, value in values.items():

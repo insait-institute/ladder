@@ -70,14 +70,14 @@ class SimplerEpisodeRunnerConfig(Config):
 
 
 class SimplerEpisodeRunner(Configurable[SimplerEpisodeRunnerConfig]):
-    """Runs batched eval episodes against a sim eval server over ZMQ —
+    """Runs batched eval episodes against a sim eval server over ZMQ:
     SimplerServer or RobotArenaServer. The coupling is a per-observation metadata
     contract, not a server class: ``env_name``, ``robot_name``
-    (widowx/google/franka/ur5), ``truncated`` (required — ends the episode) and
+    (widowx/google/franka/ur5), ``truncated`` (required, ends the episode) and
     ``done`` (success). Both servers honor it; RobotArena's SuccessChecker
     deliberately reuses SimplerEnv's ``done`` convention. A missing ``truncated``
     or unknown ``robot_name`` raises, and a missing ``done`` silently scores every
-    episode as failure — so this drives sim eval, not a real robot.
+    episode as failure, so this drives sim eval, not a real robot.
 
     ``n_envs`` is discovered from the server's first RESET reply; the runner
     holds one ``Policy`` that takes ``n_envs`` observations and returns
@@ -101,9 +101,8 @@ class SimplerEpisodeRunner(Configurable[SimplerEpisodeRunnerConfig]):
 
     def run(self) -> None:
         # A crash still saves whatever batches completed, but it must NOT exit 0: a launcher counts a
-        # zero-status cell as a measured one, so swallowing the exception banks an inference-server
-        # OOM as a real score that no downstream consumer can tell from a policy that simply failed
-        # every episode.
+        # zero-status run as a valid result, so a swallowed crash would look like a policy that
+        # failed every episode.
         try:
             while True:
                 self.run_batch()
@@ -170,7 +169,7 @@ class SimplerEpisodeRunner(Configurable[SimplerEpisodeRunnerConfig]):
         per_env_success_steps: List[List[int]] = [[] for _ in range(n_envs)]  # full per-step 0/1 trace
         # Composition per-goal progress, read from the ``oracle`` block every composition env
         # publishes (RobotArena's ConjunctionSuccessChecker, SimplerEnv's oracle_goal_keys,
-        # RoboLab's task-spec checks) -- one contract, so no per-benchmark branch. Kept as change
+        # RoboLab's task-spec checks). One contract, so no per-benchmark branch. Kept as change
         # points: the vector is near-constant, so a 1350-step RoboLab episode stores a handful of
         # rows instead of one per step.
         per_env_subtasks: List[List[str]] = [[] for _ in range(n_envs)]

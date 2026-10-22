@@ -17,19 +17,12 @@ which resets the object to its native mesh orientation (as scanned). For objects
 mesh is *natively* vertical (e.g. some utensils), ``[90, 0, Z]`` is used instead, where
 Z preserves the original horizontal orientation from the upstream data.
 
-For **default scenes**, the convention differs — the upstream rotation is Euler XYZ in
+For **default scenes**, the convention differs: the upstream rotation is Euler XYZ in
 degrees and ``[90, 0, 0]`` is the typical fix for vertical cloths.
-
-Verification workflow
----------------------
-1. Render scenes:  ``./ladder/components/inference/robots/robot_arena/scripts/render_scenes.sh [scenes] --no-serve``
-2. Create side-by-side comparison images:  ``python ladder/components/inference/robots/robot_arena/scripts/create_comparison.py``
-3. Browse gallery:  serve ``~/ra_scene_comparisons/comparisons/all.html`` over HTTP
-4. Inspect object transforms:  ``bazel run //.../inspect_scene_objects -- --scene <name>``
 
 To add a new correction:
   1. Identify the scene name and the object index (0-based position in the sorted
-     keys of transformations.json — i.e. image_0000_segmented = 0, etc.).
+     keys of transformations.json, i.e. image_0000_segmented = 0, etc.).
   2. Create a SceneCorrection with the fixed field(s) and a human-readable reason.
   3. Add it to UPSTREAM_DATA_CORRECTIONS keyed by (scene_name, object_index).
   4. Re-render and verify visually against ground truth images from
@@ -39,10 +32,10 @@ Known upstream data issues (unfixable via corrections)
 ------------------------------------------------------
 - **28 missing scenes**: scene13, scene26, scene51, scene52, scene56, scene58, scene59,
   scene61-69, scene73, scene74, scene78, scene83, scene86-89, scene91, scene92, scene95,
-  scene96 — absent from the upstream dataset entirely.
+  scene96: absent from the upstream dataset entirely.
 - **scene17 background**: background.png shows a kitchen/sink instead of the actual table
   workspace. Overridden via BACKGROUND_OVERRIDES to use scene19's table background.
-- **Thick cloth meshes (P7)**: Several cloth/towel objects were 3D-reconstructed as
+- **Thick cloth meshes**: Several cloth/towel objects were 3D-reconstructed as
   7-12cm thick solid blocks instead of thin sheets. Rotation fixes orient them correctly
   but the visual thickness is an upstream mesh quality limitation.
 """
@@ -1357,10 +1350,9 @@ UPSTREAM_DATA_CORRECTIONS: Dict[Tuple[str, int], SceneCorrection] = {
         rotation_euler_deg=[0, 0, 0],
     ),
     ("scene98", 2): SceneCorrection(
-        # green blob is a 1mm-thin flat sheet (mesh_ext ~[4.8,4.0,0.1]cm). The old
-        # [90,0,0] stood it vertical -> the contact solver blew up to NaN constraint
-        # forces on the first settle step (scene98 crashed at prebuild for every model).
-        # It is a distractor (task is blue bowl -> blue plate), so lay it flat (thin
+        # green blob is a 1mm-thin flat sheet (mesh_ext ~[4.8,4.0,0.1]cm). Standing it
+        # vertical makes the contact solver produce NaN constraint forces on the first
+        # settle step. It is a distractor (task is blue bowl -> blue plate), so lay it flat (thin
         # axis vertical = stable patch); pose does not affect task success.
         reason="green blob: 1mm-thin sheet; lay flat to avoid NaN constraint forces (was [90,0,0] vertical)",
         rotation_euler_deg=[0, 0, 0],

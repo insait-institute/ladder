@@ -55,7 +55,7 @@ class DataclassList(DataclassInterface, tuple, Template[ValueT], metaclass=Datac
 
     def __new__(cls, *args, **kwargs):
         value = tuple(*args, **kwargs)
-        # Cast value to List[cls.ValueT] (note taht ValueT already has plain List/Dict container types
+        # Cast value to List[cls.ValueT] (note that ValueT already has plain List/Dict container types
         # substituted with their DataclassList / DataclassDict equivalents).
         # NOTE: We cast the outer container to a python list instead of DataclassList to avoid infinite
         # recursion since we are in DataclassList.__new__. super().__new__() will cast the outer container

@@ -3,7 +3,7 @@ message: "If you use LADDER, please cite the paper below."
 title: "LADDER: A Long-Horizon Robot Manipulation Benchmark"
 type: software
 version: "1.0.0"
-date-released: "2026-10-01"
+date-released: "2026-10-22"
 license: MIT
 repository-code: "https://github.com/insait-institute/ladder"
 url: "https://ladderrobotics.ai"

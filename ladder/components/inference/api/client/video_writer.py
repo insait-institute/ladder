@@ -23,7 +23,7 @@ class VideoWriterOpenCV:
         self.fps = fps
         self.transform = transform
         self._writer: Optional[cv2.VideoWriter] = None
-        # Whether any frame carried signal -- the streaming form of the all-zero placeholder check.
+        # Whether any frame carried signal: the streaming form of the all-zero placeholder check.
         self.wrote_signal = False
 
     def append(self, frame: np.ndarray | PIL.Image.Image) -> None:

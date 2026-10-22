@@ -1,9 +1,8 @@
 """Force-based gripper control with weld-constraint grasping for Genesis.
 
-Supports ``n_envs=1`` (numerically bit-identical to the legacy path) and
-``n_envs>=2`` (per-env forces, per-env grasp detection, per-env weld
-constraints). Welding is the same physics in both cases — only the
-bookkeeping differs.
+Supports ``n_envs=1`` and ``n_envs>=2`` (per-env forces, per-env grasp
+detection, per-env weld constraints). Welding is the same physics in both
+cases; only the bookkeeping differs.
 """
 
 from typing import Dict, List, Optional, Sequence, Set, Tuple
@@ -36,8 +35,8 @@ LOGGER = get_logger(__name__)
 # Divide-by-zero guard for gripper canonicalization (meters).
 _GRIPPER_SPAN_EPSILON_M = 1e-6
 
-# Snug hold for welded-carry fingers: at weld formation the finger positions —
-# pressed against the object by the closing force — are captured and held there
+# Snug hold for welded-carry fingers: at weld formation the finger positions
+# (pressed against the object by the closing force) are captured and held there
 # minus this over-close for the whole carry. Zero-force fingers drift open
 # around the held object (a visible air gap); the over-close also eats the
 # ~1-3mm/side visual-vs-collision inflation of the convexified assets. The PD
@@ -47,7 +46,7 @@ _WELD_FINGER_OVERCLOSE_M = 0.002
 
 class GripperController:
     """Force-based gripper control with weld-constraint grasping. K=1 enters via
-    ``open()``/``close()`` (bit-identical legacy path); K>=2 enters via
+    ``open()``/``close()``; K>=2 enters via
     ``step_per_env()`` with per-env open/close commands and per-env welding."""
 
     def __init__(
@@ -96,8 +95,8 @@ class GripperController:
     def welded_object_indices(self) -> np.ndarray:
         """Per env, the index into ``object_entities`` of the welded object, or -1.
 
-        The weld is the reliable "is it held" signal: ``_relieve_welded_fingers`` backs the jaws off
-        once it forms, so contact reads as released while the object is in fact carried.
+        The weld is the reliable "is it held" signal: once it forms the fingers stop pushing, so
+        contact can read as released while the object is in fact carried.
         """
         held = np.full(self._n_envs, -1, dtype=np.int64)
         by_link = {}
@@ -169,7 +168,7 @@ class GripperController:
 
     def step_per_env(self, gripper_open_per_env: np.ndarray, substeps: int) -> None:
         """K>=2: per-env open/close over substeps. Mirrors the K=1 ``open()`` /
-        ``close()`` welding semantics — welds release on opening (mid-episode
+        ``close()`` welding semantics: welds release on opening (mid-episode
         failures propagate); welds form on closing once a per-env grasp is
         detected."""
         assert self._n_envs > 1, "step_per_env is K>=2 only; use open()/close() at K=1"
@@ -242,8 +241,8 @@ class GripperController:
     ) -> None:
         """Programmatically establish a held state for ``target_entity``.
 
-        Fires the Genesis weld constraint and updates ``_welds`` bookkeeping —
-        reaches the same end-state that ``close()`` reaches when contact
+        Fires the Genesis weld constraint and updates ``_welds`` bookkeeping,
+        reaching the same end-state that ``close()`` reaches when contact
         detection succeeds. Unlike ``close()`` (which fires the weld only after
         ``is_grasping_two_finger`` returns true), ``set_held`` is a
         state-assertion: the caller guarantees the target is at the correct
@@ -282,7 +281,7 @@ class GripperController:
         the gripper as fully closed (0.0) regardless of the actual finger
         position. Rationale: with a Genesis weld constraint holding the object
         to the EE, the gripper fingers physically sit at ~object_width/2 (the
-        natural grip width) — that maps to a canonical value of ~0.4 here,
+        natural grip width), which maps to a canonical value of ~0.4 here,
         which the policy interprets as "mid-grasp / not gripped" and tries to
         re-grasp by opening, which releases the weld and drops the object.
         Reporting "closed" while welded matches the training distribution (a
@@ -338,8 +337,8 @@ class GripperController:
 
     def _maybe_weld_single_env(self) -> None:
         """K=1 grasp-detect-and-weld. Walks ``object_entities``; welds the first
-        object the gripper is grasping. Stays separate from
-        ``_maybe_weld_per_env`` to preserve K=1 numeric bit-identity."""
+        object the gripper is grasping. Kept separate from
+        ``_maybe_weld_per_env`` so the K=1 numerics stay unchanged."""
         rigid = self._scene.sim.rigid_solver
         for entity, _ in self._object_entities:
             if entity is self._robot:
@@ -362,7 +361,7 @@ class GripperController:
     def _maybe_weld_per_env(self, env_indices: Sequence[int]) -> List[int]:
         """K>=2 grasp-detect-and-weld for the given (currently-unwelded) envs.
         Returns the env indices that were newly welded this call (so the caller
-        can capture their snug-hold targets — see ``_hold_welded_fingers``).
+        can capture their snug-hold targets; see ``_hold_welded_fingers``).
         For each object, runs the per-env grasp check once. Genesis's
         ``add_weld_constraint`` asserts no existing weld with the same link
         pair (globally, not per-env), so when this object's pair is already

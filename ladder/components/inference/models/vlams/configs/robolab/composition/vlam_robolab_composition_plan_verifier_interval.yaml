@@ -8,9 +8,8 @@ runner_config:
   hlc_config:
     advancer:
       gripper_trigger: False
-      # The shared config's 30 is about one check per SimplerEnv subtask (median 27 steps). RoboLab's
-      # median is 65-80, so the same one-check-per-subtask rule gives ~75. Not independently measured
-      # on RoboLab -- it is the shared rule rescaled, and a clock this fast only costs VLM calls.
+      # The shared 30 is about one check per SimplerEnv subtask. RoboLab subtasks are longer, so the
+      # same one-check-per-subtask rule gives ~75. A faster clock only costs VLM calls.
       verify_interval: 75
   recorder_config:
     output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_plan_verifier_interval/$CKPT_NAME/$ENV_NAME

@@ -99,12 +99,6 @@ py_binary(
     deps = [":robot_arena"],
 )
 
-py_binary(
-    name = "render_scene_comparison",
-    srcs = ["render_scene_comparison.py"],
-    deps = [":robot_arena"],
-)
-
 make_py_test(
     name = "test_robot_arena_server",
     timeout = "long",

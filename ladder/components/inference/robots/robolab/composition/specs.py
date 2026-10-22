@@ -35,8 +35,7 @@ from ladder.components.inference.robots.robolab.composition.layout import (
 #
 # DENSE, deliberately, and it is the CONSTRAINED families that sweep it: route and ordered_bin run
 # every rung from 2 to 10. That is what makes the length curve readable, because a rung's score then
-# varies with length alone rather than with which family happens to reach that far. A sparse axis put
-# the long end of the suite in the hands of one family and the curve rebounded rather than decayed.
+# varies with length alone rather than with which family happens to reach that far.
 GOAL_LADDER = range(2, 11)
 # The single-destination control family is sparse where the others are dense: short, middle and long.
 # It is the family the direct instruction already handles, so it is the length axis's control rather
@@ -114,12 +113,8 @@ class CompositionSpec:
 
     @property
     def episode_length_s(self) -> int:
-        """From RoboLab's own benchmark tasks. Granting a five-goal rung the one-goal rate bought NO
-        extra placement (28/80 against 29/80) and the terminal score FELL: length is the binding
-        constraint, not the clock. Confirmed on the shipping policy 2026-08-27: DOUBLING the budget on
-        the six most time-censored units raised the goals pi0.5 ever achieves by 6.1 points and
-        converted none of it into completed episodes (success 1.4% -> 0.0% flat, 11.1% -> 13.9%
-        oracle, both n.s.), for twice the benchmark runtime."""
+        """From RoboLab's own benchmark tasks. A larger budget does not convert into more completed
+        episodes: horizon length is the binding constraint, not the clock."""
         return ROBOLAB_BUDGET_S[min(self.n_ops, max(ROBOLAB_BUDGET_S))]
 
     @property
@@ -184,7 +179,7 @@ def _instances(
     start_on: Optional[str] = None,
 ) -> Tuple[PlacedObject, ...]:
     """Build unique-primed object instances. A type used once keeps its bare name ("orange"); a
-    repeated type is suffixed ("orange_1", "orange_2"). Prim names are internal ids only — the
+    repeated type is suffixed ("orange_1", "orange_2"). Prim names are internal ids only; the
     instruction noun always comes from the catalog, so suffixes never leak into language."""
     counts: Dict[str, int] = {}
     for t in type_ids:
@@ -229,13 +224,10 @@ def single_dest(
     jitter, positions = fit_scatter([CATALOG[t].radius for t in type_ids], reserved, reach_max)
     if ordered:
         # An ordered rung only tests ordering if the required order FIGHTS the policy's own
-        # preference. pi0.5 goes nearest-first: comp_ordered_bin_3, whose first goal is the farthest
-        # object, has it place all three every episode and still score 1/12 with order_violation
-        # 11/12 -- while comp_ordered_bin_4, whose first goal happened to BE the nearest object,
-        # scored 9/12 without testing ordering at all. Both replicated over two runs. Requiring the
-        # farthest object first makes that prior maximally unhelpful, so a rung measures
-        # instruction-following rather than which layout fit_scatter happened to produce. Pairs move
-        # together, so every object keeps the slot fit_scatter sized for its radius.
+        # preference, and policies tend to go nearest-first. Requiring the farthest object first
+        # makes that prior maximally unhelpful, so a rung measures instruction-following rather than
+        # which layout fit_scatter happened to produce. Pairs move together, so every object keeps
+        # the slot fit_scatter sized for its radius.
         goals = sorted(zip(type_ids[:n], positions[:n], strict=True), key=lambda tp: -dist(tp[1], (0.0, 0.0)))
         type_ids = [t for t, _ in goals] + list(distractor_types)
         positions = [p for _, p in goals] + list(positions[n:])
@@ -267,13 +259,10 @@ def split(
 
     ``reserve_as`` maps a receptacle id to the type whose footprint the scatter should reserve for
     it. Object placement is a function of the reserved boxes, so two rungs differing only in
-    receptacle otherwise get different object positions -- and the resulting change in transport
-    distance dominates the receptacle effect (r = -0.86 between the transport delta and the
-    goal-progress delta across the four unmatched bowl/plate rungs, sign flip included). Reserving
-    the bowl AS a plate makes the twins identical in layout, leaving the receptacle as the only
-    difference. Name the LARGER type: a smaller reservation would let an object spawn overlapping
-    the bigger rim. Only the differing slot is remapped -- overriding every receptacle would move
-    the shared bin too, which is the whole point of not doing it."""
+    receptacle otherwise get different object positions, and the resulting change in transport
+    distance would dominate the receptacle effect. Reserving the bowl AS a plate makes the twins
+    identical in layout, leaving the receptacle as the only difference. Name the LARGER type: a smaller reservation would let an object spawn overlapping
+    the bigger rim. Only the differing slot is remapped, so the shared bin stays where it is."""
     anchors = anchors or [RECEP_ANCHOR_2A, RECEP_ANCHOR_2B]
     receps = tuple(
         PlacedReceptacle(rid, type_id=rid, x=anchors[k][0], y=anchors[k][1])
@@ -415,12 +404,9 @@ def _build_specs() -> "OrderedDict[str, CompositionSpec]":
     # Family B - distractors present: put the fruit in the bin while non-fruit blocks sit on the
     # table and must be left behind (goals are pure fruit so "all the fruit" is unambiguous).
     #
-    # Deliberately only TWO rungs. Exclusion reads as a composition constraint but does not behave
-    # like one: flat pi0.5 places both fruits in every episode of comp_bin_2_distractor and fails
-    # every one (goal_progress 24/24, order_violation 12/12), and handing it ground-truth subtasks
-    # barely helps (oracle 2/12, still 6/8 violated) -- told "put the lemon in the bin" it takes the
-    # block anyway. That is low-level grounding, not planning, so more rungs here would add floor
-    # rather than discrimination. The two kept characterise the failure; family D does the measuring.
+    # Deliberately only TWO rungs. Exclusion reads as a composition constraint but mostly tests
+    # low-level grounding (a policy told "put the lemon in the bin" may take the block anyway), and
+    # ground-truth subtasks barely help, so more rungs would add floor rather than discrimination.
     specs.append(
         single_dest(
             "comp_bin_2_distractor",
@@ -441,16 +427,14 @@ def _build_specs() -> "OrderedDict[str, CompositionSpec]":
     )
 
     # Family D - ordered sequence into a bin (distinct objects so the required order is meaningful).
-    # The sharpest discriminator the suite has: flat pi0.5 places all three objects in EVERY episode
-    # of comp_ordered_bin_3 (goal_progress 36/36) and still scores 2/12, because it delivers them in
-    # an arbitrary order. It spans N rather than sitting at one rung because a policy that ignores
+    # The sharpest discriminator the suite has: a flat policy can place every object and still fail
+    # by delivering them in an arbitrary order. It spans N rather than sitting at one rung because a
+    # policy that ignores
     # the order has an exactly known success rate, 1/N! -- 1/2, 1/6, 1/24, 1/120 -- so the rungs form
     # a null curve that a real ordering capability must beat, and that a decomposing system should
     # hold flat against. N=2 is a weak rung on its own (a coin flip) and is kept as that curve's
     # anchor, not as a test.
-    # Swept over the SAME range as the single-destination ladder. It used to stop at five, which
-    # left rungs 7-10 of the suite holding nothing but comp_bin_N -- so the length axis reported one
-    # family at its long end rather than a length, and the ladder REBOUNDED there.
+    # Swept over the full GOAL_LADDER so the long end of the length axis is not held by one family.
     for n in GOAL_LADDER:
         specs.append(
             single_dest(f"comp_ordered_bin_{n}", n, family="ordered", ordered=True, reach_max=REACH_MAX)
@@ -472,19 +456,15 @@ def _build_specs() -> "OrderedDict[str, CompositionSpec]":
     # taller than they are wide). It does NOT rule out the banana: at radius/rest_z 4.45 it is the
     # FLATTEST thing in the catalog, ahead of lemon (1.46) and lime (1.27).
     #
-    # The rung stopped at two on the belief that a third object would have to SHARE the plate, which
-    # the banana's 17.8 cm long axis cannot do on a 16.6 cm plate. It does not have to: advance_legs
-    # chains leg k on every earlier leg latching, so an object may be relayed on its own and the
-    # plate is only ever asked to hold one. Co-residency is permitted (an early placement that still
-    # holds when the leg before it latches counts), not required -- which is what the collective
-    # phrasing, "first put everything on the plate", asks for and what the banana would break. So
-    # comp_relay_3 is solvable object-by-object and NOT by the collective reading; whether a real
-    # policy finds that path is what the oracle arm is for, and this rung is on probation until it
-    # clears that audit.
-    # NOTE ON THE NAMES: this family is parameterised by OBJECT count while every count the paper
-    # reports is placements, so comp_relay_N is a 2N-goal task (comp_revisit_N a 3N-goal one). The
-    # names are kept because five campaigns already key on them; the goal counts are placements
-    # everywhere, which is what the ladders and the tables use.
+    # A third object does not have to SHARE the plate (the banana's 17.8 cm long axis does not fit
+    # beside others on a 16.6 cm plate): advance_legs chains leg k on every earlier leg latching, so
+    # an object may be relayed on its own and the plate is only ever asked to hold one. Co-residency
+    # is permitted (an early placement that still holds when the leg before it latches counts), not
+    # required. So comp_relay_3 is solvable object-by-object, but NOT by the collective reading
+    # "first put everything on the plate".
+    # NOTE ON THE NAMES: this family is parameterised by OBJECT count while goal counts are
+    # placements, so comp_relay_N is a 2N-goal task (comp_revisit_N a 3N-goal one). The names are
+    # kept for stability; goal counts are placements everywhere else.
     for objs in (
         ("lemon", "lime"),
         ("lemon", "lime", "banana"),
@@ -492,7 +472,7 @@ def _build_specs() -> "OrderedDict[str, CompositionSpec]":
         ("lemon", "lime", "banana", "orange", "avocado"),
     ):
         specs.append(relay(f"comp_relay_{len(objs)}", objs, via_anchor=SOURCE_ANCHOR, reach_max=REACH_MAX))
-    # revisit: the type SimplerEnv-Long carries and this suite did not. One object keeps the chain
+    # revisit, as in the SimplerEnv composition benchmark. One object keeps the chain
     # short enough that the budget still covers three moves of it.
     for objs in (("lemon",), ("lemon", "lime")):
         specs.append(
@@ -500,7 +480,7 @@ def _build_specs() -> "OrderedDict[str, CompositionSpec]":
         )
 
     # Family H - routing with the plate side held to objects that rest flat by construction. Family
-    # C-b is the matched rebuild of the bowl rungs; these vary the goal count on a nested ladder
+    # C-b covers the plate/bin split; these vary the goal count on a nested ladder
     # (2 subset 4 subset 6) with the receptacle question already settled.
     for n, (to_plate, to_bin) in (
         (2, (("lemon",), ("orange",))),
@@ -515,10 +495,8 @@ def _build_specs() -> "OrderedDict[str, CompositionSpec]":
             )
         )
 
-    # The long end of the routing ladder. Rungs 7-10 of the suite contained only comp_bin_N, which
-    # the direct instruction solves at 29-54%, so at exactly the lengths where an orchestrator should
-    # matter there was no task it could win. These take FRUIT_LADDER[:n] -- the SAME objects
-    # comp_bin_n uses at that rung -- and split them across two receptacles, so route_n against
+    # The long end of the routing ladder, so the long rungs are not held by comp_bin_N alone. These
+    # take FRUIT_LADDER[:n] (the SAME objects comp_bin_n uses at that rung) and split them across two receptacles, so route_n against
     # bin_n is one instruction naming two destinations against one naming a single destination, with
     # the object set held fixed. The plate side is the three objects that rest flat by construction
     # (banana 4.45, lemon 1.46, lime 1.27 on radius/rest_z); everything else goes to the walled bin,
@@ -537,7 +515,7 @@ def _build_specs() -> "OrderedDict[str, CompositionSpec]":
             )
         )
 
-    # comp_route_2 with the PLAN ORDER reversed and nothing else -- explicit anchors undo the swap
+    # comp_route_2 with the PLAN ORDER reversed and nothing else. Explicit anchors undo the swap
     # `groups` would otherwise cause, so both receptacles and both objects stay exactly where
     # comp_route_2 puts them. Isolates whether a completed goal is lost because it sits exposed for
     # the whole of the next subtask, or because the policy re-engages an object it has placed.
@@ -551,24 +529,14 @@ def _build_specs() -> "OrderedDict[str, CompositionSpec]":
         )
     )
 
-    # A third rung for revisit, the family where the direct instruction scores 0/16 against a
-    # privileged 9/16 and which had only two units.
+    # A third rung for revisit, a family the direct instruction handles poorly.
     specs.append(
         revisit("comp_revisit_3", ("lemon", "lime", "banana"), away_anchor=SOURCE_ANCHOR, reach_max=REACH_MAX)
     )
 
-    # Family C-b - the SPLIT family on a plate. comp_split_* above pairs the bin with a BOWL, and
-    # that pair does not measure routing: commanded "put the X in the bin" with a bowl in the scene
-    # pi0.5 executes it 6/71 = 8.5% of the time against 283/433 = 65.4% with the bin alone (z = 9.0),
-    # and the step-weighted end-effector dwell puts it AT the bowl for 44-100% of its receptacle time
-    # under either instruction. Both receptacles are dark and deep and the scene reads as one
-    # container. Measured consequence: over the four bowl rungs the direct instruction scores 25% and
-    # ZERO of eight orchestrators beat it -- the privileged rule included, at 3%.
-    #
-    # These rungs change ONE thing, the receptacle, and keep the objects, the goal counts and the
-    # anchors of their bowl twins, so the pair is a single-variable test of the destination itself.
-    # comp_plate_1_avocado below is the precondition: the avocado is the one object here that has to
-    # come to rest on a flat unwalled surface and was never asked to before.
+    # Family C-b - the SPLIT family on a plate. A bin paired with a BOWL does not measure routing:
+    # both receptacles are dark and deep, the scene reads as one container, and policies confuse
+    # them. A plate is visually distinct from the bin, so these rungs test routing itself.
     #
     # Rungs 5, 7 and 8 exist to give the LENGTH axis a third routing family: without them 5 and 7
     # carried only comp_ordered_bin_N and comp_route_N, so a step in the ladder there was a step in
@@ -576,8 +544,8 @@ def _build_specs() -> "OrderedDict[str, CompositionSpec]":
     # objects that rest stably on a flat unwalled surface (avocado, banana, lemon, lime); everything
     # rounder rolls off and would score the asset rather than the routing. That cap is also why the
     # family stops at eight: nine would need a fifth plate object, and the only candidates left are
-    # the pomegranate, which pi0.5 places 9 times in 24 against 21-24 for every other object here,
-    # and orange2, whose subtask renders identically to the first orange's. comp_route_N carries the
+    # the pomegranate, which policies rarely place, and orange2, whose subtask renders identically
+    # to the first orange's. comp_route_N carries the
     # ladder at nine and ten.
     for n, (to_plate, to_bin) in (
         (2, (("avocado",), ("orange",))),
@@ -599,8 +567,7 @@ def _build_specs() -> "OrderedDict[str, CompositionSpec]":
 
     # Family G - identical instances (counting): N copies of one object into the bin.
     # TWO RUNGS ONLY, and deliberately. Duplicates is a family the direct instruction already
-    # solves -- 83.3% against the privileged rule's 87.5% over 72 episodes -- so rungs past four
-    # would add length to the suite without adding anything an orchestrator could win. A family the
+    # solves about as well as the privileged oracle, so rungs past four would add length to the suite without adding anything an orchestrator could win. A family the
     # flat policy handles reliably serves as a type control, not as a ladder.
     for n, obj in ((2, "orange"), (4, "lime")):
         specs.append(identical(f"comp_identical_{n}", obj, n, reach_max=REACH_MAX))
@@ -647,8 +614,8 @@ def _plan_name(colour: str, noun: str) -> str:
 def decomp_plan(spec: CompositionSpec) -> Dict[str, object]:
     """The cached plan for a spec, one command per goal in order, naming objects by colour and type.
 
-    The colour separates look-alikes: told a bare noun, pi0.5 grasps the lemon for the orange in a
-    third of its grasps. The task's own instruction stays on plain nouns.
+    The colour separates look-alikes: told a bare noun, a policy can confuse e.g. the lemon and the
+    orange. The task's own instruction stays on plain nouns.
     """
     receptacle_type = {r.prim: RECEPTACLE_TYPES[r.type_id] for r in spec.receptacles}
 

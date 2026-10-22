@@ -216,7 +216,7 @@ class ScriptedPolicyConfig(Config):
     max_container_insertion_m: Optional[float] = None
     # Identical movers (carrot#0, carrot#1) are credited by count, not by name: the goal naming
     # carrot#1 is met by any two carrots on the plate. When the named one already rests there, move
-    # another instance instead of lifting it back off -- which undoes the goal it was chasing.
+    # another instance instead of lifting it back off, which undoes the goal it was chasing.
     retarget_identical: bool = False
     # Gap from the reported end-effector frame to the finger pads. The policy reasons in pad space,
     # so a suite whose kinematics report the flange (RoboLab: panda_link8) declares it here.

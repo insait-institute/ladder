@@ -37,7 +37,6 @@ def widowx_eef_pose_to_canonical(eef_pose: np.ndarray) -> np.ndarray:
     ee_pose_translation: np.ndarray = eef_pose[:3]  # [3]
     ee_pose_rotation: np.ndarray = eef_pose[3:7]  # NOTE: wxyz
 
-    # Convert quaternion to rotation matrix
     ee_pose_rotation: np.ndarray = scipy.spatial.transform.Rotation.from_quat(
         ee_pose_rotation, scalar_first=True
     ).as_matrix()
@@ -52,7 +51,7 @@ def widowx_eef_pose_to_canonical(eef_pose: np.ndarray) -> np.ndarray:
 
     # NOTE: Additionally to above, keep in mind that the Bridge dataset was collected with EEF frame
     # aligned with robot base frame. To get compatible observations, you need to post-multiply the
-    # obsered rotation (returned by this function) by
+    # observed rotation (returned by this function) by
     # np.array(
     #     [
     #         [1, 0, 0],

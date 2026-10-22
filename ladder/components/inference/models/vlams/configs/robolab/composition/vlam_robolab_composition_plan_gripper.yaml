@@ -8,29 +8,20 @@ runner_config:
     source:
       cache_path: ladder/components/inference/robots/robolab/composition/decomp_cache.json
     advancer:
-      # A release only counts as a finished attempt if the object actually came UP: min_hold_steps 3
-      # (a 5 Hz default = 0.2 s here) with no lift check fired on 6.51 closures an episode where a
-      # real grasp-and-lift happens 2.17 times, and 63.7% of this arm's plan advances (311 of 488)
-      # were failed clenches. 21 is the 7x RoboLab rescale advance_cooldown_steps already uses
-      # (8 -> 57); 0.03 m is what the verifier calls a real lift in provisional_lift_m.
+      # A release only counts as a finished attempt if the object actually came up. Without a lift
+      # check, failed clenches advanced the plan. 21 is the same 7x RoboLab rescale that
+      # advance_cooldown_steps uses (8 -> 57); 0.03 m is what the verifier calls a real lift.
       min_hold_steps: 21
       lift_threshold_m: 0.03
-      # REQUIRED with the gate above, not optional: this advancer has no other escape, and the gate
-      # alone stranded it -- advances/episode 6.08 -> 0.92, 50% of episodes never advancing at all
-      # and 8% reaching the last subtask, against 100% before. Gate alone scored -6.0 vs the direct
-      # instruction; gate + this backstop scores +1.8, against the shipped gate's -3.0. 300 matches
-      # plan_verifier and sits just above RoboLab's 243-step median per achieved goal.
+      # Required with the gate above: this advancer has no other escape, and the gate alone stalls
+      # most episodes on their first subtask. 300 matches plan_verifier and sits just above
+      # RoboLab's median time per achieved goal.
       attempt_stall_steps: 300
-      # The shared 8 is SimplerEnv's, scaled here by the 7x difference in RoboLab's timescale (median
-      # 243 steps per achieved goal against 34) -- the same rule the oracle config derives its own
-      # settle and patience from.
+      # The shared 8 is SimplerEnv's, scaled by the ~7x longer RoboLab timescale, the same rule the
+      # oracle config uses for its settle and patience.
       advance_cooldown_steps: 57
-      # The oracle needed an escape from a goal the policy cannot finish; without one it "degenerates
-      # into a single-object flat policy", in that config's words. This advancer has no patience knob,
-      # so the wrap is the only escape it has: otherwise an episode that never completes a clean
-      # grasp-lift-release on goal 0 spends all 1350 steps commanding it. That matches what the arm
-      # shows -- 43.4% of goals abandoned and a 409-step mean switch lag, against 36.5% and 29 steps
-      # on SimplerEnv.
+      # The advancer has no patience knob, so wrapping is its only escape from a goal the policy
+      # cannot finish. Without it an episode that never completes goal 0 spends its budget on it.
       cyclic_repair: True
   recorder_config:
     output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_plan_gripper/$CKPT_NAME/$ENV_NAME

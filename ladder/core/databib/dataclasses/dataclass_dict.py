@@ -58,7 +58,7 @@ class DataclassDict(DataclassInterface, frozendict, Template[ValueT], metaclass=
 
     def __new__(cls, *args, **kwargs):
         values = frozendict(*args, **kwargs)
-        # Cast value to Dict[cls.ValueT] (note taht ValueT already has plain Dict/Dict container types
+        # Cast value to Dict[cls.ValueT] (note that ValueT already has plain Dict/Dict container types
         # substituted with their DataclassList / DataclassDict equivalents).
         # NOTE: We cast the outer container to a python list instead of DataclassDict to avoid infinite
         # recursion since we are in DataclassDict.__new__. super().__new__() will cast the outer container

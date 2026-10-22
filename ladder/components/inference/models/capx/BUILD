@@ -60,8 +60,8 @@ py_binary(
     deps = [":capx"],
 )
 
-# This package had no checks at all, so a name used but not imported reached the branch. Ruff's
-# pyflakes rules catch that; the package ships no unit tests, hence the empty test glob.
+# Ruff's pyflakes rules catch a name used but not imported. The package ships no unit tests,
+# hence the empty test glob.
 make_py_checks(
     name = "capx_tests",
     test_srcs = glob(

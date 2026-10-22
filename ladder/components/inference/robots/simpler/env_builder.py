@@ -6,7 +6,7 @@ import gymnasium as gym
 import sapien.physx
 
 # ManiSkill3 resolves its asset directory from MS_ASSET_DIR when mani_skill is imported, so point it
-# at the assets bundled into the runfiles (`:maniskill_assets` in BUILD) before that import — evals
+# at the assets bundled into the runfiles (`:maniskill_assets` in BUILD) before that import. Evals
 # and tests then need no runtime asset download. Mirrors the ManiSkill2 MS2_REAL2SIM_ASSET_DIR setup.
 if "MS_ASSET_DIR" not in os.environ:
     os.environ["MS_ASSET_DIR"] = os.path.join(os.path.dirname(os.path.abspath(__file__)), "maniskill3")

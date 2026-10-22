@@ -18,8 +18,8 @@ LOGGER = get_logger(__name__)
 # yes/no because a plan carries one line per goal: two carrots give two identical sentences, and a
 # yes/no is true for both the moment one carrot is placed. It names no object -- the model reads the
 # kind out of the subtask text -- so it needs no per-task variant.
-# The "held directly above the goal counts" clause is benchmark-measured: on 135 sim-labeled frames
-# it cut missed completions from 20/34 to 3/34 (the gap is the hover case) at zero false positives.
+# The "held directly above the goal counts" clause covers the hover case, which otherwise reads as
+# a missed completion.
 _VERIFY_PROMPT = (
     "You are checking the CURRENT state of a robot tabletop scene from its camera views. The subtask "
     "below moves ONE object to a goal location, and the scene may hold SEVERAL interchangeable "
@@ -36,7 +36,7 @@ _VERIFY_PROMPT = (
 
 
 # A bin is seen from outside, so an object dropped in is never visible: count it by what has left
-# the rest of the scene. RoboLab frames vs the simulator's labels: recall 0.535 -> 0.646, precision unchanged.
+# the rest of the scene. This raises recall without hurting precision.
 _CONTAINER_SUFFIX = (
     " When a goal location is a container whose interior you cannot see into, do not look for the "
     "object inside it. Instead account for every object of that kind in the scene: if an object of "
@@ -64,10 +64,9 @@ _MULTIVIEW_SUFFIX = (
 def _shrink(image: np.ndarray, max_side: Optional[int]) -> np.ndarray:
     """Downscale so the longest side is ``max_side``; pass through when already smaller or unset.
 
-    Done HERE rather than in a backend because every backend pays for the frame -- a hosted model in
-    input tokens (133,719 gateway calls measured 2314 each, 309M in a day, nearly all of it the frame)
-    and a served one in prefill -- and because doing it here is what makes the trade measurable on a
-    LOCAL verifier, for free, instead of only against a rate-limited API.
+    Done HERE rather than in a backend because every backend pays for the frame (a hosted model in
+    input tokens, which the frame dominates, and a served one in prefill), and because doing it here
+    makes the trade measurable on a LOCAL verifier, for free, instead of only against a hosted API.
     """
     if max_side is None or max(image.shape[:2]) <= max_side:
         return image
@@ -86,14 +85,13 @@ class VerifierConfig(Config):
     # A VLM answers a task-agnostic yes/no on the subtask text. vlm=None disables the check (returns
     # None) so the caller round-robins blindly.
     vlm: Optional[AutoConfig] = None  # any VLM backend (OpenAIVLM, LocalVLM, ...)
-    max_tokens: int = 2048  # flash spends hidden thinking tokens; 1024 truncated ~20-40% of replies
+    max_tokens: int = 2048  # thinking models spend hidden tokens; 1024 truncates many replies
     temperature: float = 0.0
     # Which camera views the check sees, in order. More than one is worth it wherever the goal
     # location is not legible from a single view: on RoboLab the over-shoulder "main" camera shows
-    # the bin as a ~15 px box at the frame edge, routinely occluded by the arm, and the verifier
-    # scored 4% recall there (362 of 377 completed subtasks missed) against 56-68% on the benchmarks
-    # whose tabletop view shows the goal clearly. The wrist view looks into the bin. Cameras absent
-    # from the observation are skipped, so a list is safe across embodiments.
+    # the bin as a tiny box at the frame edge, often occluded by the arm, so the verifier misses
+    # most completions there. The wrist view looks into the bin. Cameras absent from the observation are
+    # skipped, so a list is safe across embodiments.
     image_cameras: List[str] = ["main"]
     # Also send the previous verification's frame to disambiguate occlusion ("it was there and
     # nothing removed it"), cutting the false-negatives that drive re-command/undo loops.
@@ -104,12 +102,10 @@ class VerifierConfig(Config):
     # all backends, so the accuracy cost is measurable against a LOCAL verifier without spending API
     # quota -- compare advance precision on the episodes' gt flag at two values.
     max_image_side: Optional[int] = None
-    # Passed through to the backend when set. A reasoning model spends hidden thinking tokens on every
-    # call and they are billed: measured over 133,719 gateway verifier calls, 292 thinking tokens each,
-    # 39M in a day, against 16 output tokens of actual answer. The question here is a COUNT of objects
-    # visible in one frame, so the deliberation buys little -- but it is a per-config knob rather than
-    # a new default, because the answer quality is what the whole advancer rests on and it has to be
-    # re-measured against `gt` before being trusted. None leaves the backend at its own default.
+    # Passed through to the backend when set. A reasoning model spends far more billed thinking
+    # tokens than answer tokens on this one-frame COUNT question, but this stays a per-config knob
+    # rather than a new default: the advancer rests on answer quality, so any change must be
+    # re-measured against `gt` first. None leaves the backend at its own default.
     reasoning_effort: Optional[str] = None
 
 

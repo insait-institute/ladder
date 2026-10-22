@@ -1,2 +1,2 @@
 import: vlm.yaml
-model: anthropic/claude-opus-5-5
+model: claude-opus-5-5

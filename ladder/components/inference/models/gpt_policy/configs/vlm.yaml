@@ -1,5 +1,5 @@
-import: ../../../api/client/hlc/configs/vlm_nvidia.yaml
-base_url: ${VLM_BASE_URL}  # any OpenAI-compatible endpoint serving the model
-api_key_env: VLM_API_KEY
-model: openai/gpt-6-astra
+import: ../../../api/client/hlc/configs/vlm.yaml
 send_temperature: false
+max_rps: 4.0
+rate_limit_burst: 24
+rate_limit_attempts: 5

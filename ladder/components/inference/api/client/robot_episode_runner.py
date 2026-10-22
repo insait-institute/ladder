@@ -62,12 +62,10 @@ class EpisodeRunnerBase(Configurable[RunnerConfigT], Template[RunnerConfigT]):
         # Reset the robot to a neutral state. Bypass all wrappers, we only want to reset the robot.
         self.env.unwrapped.reset()
 
-        # Get the language instruction
         self.instruction = self.get_instruction()
 
         self.prepare_episode()
 
-        # Reset the policy
         self.policy.reset()
         if self.hlc is not None:
             self.hlc.reset(task_description=self.instruction, env_idx=0)
@@ -76,7 +74,6 @@ class EpisodeRunnerBase(Configurable[RunnerConfigT], Template[RunnerConfigT]):
         self.start_episode()
         print("Starting episode... Press Ctrl-C to terminate episode early!")
 
-        # Reset the environment
         observation: RobotObservation = self.env.reset(instruction=self.instruction)
 
         max_steps = self.episode_max_steps()
@@ -128,7 +125,6 @@ class EpisodeRunnerBase(Configurable[RunnerConfigT], Template[RunnerConfigT]):
                 LOGGER.warn(f"\nCaught exception: {traceback.format_exc()}\nTerminating episode.")
                 break
 
-        # End the current episode
         self.env.end_episode()
 
     def episode_max_steps(self) -> float:

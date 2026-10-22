@@ -100,7 +100,7 @@ def decode_frame_from_container(
         #   `backward=True` -> look backwards for the nearest (key)frame if none exists at the offset
         #   `any_frame=False` -> seek to a keyframe only
         #
-        # WHY seek_offset EXISTS — the B-frame / DTS-PTS problem:
+        # Why seek_offset exists (the B-frame / DTS-PTS problem):
         #
         # H.265/H.264 with B-frames (bidirectional predicted frames) encodes packets in a
         # different order than they are displayed. Each packet therefore carries two timestamps:
@@ -109,7 +109,7 @@ def decode_frame_from_container(
         #
         # With B-frames the encoder buffers several frames before outputting them, so the first
         # few packets have *negative* DTS while PTS starts at 0. The gap between DTS and PTS at
-        # keyframe boundaries is not constant — it depends on how many B-frames the encoder
+        # keyframe boundaries is not constant. It depends on how many B-frames the encoder
         # placed before the next keyframe, which varies with lookahead-based encoders (x265
         # with lookahead=20, bframes=4 can produce a gap that ranges from 2 to 6 frames).
         #
@@ -155,8 +155,8 @@ class VideoFrameReader:
     WHY THIS EXISTS: opening a container is not cheap. FFmpeg parses the whole seek index up front,
     one entry per frame at roughly 40 bytes each, so a container for a 300k-frame video costs ~11 MB
     of RAM and 20-100 ms to open. Datasets that pack many episodes into one file therefore spend
-    almost all of their frame-read time re-parsing the same few indices: measured on DROID
-    (berobot-v3, ~300k frames per file), reopening per frame put ~290 ms of the ~300 ms spent reading
+    almost all of their frame-read time re-parsing the same few indices: on DROID
+    (~300k frames per file), reopening per frame put ~290 ms of the ~300 ms spent reading
     a frame into `av.open`. Keeping containers open trades that RAM for the parse.
 
     Cache size is a count of open containers, so budget it against ~40 bytes per frame per file. Size

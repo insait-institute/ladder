@@ -9,12 +9,9 @@ runner_config:
   hlc_config:
     import: ../../../../../api/client/hlc/configs/volo.yaml
     extra_cameras: [wrist]
-    # 150, transferred from upstream's 80 rather than copied. NVlabs/VoLoAgent derives its default as
-    # "pi05 chunks=8, so 80 steps ~= 10 chunks between checks", and halves it to 40 for LIBERO because
-    # LIBERO replans every 5 steps. The invariant is CHUNKS, not steps: RoboLab runs
-    # open_loop_horizon 15, so 10 chunks is 150. It was 75 until 2026-08-26, matched to our own clock
-    # arm's `interval` -- but that number was the median gap between subtask COMMANDS (advancer
-    # thrash), not a policy horizon, and it had already been shown wrong for plan_periodic.
+    # 150, transferred from upstream's 80 rather than copied. Upstream derives 80 as ~10 policy
+    # chunks of 8 steps between checks. The invariant is chunks, not steps: RoboLab runs
+    # open_loop_horizon 15, so 10 chunks is 150.
     check_interval: 150
   recorder_config:
     output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_volo/$CKPT_NAME/$ENV_NAME

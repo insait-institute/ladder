@@ -67,7 +67,7 @@ class RobotEnv(Configurable[RobotEnvConfig]):
         if reply["status"] != "ok":
             raise RuntimeError(f"Robot server reset returned {reply.get('status')!r}")
 
-        # Backward compat: legacy servers omit n_envs → treat as single-env.
+        # Servers that omit n_envs are single-env.
         self._n_envs = int(reply.get("n_envs", 1))
         return self._get_observations()
 

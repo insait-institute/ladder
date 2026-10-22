@@ -1,8 +1,8 @@
-# Unified RobotArena eval — 137 envs/scene = 16 default-block (K=4 grid) +
+# Unified RobotArena eval: 137 envs/scene = 16 default-block (K=4 grid) +
 # 121 perturbation-block (K=11 grid).
 # Requires a separately-launched batched VLA inference server so the K policy
-# instances share one model copy in GPU memory. Use vlam_robot_arena_nenvs.sh
-# for the full launch wiring (batch inference server + RA server + client).
+# instances share one model copy in GPU memory. vlam_robot_arena.sh does
+# the full launch wiring (batch inference server + RA server + client).
 
 autoclass: ladder.components.inference.robots.robot_arena.robot_arena_server.RobotArenaServer
 env_config:
@@ -12,11 +12,10 @@ env_config:
   max_episode_steps: 60
   control_freq: 5
   sim_freq: 200
-  # Weld-NaN fix ("Invalid constraint forces causing 'nan'") — fixed at substeps=1
-  # by two targeted changes:
-  #  - gripper-weld over-constraint: gripper_controller._relieve_welded_fingers backs
-  #    the fingers off the object the instant a grasp weld forms, so finger-contact +
-  #    weld don't form a singular rigid loop.
+  # Avoids "Invalid constraint forces causing 'nan'" at substeps=1 with two changes:
+  #  - gripper-weld over-constraint: gripper_controller drops the closing force the
+  #    instant a grasp weld forms, so finger-contact + weld don't form a singular
+  #    rigid loop.
   #  - settle penetration (e.g. scene41's metal pot): rigid_constraint_timeconst=0.02
   #    bounds the deep convex-hull contact force during the gravity settle.
   sim_substeps: 1

@@ -15,13 +15,13 @@ _GRID_NX, _GRID_NY = 33, 41
 RECEP_ANCHOR_1 = (0.70, 0.0)  # single receptacle: deep centre
 RECEP_ANCHOR_2A = (0.72, 0.26)  # split/transfer/relay: deep, pushed to the back edge to free the band
 RECEP_ANCHOR_2B = (0.72, -0.26)
-# How far from the base a GRASPABLE may start. Measured, one lemon into the bin, 16 episodes per
-# position: 0.41 m 15/16, 0.63 m 14/16, 0.77 m 6/16 (p=0.002). Applies to start positions only --
-# placing INTO a bin at 0.70 m scores 94%. 0.62 not 0.65 because the greedy placement is not monotone
-# in the bound: 0.65 cannot seat ten objects at any ladder jitter, 0.62 seats them at 0.02.
+# How far from the base a GRASPABLE may start: grasp success drops sharply for objects starting much
+# beyond ~0.63 m. Applies to start positions only; placing INTO a bin at 0.70 m is fine. 0.62 not
+# 0.65 because the greedy placement is not monotone in the bound: 0.65 cannot seat ten objects at any
+# ladder jitter, 0.62 seats them at 0.02.
 REACH_MAX = 0.62
 # Transfer and relay put graspables on a receptacle rather than the table, so the SOURCE has to obey
-# the same bound: at RECEP_ANCHOR_2A the objects rest at 0.72-0.80 m, the far end of the probe. The
+# the same bound: at RECEP_ANCHOR_2A the objects would rest at 0.72-0.80 m, out of comfortable reach. The
 # destination stays deep.
 SOURCE_ANCHOR = (0.45, 0.26)
 # Jitter is DERIVED per task: each scene takes the largest value here for which a provably safe layout
@@ -56,7 +56,7 @@ def _candidate_cells(
 ) -> List[Tuple[float, float]]:
     """Candidate centres for one object: grid points inside the arm-reachable band that are also far
     enough from every table edge that neither the jitter nor the object's own footprint can bring it
-    within ``_EDGE_KEEP`` of the lip, and — when ``reach_max`` is given — within that distance of the
+    within ``_EDGE_KEEP`` of the lip, and (when ``reach_max`` is given) within that distance of the
     base even at worst-case jitter. Empty when the object cannot be placed safely at all."""
     m = radius + jitter + _EDGE_KEEP
     xmin, xmax = max(_TABLE[0] + m, _OBJ_RECT[0]), min(_TABLE[1] - m, _OBJ_RECT[1])
@@ -101,8 +101,7 @@ def _scatter(
     The pairwise bound is what stops the scene from tearing itself apart: two objects can close by
     ``2 * jitter``, so authoring them merely "far apart" (maximising the minimum distance without
     asserting one) lets high-N scenes spawn interpenetrating, and the simulator resolves the overlap
-    by ejecting an object -- observed as 0.138 m of displacement under a 0.07 m jitter, with one
-    object landing off the table.
+    by ejecting an object, sometimes off the table.
 
     Returns None when the scene is over-full at this jitter, so callers can retry lower."""
     placed: Dict[int, Tuple[float, float]] = {}
@@ -146,8 +145,8 @@ def pull_into_reach(
 ) -> Tuple[float, float]:
     """Slide a source receptacle straight toward the base until every object resting on it obeys
     ``reach_max`` at worst-case jitter. Objects on a receptacle are laid out by ``fit_on_receptacle``,
-    which knows nothing about reach, so a hand-picked anchor silently decides how far out they start --
-    which is how a transfer task came to sit 4 mm past the bound the suite is defined by."""
+    which knows nothing about reach, so a hand-picked anchor would otherwise silently decide how far
+    out they start."""
     if reach_max is None:
         return anchor
     scale = 1.0
@@ -165,9 +164,8 @@ def fit_on_receptacle(
 ) -> Tuple[float, List[Tuple[float, float]]]:
     """Same idea for objects that start resting ON a receptacle (the transfer sources): offsets from
     the receptacle centre, on a concentric ring, plus the largest jitter for which every object stays
-    ``_RIM_KEEP`` inside the rim and no two can overlap. Randomizing these within the source -- rather
-    than pinning them, which made every transfer episode an identical scene -- keeps the source intact
-    while still giving each episode a fresh draw."""
+    ``_RIM_KEEP`` inside the rim and no two can overlap. Randomizing these within the source, rather
+    than pinning them, keeps the source intact while still giving each episode a fresh draw."""
     n = len(radii)
     for jitter in JITTER_LADDER:
         usable = min(footprint) - _RIM_KEEP - jitter - max(radii)

@@ -27,8 +27,8 @@ pip.override(
     patches = ["//build_support/python/patches:mujoco_2.3.2_plugin_loader.patch"],
 )
 
-# isaacsim 6 (RoboLab env): the isaacsim 4.5 realpath + omni.__path__ fixes above, adapted to the
-# 6.0 kernel wheel layout.
+# isaacsim 6 (RoboLab env): stop resolving symlinks with realpath (which escapes the Bazel venv)
+# and refresh omni.__path__ after sys.path changes, so the kernel wheel works from runfiles.
 pip.override(
     file = "isaacsim_kernel-6.0.0.1-cp312-none-manylinux_2_35_x86_64.whl",
     patch_strip = 1,

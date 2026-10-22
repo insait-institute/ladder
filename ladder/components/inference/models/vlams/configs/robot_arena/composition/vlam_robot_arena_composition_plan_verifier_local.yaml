@@ -1,7 +1,7 @@
 import: vlam_robot_arena_composition.yaml
 
-# RobotArena composition -- _plan_verifier with every VLM role served in-process rather than by the
-# API gateway, so the arm runs with no credentials and no network.
+# RobotArena composition -- _plan_verifier with every VLM role served in-process rather than by a
+# remote API, so the arm runs with no credentials and no network.
 runner_config:
   hlc_config:
     import: ../../../../../api/client/hlc/configs/plan_verifier_local.yaml

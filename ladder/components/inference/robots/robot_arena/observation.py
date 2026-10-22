@@ -99,7 +99,7 @@ class ObservationBuilder:
         """``last_target_pose_canonical``: ``(4, 4)`` (broadcast), ``(K, 4, 4)``, or ``None``."""
         main_images, depth_all = self._render_main_images() if self._render_images else (None, None)
 
-        # atleast_2d normalizes Genesis getter output to ``(n_envs, ...)`` — K=1
+        # atleast_2d normalizes Genesis getter output to ``(n_envs, ...)``. K=1
         # returns 1D shapes (n,), K>=2 already returns (K, n); both become (K, n).
         ee_link = self._robot.get_link(name=self._robot_config.ee_link)
         ee_pos_all = np.atleast_2d(ee_link.get_pos().cpu().numpy())

@@ -1,7 +1,6 @@
 import: vlam_robot_arena_composition_unified.yaml
 
-# The verifier system on the unified layout. Same system that won the SimplerEnv composition
-# campaign (hlc_systems_20260716).
+# The verifier system on the unified layout.
 runner_config:
   hlc_config:
     import: ../../../../../api/client/hlc/configs/plan_verifier.yaml

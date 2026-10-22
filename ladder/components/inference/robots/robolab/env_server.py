@@ -104,15 +104,15 @@ LOGGER = get_logger(__name__)
 # which world_state does not resolve), so keep it off regardless of the shared --enable-subtask flag.
 robolab.constants.ENABLE_SUBTASK_PROGRESS_CHECKING = False
 
-# Kit mutes USD diagnostics by default, which is why an entire class of renderer failure -- the
-# payload geometry being evicted mid-episode -- produced 188 blind episodes without one log line.
+# Kit mutes USD diagnostics by default, which hides renderer failures such as payload geometry
+# being evicted mid-episode.
 carb.settings.get_settings().set("/persistent/app/usd/muteUsdDiagnostics", False)
 
 # A composition task is named by its spec (comp_bin_2); everything else is a RoboLab task name or
 # path, passed through. Both register and are then served under the Task class name.
 _requested = args_cli.task or []
-# One view leaves the camera set at robolab's own default; two matches the layout the cosmos3
-# DROID policies were post-trained on. The second costs GPU, so it is opt-in.
+# One view leaves the camera set at robolab's own default; two matches the layout some DROID
+# policies were post-trained on. The second costs GPU, so it is opt-in.
 _CAMERAS = WRIST_LEFT_RIGHT if args_cli.exterior_cameras == 2 else None
 if args_cli.publish_depth:
     # with_depth extends each camera's data_types, leaving the rgb-only registration alone.
@@ -131,7 +131,6 @@ _REVISIT_TASKS = {task_class_name(name): bool(spec.via_legs) for name, spec in S
 # and the planner arms (served the same list from decomp_cache.json) command identical text and
 # differ only in where the plan came from.
 _PLAN_SUBTASKS = {name: entry["subtasks"] for name, entry in decomp_cache_entries().items()}
-# Task class name -> its spec, for the payload the scripted completability policy reads.
 
 
 def _half(frame) -> np.ndarray:
@@ -394,8 +393,8 @@ class RobolabServer:
                 "truncated": truncated,
                 # Privileged ground truth for oracle HLCs (PrivilegedDecomposer/Advancer): the
                 # synthesized per-goal commands paired with each goal's task-spec condition
-                # (ladder/.../robolab/oracle.py). A task with no subtask spec publishes the
-                # single-goal form — the instruction with the env-side success predicate.
+                # (robolab/oracle.py). A task with no subtask spec publishes the
+                # single-goal form: the instruction with the env-side success predicate.
                 "oracle": {
                     "subtasks": plan_subtasks,
                     "achieved": achieved_all[env_i],
@@ -459,7 +458,7 @@ class RobolabServer:
     def _record_trajectory(self, commands: np.ndarray) -> None:
         """One post-step sample per still-running env, from the same articulation state the native
         hdf5 recorder writes (PostStepEndEffectorPoseRecorder: env-local EE position, world EE
-        linear velocity) — the inputs of robolab's compute_episode_metrics."""
+        linear velocity), the inputs of robolab's compute_episode_metrics."""
         if self._ee_body_index is None:
             return
         unwrapped = getattr(self._env, "unwrapped", self._env)
@@ -494,9 +493,8 @@ class RobolabServer:
         if robot is not None:
             # Gripper wedge detector: the Robotiq joints are physically bounded at ~1.05 rad, so
             # a linkage past 2.0 rad is bent/wrecked even though it is far below the 6.5-rad ARM
-            # sanity threshold (that gap let m27 env9 run three visibly-broken episodes without a
-            # single flag). Phrased as "diverged joints" so every existing harvest/report
-            # exclusion regex picks these episodes up unchanged.
+            # sanity threshold. Phrased as "diverged joints" so report filters that exclude
+            # diverged episodes pick these up unchanged.
             grip_q = robot.data.joint_pos[:, 7:]
             wedged = torch.isfinite(grip_q).all(dim=-1) & (
                 torch.nan_to_num(grip_q).abs().max(dim=-1).values > _GRIP_WEDGE_RAD

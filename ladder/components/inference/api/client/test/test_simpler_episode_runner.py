@@ -124,7 +124,7 @@ class TestSimplerEpisodeRunner(unittest.TestCase):
         self.assertEqual(cell["success"], "1/1")
         self.assertEqual(cell["success_terminal"], "1/1")
         # This env publishes no per-goal oracle block, so the composition metrics must be absent
-        # rather than reported as zero -- an inapplicable metric never dilutes an average.
+        # rather than reported as zero: an inapplicable metric never dilutes an average.
         self.assertNotIn("goal_progress", cell)
 
         with open(episode_log_path, "r") as file:
@@ -137,7 +137,7 @@ class TestSimplerEpisodeRunner(unittest.TestCase):
 
 
 class TestAssignBlockInstructions(unittest.TestCase):
-    """Unit tests for the K>=2 instruction assignment helper used by the unified eval campaign."""
+    """Unit tests for the K>=2 instruction assignment helper used by the unified eval."""
 
     def test_block_assign_divisible(self):
         overrides = ["paraphrase 1", "paraphrase 2"]
@@ -173,8 +173,7 @@ class TestAssignBlockInstructions(unittest.TestCase):
 
     def test_default_block_no_overrides(self):
         # Default-only scene (no override entry): every env runs the default,
-        # no breakdown to extract. Real case in production for scenes without
-        # paraphrase coverage.
+        # no breakdown to extract. Happens for scenes without paraphrase coverage.
         instructions = assign_block_instructions(
             n_envs=137,
             default_instruction="default",

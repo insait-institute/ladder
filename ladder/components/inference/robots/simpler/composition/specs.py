@@ -15,14 +15,13 @@ from ladder.components.inference.robots.simpler.composition.placement import (
     strip_instance_id,
 )
 
-STEPS_PER_GOAL = 100  # measured p90 of one successful pick-place in a chain is 73-98 steps
+STEPS_PER_GOAL = 100  # covers the p90 length of one successful pick-place in a chain
 # The benchmark's length axis, shared by every family that sweeps all of it. It starts at 2 because
 # the single-destination family declares its N=1 rung explicitly, at native receptacle size rather
 # than this ladder's scaling; 10 movers is the most the packer fits in the workspace. A family that
 # covers less of the axis says so where it stops.
-# The rungs every length-swept family is built at. Every one of them earns its place: measured over
-# the shipped campaigns, each separates the advancement rules by 10-21pp of goal progress, so
-# dropping a rung to save eval time would cost a comparison rather than a duplicate.
+# The rungs every length-swept family is built at. Each rung separates the advancement rules on goal
+# progress, so dropping one to save eval time would lose a comparison rather than a duplicate.
 GOAL_LADDER = range(2, 11)
 # The towel is always "the blue towel": a bare destination word is weakly grounded, and naming the colour
 # measurably improved delivery to it. Every instruction below and every cached plan says it the same way.
@@ -228,25 +227,13 @@ SPECS: List[Spec] = [
     # until the third round opens at leg 7: shuttle4-6 would be relays under another name. 7 is the
     # family's floor, which is why revisit has no rung in the 2-5 window and relay does.
     *[_revisit(f"shuttle{n}", _shuttle_legs(n), 1.7, 1.7) for n in (7, 8, 9, 10)],
-    # ONE receptacle scaling for the whole relay ladder. The three that shipped at rungs 6-10 are the
-    # same goals with the towel at 1.5, at 2.0 ("e"), and at 2.0 with a 1.2 plate ("sp"), so two of
-    # them are probes rather than tasks.
+    # One receptacle scaling for the whole relay ladder: the eased 2.0 towel ("e"). It is chosen for
+    # solvability. The towel is the relay accumulator, holding every mover by the late legs, so at
+    # 1.5 it obstructs them physically and even perfect switch timing almost never finishes. A scene
+    # no system can finish with perfect decisions measures manipulation, not composition.
     #
-    # The eased towel is kept on SOLVABILITY, not on scoring highest: under the privileged rule,
-    # which is perfect switch timing and therefore the ceiling any orchestrator could reach, the 1.5
-    # towel scores 1 success in 960 episodes and exactly zero at four of the five rungs. A scene no
-    # system can finish with perfect decisions measures manipulation, not composition, which is the
-    # audit every scene here is supposed to pass. The towel is the relay accumulator, holding every
-    # mover by the late legs, so at 1.5 it obstructs them physically.
-    #
-    # Choosing on rate alone would have been choosing on the outcome: the scaling interacts with the
-    # system, worth +4.1pp success to the visual rule and +0.1pp to the direct instruction, so the
-    # eased towel widens the orchestrator effect on this family. It does so by lifting a floor that
-    # suppressed every arm, not by favouring one.
-    #
-    # The "e" suffix is kept rather than renamed to relay{n}: composition.csv already carries
-    # relay6-relay10 rows under the 1.5 towel, and reusing those names would pool two different
-    # scenes under one unit.
+    # The "e" suffix is kept rather than renamed to relay{n}, so these scenes are never confused with
+    # earlier relay6-relay10 results recorded under the 1.5 towel.
     *[_revisit(f"relay{n}e", _relay_legs(n), 1.5, 2.0) for n in GOAL_LADDER],
     # identical movers: 3 spoons, so no wording can bind a particular spoon to a particular goal
     Spec("spoons2", goals=_spoons(1, 1)),

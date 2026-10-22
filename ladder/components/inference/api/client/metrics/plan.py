@@ -154,7 +154,7 @@ def plan_goals_missed(episode: Episode) -> Optional[Fraction]:
 
 @metric
 def plan_goals_invented(episode: Episode) -> Optional[Fraction]:
-    """Plan goals the environment's reference does not contain — an object or destination the task
+    """Plan goals the environment's reference does not contain: an object or destination the task
     never asked for, which spends budget and can undo a goal already reached."""
     reference = _goals(episode.subtasks)
     if not episode.plan or not reference:
@@ -173,7 +173,7 @@ def plan_exact(episode: Episode) -> Optional[Fraction]:
 
 @metric
 def plan_attempted(episode: Episode) -> Optional[Fraction]:
-    """Plan steps the controller commanded before the episode ended — how much of the plan was
+    """Plan steps the controller commanded before the episode ended: how much of the plan was
     actually tried, which separates a bad plan from one that was never reached."""
     if not episode.plan:
         return None

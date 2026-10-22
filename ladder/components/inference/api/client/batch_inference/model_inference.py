@@ -181,7 +181,7 @@ class ModelInference(Configurable[PolicyConfigT], Template[PolicyConfigT]):
     ``policy_config``.
 
     Not api/client's ``Policy``, which is the other seam: a ``Policy`` is what an episode runner
-    drives -- robot observations in, robot actions out, per-env rollout state inside -- and it
+    drives (robot observations in, robot actions out, per-env rollout state inside), and it
     reaches this one over the wire, owning the history window and the action chunk
     (``VLAMRobotInference`` over a ``RemoteInferenceClient``)."""
 
@@ -191,8 +191,8 @@ class ModelInference(Configurable[PolicyConfigT], Template[PolicyConfigT]):
 
     @abc.abstractmethod
     def prepare_observation(self, observation: RobotInferenceObservation) -> RobotInferenceObservation:
-        """Server-side normalization of one wire observation — drop cameras the policy does not
-        read, resize the rest — so every client sends full frames and stays model-agnostic."""
+        """Server-side normalization of one wire observation: drop cameras the policy does not
+        read and resize the rest, so every client sends full frames and stays model-agnostic."""
 
     @abc.abstractmethod
     def low_level_step(self, observations: List[RobotInferenceObservation]) -> List[RobotInferenceControl]:

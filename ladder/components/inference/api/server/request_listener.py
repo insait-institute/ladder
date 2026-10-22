@@ -50,9 +50,6 @@ class RequestListener(Configurable[RequestListenerConfig]):
         Args:
             request_type (RequestType): The request type to register the handler for
         """
-        # TODO:
-        # - can we enforce that the handler has the right signature?
-        # - should we instead just warn if it's already registered?
         if request_type in self._handlers:
             raise ValueError(f"Handler for request type {request_type} is already registered")
         self._handlers[request_type] = handler

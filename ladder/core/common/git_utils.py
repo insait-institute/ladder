@@ -15,7 +15,7 @@ def _get_git_file_if_in_docker(git_filename: str) -> str:
 
 
 def _get_git_file_if_staged(git_filename: str) -> str:
-    # git meta files will be generated in this directory when ssubmit.sh is used
+    # git meta files will be generated in this directory when a job is staged for submission
     filename = os.path.join('ladder/core/common/build_info/', git_filename)
 
     with open(filename, 'r') as f:

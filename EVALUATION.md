@@ -66,14 +66,14 @@ Instead of `--method`, give your own system ([`examples/README.md`](examples/REA
 | option | default |
 |---|---|
 | `--task` | one two-subgoal task; `all` runs every task of the suite |
-| `--episodes` | 24 on `simplerenv_long`, 8 on `robolab_long` (`robotarena_long` always runs 8) |
+| `--episodes` | `robolab_long`: episodes per task (8). `simplerenv_long`: how many of the 24 episodes run at once (24). `robotarena_long` always runs 8 |
 | `--output` | `out` |
 
 Results go to `<output>/<suite>/<low-level policy>/<method>_c1/`, one directory per task with its
 `results.yaml` and the episode videos. The dashboard reads this layout:
 
 ```bash
-bazel run //ladder/components/dashboard:serve -- --results $PWD/out
+scripts/dashboard.sh
 ```
 
 To download the evaluation episodes of every method ([`INSAIT-Institute/LADDER-Evaluation-Episodes`](https://huggingface.co/datasets/INSAIT-Institute/LADDER-Evaluation-Episodes)),
@@ -81,24 +81,20 @@ one directory per suite and method:
 
 ```bash
 # one method on one suite; leave out --suite or --method for all of them, add --no-videos for the logs only
-bazel run //ladder/components/dashboard:fetch -- episodes --repo INSAIT-Institute/LADDER-Evaluation-Episodes --out ~/ladder_episodes \
-    --suite robolab_long --method psp_agent
-bazel run //ladder/components/dashboard:serve -- --results $PWD/out ~/ladder_episodes/dashboard ~/ladder_episodes/dashboard_real
+scripts/dashboard.sh fetch --suite robolab_long --method psp_agent
+scripts/dashboard.sh out ~/ladder_episodes/dashboard ~/ladder_episodes/dashboard_real
 ```
 
 ## Models and API keys
 
 `low_level_policy`, `privileged_verifier` and `scripted` need no API. The other methods call a
-vision-language model through an OpenAI-compatible endpoint:
+vision-language model through any OpenAI-compatible Chat Completions endpoint:
 
 ```bash
 export VLM_BASE_URL=<endpoint>   # e.g. https://generativelanguage.googleapis.com/v1beta/openai/
 export VLM_API_KEY=<key>
+export VLM_MODEL=<model>         # optional: gemini-3.7-flash by default, gpt-6-astra for gpt_policy
 ```
-
-The models are Gemini 3.7 Flash (`ladder/components/inference/api/client/hlc/configs/vlm.yaml`) and,
-for `gpt_policy`, GPT-6 Astra (`ladder/components/inference/models/gpt_policy/configs/vlm.yaml`).
-Change `model:` there if your endpoint names them differently.
 
 `cap_x` uses SAM 3, whose weights are gated: accept the license at
 [`facebook/sam3`](https://huggingface.co/facebook/sam3), then `export HF_TOKEN=<token>`.
@@ -113,8 +109,8 @@ vision-language model on the judgements an orchestrator makes, without running a
 
 | task | command |
 |---|---|
-| plan decomposition | `bazel run //ladder/components/inference/models/vlams:score_decomposition -- --dataset INSAIT-Institute/LADDER-Offline-VLM-Benchmark --out OUT.json --model MODEL` |
-| subgoal verification, state tracking, subgoal switching | `bazel run //ladder/components/inference/models/vlams:score_subtask_states -- --dataset INSAIT-Institute/LADDER-Offline-VLM-Benchmark --task verification\|state_tracking\|next_subtask --out OUT.json --model MODEL` |
+| plan decomposition | `scripts/vlm_benchmark.sh decomposition --model MODEL` |
+| subgoal verification, state tracking, subgoal switching | `scripts/vlm_benchmark.sh verification\|state_tracking\|next_subtask --model MODEL` |
 
 `--backend local` (the default) runs the model on your GPU from Hugging Face; `--backend gateway`
 calls it on the endpoint in `VLM_BASE_URL` / `VLM_API_KEY`. `--limit N` scores the first N items.

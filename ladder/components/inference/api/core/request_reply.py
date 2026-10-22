@@ -147,7 +147,7 @@ class ZmqRequestReplyClientConfig(RequestReplyClientConfig):
     # If True, recv timeouts are raised as ``zmq.Again`` to the caller after the broken
     # REQ socket has been reset. Use when a timeout indicates the worker should fail and
     # be respawned by its supervisor (e.g. a remote inference client). Default False
-    # preserves the legacy "log and return None" behaviour.
+    # keeps the "log and return None" behaviour.
     propagate_timeout: bool = False
 
 
@@ -225,7 +225,7 @@ class ZmqRequestReplyClient(RequestReplyClient[ZmqRequestReplyClientConfig]):
             try:
                 message = self.socket.recv()
             except zmq.Again:
-                # REQ socket is now stuck in "waiting for reply" — any subsequent send
+                # REQ socket is now stuck in "waiting for reply", so any subsequent send
                 # would fail with ZMQError. Reset before deciding how to surface the timeout.
                 self._init_socket()
                 if self.config.propagate_timeout:

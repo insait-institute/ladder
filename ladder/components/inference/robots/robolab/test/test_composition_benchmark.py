@@ -6,11 +6,9 @@ from ladder.components.inference.robots.robolab.composition.specs import SPECS
 
 class TestCompositionBenchmark(unittest.TestCase):
     def test_the_benchmark_is_exactly_these_tasks(self):
-        """SPECS is the benchmark -- there is no second list to select from it, because there used
-        to be and the two drifted. Campaigns were run on retired variants (bowl-receptacle twins,
-        intermediate ladder rungs) that scored as if they were benchmark results and cost days of
-        GPU time. Adding or removing a task must be a deliberate edit here, so that a change to the
-        benchmark cannot happen as a side effect of touching the generators."""
+        """SPECS is the benchmark, with no second list to select from it. Adding or removing a task
+        must be a deliberate edit here, so that a change to the benchmark cannot happen as a side
+        effect of touching the generators."""
         expected: Set[str] = {
             "comp_bin_1",
             "comp_plate_1",

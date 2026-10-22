@@ -159,7 +159,7 @@ def _latched(predicate, key: str):
 
     A relay leg is a milestone, not an end state: lifting the object to start leg 2 makes the leg-1
     check false again, so an advancer reading the raw predicate walks back onto a leg it finished and
-    the task becomes unwinnable. Terminal goals are deliberately NOT wrapped -- an object knocked out
+    the task becomes unwinnable. Terminal goals are deliberately NOT wrapped: an object knocked out
     of its destination must un-achieve so the advancer can repair it. The wrapper carries the inner
     predicate's ``__name__`` and bound nouns, which the oracle renders each subtask's command from."""
     base = getattr(predicate, "func", predicate)
@@ -214,9 +214,8 @@ def _author_usda(spec: CompositionSpec) -> str:
     _SCENE_DIR.mkdir(parents=True, exist_ok=True)
     path = _SCENE_DIR / f"{spec.name}.usda"
     # Publish ATOMICALLY: every process rewrites these on import while running eval processes read
-    # them at env-creation time. A reader landing inside a truncating write loads an empty stage --
-    # no table, no robot, no objects -- which still burns its step budget and scores as a failure.
-    # That cost 10% of the recorded episodes on a node where several jobs shared one /tmp.
+    # them at env-creation time. A reader landing inside a truncating write loads an empty stage
+    # (no table, no robot, no objects), which still burns its step budget and scores as a failure.
     tmp = _SCENE_DIR / f".{spec.name}.{os.getpid()}.usda.tmp"
     tmp.write_text(usda)
     os.replace(tmp, path)

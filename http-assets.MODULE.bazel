@@ -1,6 +1,5 @@
 # Hermetic sim/robot-benchmark archives: asset tarballs, benchmark code drops, and vendored
-# sources. Split out of MODULE.bazel (include()d from there) to keep the module file readable
-# as these pins grew; same pattern as the pip-*.MODULE.bazel segments.
+# sources. Included from MODULE.bazel, like the pip-*.MODULE.bazel segments.
 #
 # Everything comes from the repository's assets-v1 release, except the few archives that may not be
 # redistributed, which are marked where they are pinned.
@@ -74,7 +73,7 @@ filegroup(
     url = "https://github.com/insait-institute/ladder/releases/download/assets-v1/robot_arena_assets.tar.gz",
 )
 
-# RoboLab benchmark code (no LFS assets — those ship via @robolab_assets_archive). The patch makes
+# RoboLab benchmark code (no LFS assets; those ship via @robolab_assets_archive). The patch makes
 # robolab resolve assets from ROBOLAB_ASSET_DIR (the staged tree) instead of its repo-root assets/.
 http_archive(
     name = "robolab_repo",

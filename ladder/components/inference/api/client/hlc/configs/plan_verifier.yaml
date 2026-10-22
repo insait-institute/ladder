@@ -9,10 +9,8 @@ advancer:
   autoclass: ladder.components.inference.api.client.hlc.advancers.verified.VerifiedAdvancer
   verifier:
     autoclass: ladder.components.inference.api.client.hlc.verifiers.Verifier
-    # reasoning_effort is available on this config and deliberately NOT set. The model spends 292
-    # hidden thinking tokens per call against 16 tokens of answer -- 39M in a day, billed at output
-    # rates, on a question that asks how many objects are at a goal location in one frame -- so it is
-    # the obvious saving, but cheaper deliberation is exactly the kind of change that shows up as a
-    # worse verdict rather than an error. Set it once an A/B against gt says precision holds.
+    # reasoning_effort is deliberately NOT set. Hidden thinking tokens dominate the cost of a call,
+    # but cheaper deliberation shows up as a worse verdict rather than an error. Set it only once an
+    # A/B against ground truth shows precision holds.
     vlm:
       import: vlm.yaml

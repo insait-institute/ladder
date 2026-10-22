@@ -1,8 +1,8 @@
 import: vlam_simpler_composition.yaml
 
-# SimplerEnv composition -- a not-done verdict does not withhold advancement: the verifier still runs and every verdict
-# is still logged, the controller just moves on. Paired with _plan_verifier this separates the value
-# of TESTING completion from the value of REFUSING to advance.
+# SimplerEnv composition -- a not-done verdict does not withhold advancement: the verifier still runs
+# and every verdict is still logged, the controller just moves on. Paired with _plan_verifier this
+# separates the value of TESTING completion from the value of REFUSING to advance.
 runner_config:
   hlc_config:
     import: ../../../../../api/client/hlc/configs/plan_verifier_noretry.yaml

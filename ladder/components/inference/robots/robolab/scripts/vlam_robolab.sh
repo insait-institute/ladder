@@ -2,7 +2,7 @@
 
 # RoboLab eval launcher (analogue of vlam_robot_arena.sh). Ladder models via the standard
 # run_model/SimplerEpisodeRunner stack (env_server speaks the RobotServer ZMQ protocol); also emits
-# RoboLab-native episode_results.jsonl so their dashboard can read the campaign.
+# RoboLab-native episode_results.jsonl so RoboLab's dashboard can read the run.
 # Run from the repo root:
 #   SESSION_NAME=sess_... CKPT_NAME=model-checkpoint-ema-050000.pt \
 #   TASKS="BananaOnPlateTask" NUM_ENVS=8 bash ladder/components/inference/robots/robolab/scripts/vlam_robolab.sh
@@ -37,7 +37,7 @@ CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
 SERVER_READY_TIMEOUT=${SERVER_READY_TIMEOUT:-$((1800 + 120 * ${LANES_PER_GPU:-1}))}
 
 
-# The whole launcher-side interface for a policy that is not one of our checkpoints: which
+# The whole launcher-side interface for a policy that is not a ladder checkpoint: which
 # run_model target runs it (its own, when the model brings its own pip environment) and whether
 # anything has to be served. A new model is then a config plus a benchmark entry, not an edit here.
 RUN_MODEL=${RUN_MODEL:-models/vlams:run_model}
@@ -46,8 +46,8 @@ RUN_MODEL=${RUN_MODEL:-models/vlams:run_model}
 grep -q "scripted_policy.ScriptedPolicy" "$LADDER_CONFIG" 2>/dev/null && : "${INFERENCE_SERVER:=0}"
 INFERENCE_SERVER=${INFERENCE_SERVER:-1}
 
-# With nothing served there is no checkpoint of ours, so these two only label the output; name
-# them after the config, or the results land under a name that reads as one of our checkpoints.
+# With nothing served there is no ladder checkpoint, so these two only label the output; name
+# them after the config, or the results land under a name that reads as a ladder checkpoint.
 if [ "$INFERENCE_SERVER" = "0" ]; then
     SESSION_NAME=${SESSION_NAME:-$(basename "$LADDER_CONFIG" .yaml)}
     CKPT_NAME=${CKPT_NAME:-$(basename "$LADDER_CONFIG" .yaml)}
@@ -64,24 +64,20 @@ VLM_SERVER_CONFIG=${VLM_SERVER_CONFIG:-}
 read -ra EXTRA_ARGS <<< "${EXTRA_RUN_ARGS:-}"
 
 # One lane = env_server + run_model, and lanes share a single batch_inference_server, so a card
-# holds (VRAM - 7 GB for the server) / 14 GB per lane.
-# Measured: 4 lanes on a 98 GB RTX PRO 6000 give 2.1x one lane's throughput at 91-100% util;
-# 2 lanes fill a 46 GB A6000, and a 3rd there OOMs PhysX into silently garbage physics.
+# holds (VRAM - 7 GB for the server) / 14 GB per lane. Over-packing a small card can OOM PhysX,
+# which silently produces garbage physics.
 #
 # A lane is a SERIAL chain of sim steps, so packing lanes is the only thing that shortens a
-# campaign -- nothing makes one unit finish sooner. Measured on an H200 running 3 lanes: 62% GPU,
-# 51 of 143 GB, 1.2 of 16 cores. Five sixths of the card sat idle because the cap below was 4,
-# which turned a 4-hour campaign into a 56-hour one.
+# run; nothing makes one unit finish sooner.
 #
 # Host RAM kills an overpacked run LOUDLY (the batch server is OOM-killed and it surfaces as a ZMQ
 # timeout), and each lane drives ~1.2 cores, so the count is bounded by the CPUs the job holds. VRAM
 # kills it SILENTLY, which is worse, and is why env_server checks free VRAM on every reset: a
 # full card makes the RTX renderer evict the streamed USD payload geometry instead of raising, so
 # the scene disappears mid-episode while physics keeps stepping and the policy is served a picture
-# of the empty room. Measured on an H200 (143771 MiB), same code and units: 6 lanes x 4 envs peaks
-# at 99.5% of the card and blinds 30/48 episodes, while 6 x 1 (95%) and 3 x 8 (81%) are clean -- so
-# the bound is the card's occupancy, not the lane count. Checking here does NOT work: lanes boot
-# minutes apart, so the card is still half empty when the first ones report ready.
+# of the empty room. The bound is the card's occupancy, not the lane count. Checking here does
+# NOT work: lanes boot minutes apart, so the card is still half empty when the first ones report
+# ready.
 GPU_MIB=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>/dev/null | head -1)
 # LANES_PER_GPU matches the other two launchers and takes precedence over LANES.
 # An explicit count is taken as given: the cap bounds only the auto-derived guess, and raising it is
@@ -91,7 +87,7 @@ if [ -n "${LANES_PER_GPU:-}" ]; then
 else
     LANES=${LANES:-$(( (${GPU_MIB:-21000} - 7000) / 14000 ))}
     [ "$LANES" -lt 1 ] && LANES=1
-    CPU_LANES=$(( ${SLURM_CPUS_PER_TASK:-16} / 2 ))
+    CPU_LANES=$(( $(nproc) / 2 ))
     [ "$LANES" -gt "$CPU_LANES" ] && LANES=$CPU_LANES
     [ "$LANES" -gt 8 ] && LANES=8
 fi
@@ -201,26 +197,26 @@ fi
 echo "=== tasks=[$TASKS] num_envs=$NUM_ENVS num_runs=$NUM_RUNS ==="
 
 # Build once and launch through generated scripts, as vlam_simpler_bridge.sh does: a lane then
-# runs no bazel client at all, so it cannot lose an analysis race against a sibling -- which is
-# what forced lanes to come up one at a time, and made bring-up cost O(lanes x Isaac boot).
+# runs no bazel client at all, so it cannot lose an analysis race against a sibling and lanes can
+# boot in parallel.
 LAUNCHERS=$(mktemp -d)
-# Compose with the launcher's own cleanup rather than replacing it -- a bare `trap ... EXIT` here
-# silently dropped the kill of every spawned lane.
+# Compose with the launcher's own cleanup rather than replacing it, or the spawned lanes are not
+# killed on exit.
 trap 'cleanup; rm -rf "$LAUNCHERS"' EXIT
 TARGETS=(robots/robolab:env_server robots/robolab:export_robolab_results "$RUN_MODEL")
 [ "$INFERENCE_SERVER" = "1" ] && TARGETS+=(models/vlams:batch_inference_server)
 for t in "${TARGETS[@]}"; do
     script="$LAUNCHERS/${t##*:}.sh"
     # Twice: sibling eval jobs on this node share one bazel server (one output_base), and it
-    # lives in whichever job's cgroup started it -- when that job ends, ours dies with
+    # lives in whichever job's cgroup started it. When that job ends, ours dies with
     # "Server terminated abruptly ... Socket closed". Bazel starts a fresh one on the next call.
     for attempt in 1 2; do
         bazel run --script_path="$script" "//ladder/components/inference/$t" 2>&1 | tail -3
         [ -x "$script" ] && break
         echo "=== build attempt $attempt produced no launcher for $t; retrying"
     done
-    # Test the artifact, not the pipeline: `| tail` makes $? tail's, so a failed build here
-    # reported success and the lanes died later on a missing file with the cause tailed away.
+    # Test the artifact, not the pipeline: `| tail` makes $? tail's, so it cannot report a
+    # failed build.
     [ -x "$script" ] || { echo "BUILD_FAIL: no launcher generated for $t"; exit 2; }
 done
 
@@ -250,7 +246,7 @@ else
 fi
 
 
-# Each lane takes a round-robin slice of TASKS and writes its own campaign subtree; one
+# Each lane takes a round-robin slice of TASKS and writes its own output subtree; one
 # run_model per lane drains that slice's (task x run) batches, bucketed by env_name.
 #
 # A lane owns a SLICE rather than one task, unlike the RobotArena/SimplerEnv launchers' per-cell
@@ -271,8 +267,8 @@ LANES_FAIL=0
 LANE_PORT=()
 LANE_PID=()
 
-# Phase 1 -- every Isaac app starts at once. Their boots then overlap instead of stacking, which
-# is the whole cost of bring-up: one app takes ~10 min, and serially that was ~10 min PER LANE.
+# Phase 1: every Isaac app starts at once, so their boots (~10 min each) overlap instead of
+# stacking.
 for ((LANE = 0; LANE < LANES; LANE++)); do
     LANE_TASKS=""
     for ((i = LANE; i < ${#ALL_TASKS[@]}; i += LANES)); do LANE_TASKS="$LANE_TASKS ${ALL_TASKS[$i]}"; done
@@ -291,7 +287,7 @@ for ((LANE = 0; LANE < LANES; LANE++)); do
     LANE_PORT[$LANE]=$ROBOT_PORT
     LANE_PID[$LANE]=$!
     # Warm the shared Kit extension cache with the FIRST app before releasing the others: they
-    # all resolve extensions against the same /scratch cache, and starting cold together makes
+    # all resolve extensions against the same node-local cache, and starting cold together makes
     # all but one die in the dependency solver. Only this one boot is serialised.
     if [ "$LANE" = 0 ] && [ "$LANES" -gt 1 ]; then
         wait_for_port "$ROBOT_PORT" "$LANE_ROOT/env_server.log" "$SERVER_READY_TIMEOUT" "$!" \
@@ -299,9 +295,8 @@ for ((LANE = 0; LANE < LANES; LANE++)); do
     fi
 done
 
-# Phase 2 -- collect them IN READY ORDER, not lane order. Isaac boots vary by minutes, and
-# waiting on lane N before looking at lane N+1 left ready lanes idle behind a slow one.
-# A lane that never comes up costs that lane, not the campaign.
+# Phase 2: collect them IN READY ORDER, not lane order. Isaac boots vary by minutes, so ready
+# lanes should not wait behind a slow one. A lane that never comes up costs that lane, not the run.
 PENDING=($(seq 0 $((LANES - 1))))
 DEADLINE=$((SECONDS + SERVER_READY_TIMEOUT))
 while [ ${#PENDING[@]} -gt 0 ]; do
@@ -368,7 +363,7 @@ split_results
 
 echo "=== eval rc=$EVAL_RC; ${#LANES_UP[@]} of $LANES lane(s) ran under $CAMPAIGN_ROOT ==="
 [ "$EVAL_RC" -ne 0 ] && { echo "--- lane${LANES_UP[0]:-0} run_model.log tail ---"; tail -40 "$CAMPAIGN_ROOT/lane${LANES_UP[0]:-0}/run_model.log"; }
-# A campaign that lost a lane exits non-zero even when the lanes that ran succeeded: the job
+# A run that lost a lane exits non-zero even when the lanes that ran succeeded: the job
 # otherwise reports success and only a missing episode_log.yaml records the gap.
 [ "$EVAL_RC" -eq 0 ] && [ "$LANES_FAIL" -gt 0 ] && EVAL_RC=1
 exit $EVAL_RC

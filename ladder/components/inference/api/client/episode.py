@@ -88,7 +88,7 @@ class Episode:
     """One evaluation episode: the unit every metric is computed from, and the schema of one
     ``episode_log.yaml`` entry.
 
-    The composition fields are populated for any env that publishes the per-goal ``oracle`` block —
+    The composition fields are populated for any env that publishes the per-goal ``oracle`` block:
     RobotArena's ``ConjunctionSuccessChecker``, SimplerEnv's ``oracle_goal_keys``, RoboLab's
     task-spec checks. That block is the one per-goal signal all three benchmarks already agree on,
     so a metric written against it works on all three without a per-benchmark branch.
@@ -107,9 +107,9 @@ class Episode:
 
     # Composition. ``goal_trace`` holds CHANGE POINTS, [(step, [achieved, ...]), ...]: the vector is
     # near-constant, so a 1350-step RoboLab episode stores a handful of rows rather than one per
-    # step, and nothing is lost — the value between two change points is the earlier one.
+    # step, and nothing is lost: the value between two change points is the earlier one.
     # ``subtasks`` is the ENVIRONMENT's reference decomposition, published by the oracle block and
-    # therefore identical whatever system ran -- a flat episode carries it too. ``plan`` is what the
+    # therefore identical whatever system ran, so a flat episode carries it too. ``plan`` is what the
     # controller decided to do, so the two together are what makes a plan scorable: the reference
     # says which goals exist, the plan says which the controller set out to reach. Empty for a flat
     # run and for a stepwise system, neither of which forms a plan up front.
@@ -143,7 +143,7 @@ class Episode:
     @property
     def goals_best(self) -> int:
         """Most goals held simultaneously at any step. Above :attr:`goals` when a completed goal was
-        later undone — a placement knocked off by the next one."""
+        later undone, e.g. a placement knocked off by the next one."""
         return max((sum(achieved) for _, achieved in self.goal_trace), default=0)
 
     def first_achieved(self, goal: int) -> Optional[int]:
@@ -158,9 +158,8 @@ class Episode:
         was not achieved at ``step`` at all.
 
         Distinct from :meth:`first_achieved`, and the difference is not academic: a goal can be
-        completed, knocked off, and completed again. One measured RobotArena episode satisfied goal 0
-        at step 18, lost it at 27, regained it at 259, and the controller advanced at 262 — measuring
-        from the FIRST achievement calls that 244 steps of budget spent on finished work when it was 3.
+        completed, knocked off, and completed again. Measuring from the FIRST achievement would count
+        the time spent re-achieving it as budget wasted on finished work.
         """
         since = None
         for at, achieved in self.goal_trace:

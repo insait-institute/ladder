@@ -30,9 +30,9 @@ class VLAMSubtaskSourceConfig(Config):
 
     * **self-HLC** (``inference_config = None``, the default): the runner calls
       :meth:`VLAMSubtaskSource.bind_policy` so the HL reuses the LL policy's own
-      inference client — one on-GPU model copy is both planner and action expert, and
+      inference client: one on-GPU model copy is both planner and action expert, and
       HL/LL forwards coalesce on the shared :class:`BatchPolicyServer`.
-    * **external HLC** (``inference_config`` set): a SEPARATE backend — e.g. a
+    * **external HLC** (``inference_config`` set): a SEPARATE backend, e.g. a
       :class:`RemoteInferenceClient` pointed at its own batch server, or an
       in-process :class:`VLAMInference` for K=1 debugging. ``bind_policy`` is a no-op once
       an external backend is configured.
@@ -51,8 +51,8 @@ class VLAMSubtaskSourceConfig(Config):
 
 class VLAMSubtaskSource(SubtaskSource[VLAMSubtaskSourceConfig]):
     """On-the-fly subtasks from a trained VLAM checkpoint's own VLM backbone (its trained
-    subtask prompt, not generic chat — hence a dedicated source rather than a :class:`VLM`
-    backend). Proprio is filled with zeros — only image + per-env task drives generation; the
+    subtask prompt, not generic chat, hence a dedicated source rather than a :class:`VLM`
+    backend). Proprio is filled with zeros (only image + per-env task drives generation); the
     envs whose index moved collapse into one ``high_level_step`` batch on the shared server."""
 
     def __init__(self, config: VLAMSubtaskSourceConfig):

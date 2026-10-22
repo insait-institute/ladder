@@ -290,14 +290,14 @@ def import_py_module(file_path: str | pathlib.Path, module_name: str):
         module_name: The name that will be given to the base python module
 
     Ex:
-        path = /work/$USER/models/llama_cognizant_black/hf_export/src/modeling_paligemma_dit_pizero.py
-        module_name: llama_cognizant_black
-        root_path -> /work/$USER/models
-        py_module_path -> llama_cognizant_black.hf_export.src.modeling_paligemma_dit_pizero
+        path = /path/to/models/my_session/hf_export/src/modeling_paligemma_dit_pizero.py
+        module_name: my_session
+        root_path -> /path/to/models
+        py_module_path -> my_session.hf_export.src.modeling_paligemma_dit_pizero
 
     The equivalent would be
-        sys.path.append('/work/$USER/models')
-        from llama_cognizant_black.hf_export.src.modeling_paligemma_dit_pizero import MainModel
+        sys.path.append('/path/to/models')
+        from my_session.hf_export.src.modeling_paligemma_dit_pizero import MainModel
     """
     file_path = str(file_path)
 
@@ -333,7 +333,7 @@ def import_py_module(file_path: str | pathlib.Path, module_name: str):
     return py_module
 
 
-# Keys are ``ReferenceFrame.{ROBOT_BASE,EEF}.value`` — comparing against the StrEnum
+# Keys are ``ReferenceFrame.{ROBOT_BASE,EEF}.value``. Comparing against the StrEnum
 # string lets ``compute_delta_mode`` work without importing the dynamically-loaded HF
 # model config's enum class.
 _TRANSLATION_LABELS = {"robot_base": "trans_base", "eef_relative": "trans_eef"}

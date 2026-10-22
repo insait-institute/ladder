@@ -161,8 +161,8 @@ def single_env_view(arr: np.ndarray | torch.Tensor, expected_ndim: int = 1) -> n
 
     Genesis getters return the per-env shape at K=1 and a K-prefixed shape
     at K>=2:
-        ``get_pos``  → ``(3,)`` / ``(K, 3)``       — ``expected_ndim=1``
-        ``get_AABB`` → ``(2, 3)`` / ``(K, 2, 3)``  — ``expected_ndim=2``
+        ``get_pos``  → ``(3,)`` / ``(K, 3)``       (``expected_ndim=1``)
+        ``get_AABB`` → ``(2, 3)`` / ``(K, 2, 3)``  (``expected_ndim=2``)
     At K>=2 envs are identical at build time (replication), so env 0 is
     canonical for overlap-resolution math.
     """

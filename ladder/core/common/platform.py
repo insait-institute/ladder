@@ -1,6 +1,5 @@
 import os
 import socket
-import subprocess
 from typing import List
 
 import psutil
@@ -61,7 +60,7 @@ LADDER_LOCKFILES_DIR = os.getenv('LADDER_LOCKFILES_DIR', '/tmp')
 def cuda_visible_devices_ids() -> List[str]:
     """
     Return a list of strings of the values in CUDA_VISIBLE_DEVICES. Note these aren't guaranteed
-    to be numbers, e.g. slurm sets gpu ids to hashes, e.g. 'GPU-00000000-0000-0000-0000-000000000000'
+    to be numbers, e.g. GPU UUIDs such as 'GPU-00000000-0000-0000-0000-000000000000'
     """
     return [gpu_id for gpu_id in os.getenv("CUDA_VISIBLE_DEVICES", "").split(',') if gpu_id != '']
 
@@ -69,11 +68,9 @@ def cuda_visible_devices_ids() -> List[str]:
 def cuda_visible_devices_indices() -> List[int]:
     """
     Return a list of ints corresponding to the values in CUDA_VISIBLE_DEVICES.
-    - If running in SLURM, it would return a list of consecutive numbers and of size equal to the number of
-      visible devices. The numbers would correspond to the values you see in `nvidia-smi`. However, the
-      actual value of CUDA_VISIBLE_DEVICES will contain ids like 'GPU-00000000-0000-0000-0000-000000000000'
-    - If not in SLURM, will contain the actual values in CUDA_VISIBLE_DEVICES env variable, which
-      will be a subset of the numbers in `nvidia-smi`, but not guaranteed to be ordered or consecutive
+    - If CUDA_VISIBLE_DEVICES holds GPU UUIDs, it returns consecutive numbers, one per visible device
+    - Otherwise, the values in CUDA_VISIBLE_DEVICES, which are a subset of the numbers in `nvidia-smi`,
+      not guaranteed to be ordered or consecutive
     """
     gpu_ids = cuda_visible_devices_ids()
 
@@ -102,40 +99,13 @@ DOCKER_TRAIN_IMAGE = os.getenv('DOCKER_TRAIN_IMAGE', 'no-docker-image-detected')
 # -----------------
 # Cloud
 # -----------------
-IS_RUNNING_IN_SLURM = "SLURM_JOB_ID" in os.environ
 # TODO: These are just examples. Proper detection needs to be done
 IS_RUNNING_IN_CLOUD = os.getenv('IS_RUNNING_IN_CLOUD', '') == 'true'
 IS_RUNNING_IN_AWS = os.getenv('IS_RUNNING_IN_AWS', '') == 'true'
 IS_RUNNING_IN_AZURE = os.getenv('IS_RUNNING_IN_AZURE', '') == 'true'
 IS_RUNNING_IN_GCP = os.getenv('IS_RUNNING_IN_GCP', '') == 'true'
 
-SLURM_NODELIST: List[str] = []
-SLURM_JOB_ID: str = ''
-
-
-def get_slurm_hostnames() -> List[str]:
-    assert IS_RUNNING_IN_SLURM
-    assert "SLURM_JOB_NODELIST" in os.environ
-    nodelist = os.environ["SLURM_JOB_NODELIST"]
-    if '[' in nodelist or ']' in nodelist or ',' in nodelist:
-        result = subprocess.run(
-            ['scontrol', 'show', 'hostnames', nodelist],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        hostnames = result.stdout.strip().split("\n")
-    else:
-        hostnames = [nodelist]
-    return hostnames
-
-
-if IS_RUNNING_IN_SLURM:
-    TRAINING_PLATFORM = "slurm"
-    NODE_COUNT = int(os.getenv("SLURM_JOB_NUM_NODES", '-1'))
-    SLURM_NODELIST = get_slurm_hostnames()
-    SLURM_JOB_ID = os.getenv("SLURM_JOB_ID", "")
-elif IS_RUNNING_IN_AWS:
+if IS_RUNNING_IN_AWS:
     TRAINING_PLATFORM = "SageMaker"
     NODE_COUNT = int(os.getenv('NODE_COUNT', '-1'))
 elif IS_RUNNING_IN_AZURE:

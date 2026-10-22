@@ -1,6 +1,6 @@
 # VoLo in the controller seat. Reaches the policy only through the instruction, so it pairs with
 # whatever policy_config the benchmark already uses. Values here are upstream's `--mode subgoal`
-# defaults; each campaign config carries its benchmark's deltas.
+# defaults; each benchmark config carries its benchmark's deltas.
 autoclass: ladder.components.inference.api.client.hlc.volo.VoloOrchestrator
 
 vlm:

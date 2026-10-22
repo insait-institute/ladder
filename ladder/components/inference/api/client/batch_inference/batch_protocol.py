@@ -28,7 +28,7 @@ class ResponseStatus(str, enum.Enum):
 class PolicyMetadataPayload(TypedDict):
     """The transport stamps its version on top, so a policy never has to know about the wire
 
-    ``image_sizes`` is ``{camera_name: [height, width]}`` — the server normalizes
+    ``image_sizes`` is ``{camera_name: [height, width]}``. The server normalizes
     processor-specific tuple formats to this flat shape before sending. Clients use
     it to know which cameras the model accepts; the actual resize happens server-side
     via the real processor.

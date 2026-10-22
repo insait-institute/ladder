@@ -1,5 +1,5 @@
-"""Genesis scene construction. K=1 builds without a batch dim (bit-identical
-to the legacy path); K>=2 replicates via ``scene.build(n_envs=K)`` and
+"""Genesis scene construction. K=1 builds without a batch dim;
+K>=2 replicates via ``scene.build(n_envs=K)`` and
 attaches one unbound camera under Madrona's BatchRenderer."""
 
 import dataclasses
@@ -159,11 +159,11 @@ def build_genesis_scene(
             links_to_keep=[robot_config.ee_link],
         )
     # widowx_description URDF's OBJ meshes ship with a SimpleMaterial that
-    # references interbotix_black.png — Genesis's trimesh loader picks that up
+    # references interbotix_black.png, and Genesis's trimesh loader picks that up
     # as the diffuse texture (utils/urdf.py:202+ falls through to the URDF
     # surface when no <material> tag is present). Don't override: the texture's
-    # ~50 RGB matte-black pixels are exactly the WX250s look. The previous
-    # K>=2 override of Default(color=(0.10,...)) flattened it to uniform gray.
+    # ~50 RGB matte-black pixels are exactly the WX250s look; a uniform color
+    # override flattens it to gray.
     robot = scene.add_entity(urdf_morph)
 
     object_entities: List[Tuple["genesis.Entity", ObjectConfig]] = []
@@ -180,14 +180,14 @@ def build_genesis_scene(
         )
     ]
 
-    # Madrona ignores vis_options.lights/ambient_light — only scene.add_light()
+    # Madrona ignores vis_options.lights/ambient_light; only scene.add_light()
     # plus its hardcoded ~0.05 ambient contribute. Reproduce the K=1 pyrender
     # key/fill/rim directionals (same dirs as vis_options above) scaled to Madrona
     # intensity units (pyrender 8/4/3 -> x0.2). No omnidirectional fill: it washes
     # out contrast and neutralises the warm scene hue, while the baked ambient lifts
     # shadows enough; castshadow restores the pyrender dark-shadow/bright-highlight
     # contrast. Calibrated to the pyrender reference by matching the segmentation-
-    # masked foreground mean colour (dist ~8, vs ~37 for the old 6-cardinal fill).
+    # masked foreground mean colour.
     if n_envs > 1:
         for light_dir, intensity in (
             ((-0.3, -0.3, -1.0), 1.6),

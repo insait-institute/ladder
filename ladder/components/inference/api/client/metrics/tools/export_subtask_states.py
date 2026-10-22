@@ -51,7 +51,7 @@ def achieved_at(goal_trace: Sequence[Tuple[int, List[bool]]], step: int) -> Opti
 
 
 def stable_at(goal_trace: Sequence[Tuple[int, List[bool]]], step: int, margin: int) -> bool:
-    """No change point within ``margin`` steps of ``step`` — the label holds on the whole window,
+    """No change point within ``margin`` steps of ``step``: the label holds on the whole window,
     so an off-by-a-few frame index cannot flip it."""
     return not any(step - margin < at <= step + margin for at, _ in goal_trace[1:])
 
@@ -151,7 +151,7 @@ def episode_candidates(episode: Episode, episode_dir: str) -> List[Candidate]:
     return [c for c in candidates if c is not None and (c.tag not in expected or c.label == expected[c.tag])]
 
 
-# Positive slots prefer the hover case (held while counting as placed — the measured hard case for
+# Positive slots prefer the hover case (held while counting as placed: the measured hard case for
 # a verifier), then a fresh completion over a terminal frame; negatives prefer a goal the policy is
 # demonstrably mid-way through over one it never touched.
 _POSITIVE_RANK = {"fresh": 1, "terminal": 2}
@@ -224,7 +224,7 @@ def matches_reference(episode: Episode, reference: Dict[str, Any]) -> bool:
     Only ``subtasks`` is compared: the logged instruction is whatever the policy was last commanded,
     which on an orchestrated run is a subtask rather than the compound task, while the logged
     subtasks are the ENV's reference and identical whatever system ran. An unordered task is
-    compared as a MULTISET — the env and the exporter list the same goals in different orders, and
+    compared as a MULTISET: the env and the exporter list the same goals in different orders, and
     only on an ordered task is that order part of the task. Sample rows keep the EPISODE's order,
     which is what the goal vector indexes."""
     logged = _goal_keys(episode.subtasks)
@@ -247,7 +247,7 @@ def _recording_dirs(unit_dir: str) -> List[str]:
 
 
 def _recording_of(episode: Episode, index: int, recordings: List[str]) -> Optional[str]:
-    """The recording dir of log entry ``index``, verified against its episode_meta.yaml —
+    """The recording dir of log entry ``index``, verified against its episode_meta.yaml:
     ``episode_index`` is 1-based log order, and a num_steps/success disagreement means the
     recordings and the log are not from the same run."""
     for directory in recordings:
@@ -352,7 +352,7 @@ def harvest(
 ) -> None:
     """Walk every episode_log.yaml under ``episode_roots``, pool candidates per task, select
     ``per_task`` of them, and write one <suite>/subtask_states.json + PNG frames per suite under
-    ``out_dir`` — the same relocatable manifest contract the decomposition export uses.
+    ``out_dir``: the same relocatable manifest contract the decomposition export uses.
 
     ``since`` drops logs written before that epoch, PER FILE: the reference guard catches a task
     whose plan changed, but a geometry-only rebuild leaves the plan intact, so recordings from
@@ -435,10 +435,8 @@ def main() -> None:
         help="decomposition export holding <suite>/scenes.json (the sync anchor)",
     )
     parser.add_argument("--out-dir", required=True)
-    # 10, which is what the published benchmark is built with. At 3 the whole benchmark was 171
-    # samples and the 95% half-width on a rate near 0.8 was +/-6 points, wide enough that the top
-    # models could not be ordered; 10 gives 520 samples and +/-3.4, and the class balance moves
-    # from 30/70 to 46/54 because the selector keeps balancing past the first few picks.
+    # 10, which is what the published benchmark is built with. Much smaller values leave confidence
+    # intervals too wide to order the top models and skew the class balance.
     parser.add_argument("--per-task", type=int, default=10)
     parser.add_argument("--benchmarks", nargs="*", help="restrict to these benchmark names")
     parser.add_argument(

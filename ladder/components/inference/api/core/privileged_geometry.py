@@ -25,15 +25,14 @@ def spread_offsets(
     """Where to lay N objects on one destination, as XY offsets plus the layer each one sits in.
 
     Piling is a real failure mode: every arrival dropped on the same point knocks the last one off.
-    The constraint is each object's FOOTPRINT, not its centre -- a grid that only keeps centres
+    The constraint is each object's FOOTPRINT, not its centre. A grid that only keeps centres
     inside the destination still aims every object so its own body overhangs the rim, which for a
-    container means setting it down on the wall. Measured on RoboLab's bins, that overhang credited
-    a delivery and then lost it: one object per bin succeeded 8/8, three or more never did.
+    container means setting it down on the wall, where a delivery is credited and then lost.
 
     When a grid sized for the largest object cannot hold them all, each object's own footprint is
     laid in rows along the destination's longer side instead, and what still does not fit piles on
-    the floor. Stacked layers aimed every arrival past the first higher above the destination, and a
-    fruit dropped from 0.2-0.7 m above RoboLab's bin bounced out of it (6 objects: 0/8).
+    the floor. Stacked layers are avoided because they aim each later arrival higher above the
+    destination, and an object dropped from that height bounces out of a container.
     """
     count = len(half_extents)
     offsets = np.zeros((count, 2))
@@ -100,7 +99,7 @@ def goal_point(
 
     ``on`` rests it on the destination's top face; ``in`` drops it just above the floor of the
     container, which is what ``is_inside`` scores. Those differ for a walled destination: the object
-    must END at the floor, but it must be RELEASED above the rim -- carrying it down inside fouls the
+    must END at the floor, but it must be RELEASED above the rim, since carrying it down inside fouls the
     gripper on the wall and on anything already delivered. Releasing above the rim lets it fall the
     last centimetres, which is how the container gets loaded.
     """
@@ -131,7 +130,7 @@ def build_payloads(
 
     Each entry of ``goals`` is ``{"source": idx, "destination": idx | None, "relation": str,
     "satisfied": [n_envs] bool}``, optionally with ``"predicate"`` (default ``"pick_and_place"``;
-    ``pickup``/``grasp``/``reach`` end the motion early) and ``"point"`` -- an explicit goal
+    ``pickup``/``grasp``/``reach`` end the motion early) and ``"point"``, an explicit goal
     position, ``[3]`` or ``[n_envs, 3]``, for a goal whose destination is a place rather than an
     object, which is how a region or a relative-placement task states where the object must end up.
     """

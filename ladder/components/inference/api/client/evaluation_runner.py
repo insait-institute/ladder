@@ -53,7 +53,7 @@ class EvaluationRunnerConfig(RobotEpisodeRunnerConfig):
     resume_system: int = 0
     results_file: str = "evaluation_scores.csv"
     configuration_pub_config: ZmqPublisherConfig = ZmqPublisherConfig(port=5560)
-    # Measured on this rig: a goal costs a median 49 steps and at most 84, the first one up to 122.
+    # A goal typically costs about 50 steps and rarely more than 85; the first goal can take ~120.
     steps_per_goal: int = 70
     extra_first_goal_steps: int = 60
 

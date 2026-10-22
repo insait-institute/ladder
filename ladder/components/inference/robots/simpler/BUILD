@@ -10,7 +10,7 @@ pip_compile(
     name = "pip_compile_inference_simpler",
     requirements_in = "//ladder/components/inference/robots/simpler:pyproject.toml",
     requirements_txt = "//ladder/components/inference/robots/simpler:requirements.txt.lock",
-    tags = ["build"],  # Tag for the test target
+    tags = ["build"],
 )
 
 make_interactive_tools(
@@ -24,7 +24,7 @@ py_library(
         exclude = [
             "**/test/**",
             "generate_perturbations.py",
-        ],  # generate_perturbations.py is a local-only helper (perturbation eval isn't shipped yet)
+        ],  # generate_perturbations.py is not part of the release
     ),
     data = [
         # The tracked plan cache. At eval time the Decomposer reads it from the source tree (it
@@ -105,7 +105,7 @@ copy_to_directory(
 
 # Renders each composition scene's reset frame and writes the decomposition-benchmark records
 # (instruction + the suite's own subtask list) beside them. GPU node only. The sibling exporters on
-# the RobotArena and RoboLab stacks emit the same shape into their own directory, so the benchmark
+# the RobotArena and RoboLab suites emit the same shape into their own directory, so the benchmark
 # is the concatenation of the three scenes.json files -- there is no cross-suite builder, because
 # each suite needs its own simulator.
 py_binary(
@@ -121,7 +121,7 @@ py_binary(
     deps = [":simpler"],
 )
 
-# Prints "<env-v0>|<max_episode_steps>" per composition task, so a campaign can enumerate the
+# Prints "<env-v0>|<max_episode_steps>" per composition task, so a run can enumerate the
 # registry from the registry itself (see README.md).
 py_binary(
     name = "composition_manifest",

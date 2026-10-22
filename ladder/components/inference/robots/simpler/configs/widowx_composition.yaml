@@ -1,8 +1,8 @@
 autoclass: ladder.components.inference.robots.simpler.simpler_server.SimplerServer
-# ONE server config for every composition task in composition/envs.py: a campaign picks the scene by
+# One server config for every composition task in composition/envs.py: a run picks the scene by
 # overriding env_config.env_name and sweeps the registry (see vlam_simpler_bridge.sh).
 env_config:
-  # A real registry env so the config runs as-is; every campaign overrides it per task.
+  # A real registry env so the config runs as-is; each run overrides it per task.
   env_name: all2_plate-v0
   robot_name: widowx
   scene_name: bridge_table_1_v1
@@ -27,7 +27,7 @@ init_range_config:
   robot_init_pitch_range: [0, 0, 1]  # [pitch_min, pitch_max, pitch_num]
   robot_init_yaw_range: [0, 0, 1]  # [yaw_min, yaw_max, yaw_num]
   object_variation_mode: episode
-  object_episode_range: [0, 24]  # [start, end] — 24 object-position layouts per scene
+  object_episode_range: [0, 24]  # [start, end], 24 object-position layouts per scene
 
 request_listener_config:
   req_rep_server_config:

@@ -17,7 +17,7 @@ LOGGER = get_logger(__name__)
 
 
 class VLMSourceConfig(Config):
-    vlm: AutoConfig  # the backend (OpenAIVLM, LocalVLM, ...) — any VLM works
+    vlm: AutoConfig  # the backend (OpenAIVLM, LocalVLM, ...); any VLM works
     max_tokens: int = 256
     temperature: float = 0.3
     history_length: int = 3  # past (image, command) pairs kept as rolling context

@@ -177,15 +177,15 @@ def combine_video_paths_into_chunk(  # noqa: PLR0912, PLR0915, C901
             # opaque=True copies the codec object straight from the input (a decoder) instead of
             # constructing a fresh encoder for the output stream. This is a pure packet-copy remux, so an
             # encoder is never needed, and creating one is actively harmful: PyAV opens it in
-            # start_encoding() before writing the header, which (a) wasted an encoder init and let libx265
-            # spam its banner + "encoded 0 frames" to fd 2 over the tqdm bars, and (b) outright failed for
+            # start_encoding() before writing the header, which (a) wastes an encoder init and lets libx265
+            # print its banner + "encoded 0 frames" to fd 2 over the tqdm bars, and (b) fails outright for
             # the lossless depth stream (probes as h264/gbrp), where the libx264 encoder rejects the RGB
             # pixel format with EINVAL even though no frame is ever encoded.
             output_stream = output_container.add_stream_from_template(reference_stream, opaque=True)
 
             # opaque=True skips the encoder that otherwise carried the fps-derived timescale, so the muxer
             # would fall back to its 90 kHz default. Copy the source time_base to keep the remux a faithful
-            # copy — otherwise re-chunking an already-chunked dataset mixes 90 kHz segments with the
+            # copy. Otherwise re-chunking an already-chunked dataset mixes 90 kHz segments with the
             # source-timescale ones and trips the encoding-consistency check above.
             output_stream.time_base = reference_stream.time_base
 

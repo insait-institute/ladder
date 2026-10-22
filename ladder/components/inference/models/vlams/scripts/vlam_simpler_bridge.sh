@@ -11,7 +11,7 @@
 #
 # LANES_PER_GPU>1 runs that many envs at once on one GPU against the shared inference server, as in
 # vlam_robot_arena.sh; 1 (the default) is one env at a time. SIM_CONFIG/ENV_NAMES also drive the
-# long-horizon composition benchmark — see robots/simpler/README.md.
+# long-horizon composition benchmark (see robots/simpler/README.md).
 #
 # Sessions are read from SESSIONS_HOME (default /home/$USER/experiments/vlams/control). OUT_ROOT, when
 # set, is the output directory: <OUT_ROOT>/<ckpt>/<env>/ holds results.yaml and the recordings.
@@ -99,7 +99,7 @@ find_free_port() {
 }
 
 # Build once, and launch through generated scripts rather than `bazel run`, so no lane runs a bazel
-# client at all: a lane cannot then lose an analysis/build race against a sibling, and the campaign
+# client at all: a lane cannot then lose an analysis/build race against a sibling, and the run
 # holds one bazel invocation instead of 3*LANES. `--script_path` writes the launch command out instead
 # of running it, ending the script in "$@", so per-lane arguments still work:
 # https://bazel.build/reference/command-line-reference#param-script-path
@@ -170,7 +170,7 @@ run_cell() {
 
     # Sim config: by default the per-scene config/<ENV_NAME>.yaml (the 4 original bridge scenes,
     # unchanged). When SIM_CONFIG is set (e.g. the shared composition config
-    # widowx_composition.yaml) it is used instead and ENV_NAME is passed as the scene id — this is
+    # widowx_composition.yaml) it is used instead and ENV_NAME is passed as the scene id. This is
     # how composition scenes run through the SAME launcher.
     if [ -n "${SIM_CONFIG:-}" ]; then
         SIM_ARGS=(--config "${SIM_CONFIG}" --env_config.env_name "${ENV_NAME}-v0")
@@ -268,10 +268,9 @@ do
             --seed "${VLA_SEED:-987654321}" \
             > "$VLA_LOG" 2>&1 &
         VLA_SERVER_PID=$!
-        # 600 s was enough for a lone job and not for a campaign: several jobs starting together each
-        # read an 11 GB checkpoint off shared storage, and the load then runs past ten minutes. A checkpoint
-        # skipped here costs the whole job -- it exits having evaluated nothing -- so the timeout is
-        # generous and the skip is recorded rather than shrugged off.
+        # Several jobs starting together each read a large checkpoint off shared storage, which can
+        # take well over ten minutes. A checkpoint skipped here costs the whole job, so the timeout is
+        # generous and the skip is recorded.
         if ! wait_for_log "$VLA_LOG" "Batch inference server running" "${INFERENCE_SERVER_READY_TIMEOUT:-2400}" \
                 "$VLA_SERVER_PID"; then
             kill "$VLA_SERVER_PID" 2>/dev/null
@@ -304,15 +303,14 @@ do
     fi
 done
 
-# Exiting 0 after skipping every checkpoint is how a campaign silently loses a whole chunk: the job
-# reports success, and only a missing results.yaml says otherwise.
+# Exiting 0 after skipping every checkpoint would report success with no results, so fail instead.
 if [ "$SKIPPED_CKPTS" -gt 0 ]; then
     echo "FAIL: $SKIPPED_CKPTS of ${#CKPT_NAMES[@]} checkpoint(s) never started an inference server" >&2
     exit 1
 fi
 
 # Cells run backgrounded and are reaped with `wait -n`, so no per-cell status survives to here.
-# Check instead that every (checkpoint, env) pair left a non-empty results.yaml: that is the campaign's
+# Check instead that every (checkpoint, env) pair left a non-empty results.yaml: that is the run's
 # whole output, and a missing one catches every way a cell can vanish -- a crashed client, a sim server
 # that never bound, an env name with no registered scene.
 if [ -n "${OUT_ROOT:-}" ]; then

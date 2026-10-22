@@ -50,7 +50,7 @@ CANONICAL_TO_WIDOWX_GENESIS_ROTATION = np.array(
 # Franka in Genesis should be near-identity since canonical IS Franka convention.
 CANONICAL_TO_FRANKA_GENESIS_ROTATION = np.eye(3, dtype=np.float32)
 
-# UR5 correction matrix — must be determined empirically from Genesis neutral pose.
+# UR5 correction matrix: must be determined empirically from Genesis neutral pose.
 # Placeholder identity until validated.
 CANONICAL_TO_UR5_GENESIS_ROTATION = np.eye(3, dtype=np.float32)
 

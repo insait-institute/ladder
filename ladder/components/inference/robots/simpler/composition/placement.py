@@ -14,7 +14,7 @@ EGGPLANT = "eggplant"  # a sink-scene object in SimplerEnv; reused here on the f
 INSTANCE_SEP = "#"  # a source model used twice becomes "<model>#0", "<model>#1"
 
 # Drop heights and orientations, reused verbatim from the single bridge tasks (the eggplant mirrors the
-# carrot -- same ~3.8 cm thickness). Every object lies flat with its long axis on a world axis.
+# carrot, same ~3.8 cm thickness). Every object lies flat with its long axis on a world axis.
 _FLAT = (1.0, 0.0, 0.0, 0.0)
 _OBJ_Z: Dict[str, float] = {
     CARROT: 0.887529,
@@ -31,11 +31,9 @@ _OBJ_QUAT: Dict[str, Tuple[float, float, float, float]] = {
     EGGPLANT: _FLAT,
 }
 # Models that do not keep the yaw they are spawned with, so their footprint has to be bounded under any
-# orientation. Measured over 1344 rendered layouts the eggplant -- curved, and it turns as it settles --
-# reaches a y half-extent of 0.0328 against the 0.0185 its box reserves, while the carrot and the spoon
-# hold their pose to within 2 mm. Bounding everything this way is not free: the circumscribed square of a
-# 14 cm spoon is 7.2 cm on both axes, and charging that to move_plate_to_towel_5 costs it eleven of its
-# twenty-four layouts, because its movers have to fit inside a plate that then has nowhere to stand.
+# orientation. The curved eggplant turns as it settles and outgrows its box, while the carrot and the
+# spoon hold their pose. Bounding every object this way would be too costly: the circumscribed square of
+# a 14 cm spoon leaves dense scenes such as move_plate_to_towel_5 with too few valid layouts.
 _TUMBLES = frozenset({EGGPLANT})
 # From info_bridge_custom_v0.json. Used only to lay out a scene; success geometry reads the live model_db.
 BBOX_XY: Dict[str, Tuple[float, float]] = {
@@ -54,11 +52,8 @@ _OVERLAP_MARGIN_M = 0.01
 FOOTPRINT_SLACK_M = 0.003
 _NEAR_M = 0.08  # how far outside its target's edge a source may spawn
 # A transfer mover starts this far above its start receptacle's TOP FACE, so it settles onto it rather
-# than intersecting it. The plate is a 6 mm dish whose top sits 2.5 mm above the table, so the old 3 cm
-# -- measured from the table, not from the plate -- was a 27.5 mm free fall onto a curved surface: the
-# eggplant bounced off and was found 18 mm outside the plate and 24 mm into the towel it was supposed to
-# be carried to. Reserving room for that roll instead of preventing it costs move_plate_to_towel_5
-# twenty-two of its twenty-four layouts, since its movers all have to fit inside the plate.
+# than intersecting it. Measuring the drop from the receptacle, not the table, keeps the fall short, so
+# a curved mover does not bounce off the plate and roll toward its destination.
 _RECEP_TOP_M = 0.0025
 _ON_RECEP_CLEAR_M = _RECEP_TOP_M + 0.0035
 
@@ -88,8 +83,7 @@ def _rot_half(quat: Tuple[float, float, float, float], size: Tuple[float, float]
 def _yaw_free_half(size: Tuple[float, float]) -> float:
     """Half-diagonal of a ``size`` footprint: the bound that holds under ANY yaw.
 
-    Not every mover keeps the orientation it is spawned with -- a curved body turns as it settles, and
-    the eggplant's y half-extent is measured reaching 0.0328 against the 0.0185 its box reserves -- so a
+    Not every mover keeps the orientation it is spawned with (a curved body turns as it settles), so a
     destination kept clear only of the spawn box is not kept clear of where the mover comes to rest.
     """
     return 0.5 * float(np.hypot(size[0], size[1]))
@@ -106,10 +100,8 @@ def _clear_of_targets(
 ) -> bool:
     """No part of a mover may come to rest over a goal destination.
 
-    Testing only the mover's CENTRE -- which is what the success predicate reads -- leaves its body
-    hanging over the destination's edge: measured across 1296 rendered layouts, 13 spawned a mover on
-    its own destination, up to 25 mm in, and 2 of those were credited before the policy acted. The
-    rest were uncredited but just as wrong, since the goal is already half done.
+    Testing only the mover's centre (what the success predicate reads) can leave its body hanging over
+    the destination's edge, so a goal could start half done or even be credited before the policy acts.
     """
     rx, ry = (_yaw_free_half(bbox[name]),) * 2 if strip_instance_id(name) in _TUMBLES else halves[name]
     return not any(

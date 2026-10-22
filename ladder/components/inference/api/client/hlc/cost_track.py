@@ -31,7 +31,6 @@ def log_call(
         "output_tokens": int(output_tokens or 0),
         "thinking_tokens": int(thinking_tokens or 0),
         "alias": alias or os.environ.get("ALIAS"),
-        "slurm_job": os.environ.get("SLURM_JOB_ID"),
         "user": os.environ.get("USER"),
         "host": socket.gethostname(),
         "pid": os.getpid(),

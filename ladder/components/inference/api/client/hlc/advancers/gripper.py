@@ -13,9 +13,8 @@ class GripperAdvancerConfig(Config):
     advance_cooldown_steps: int = 0  # after advancing, ignore new releases this many steps (0 = off)
     # Advance anyway after this many steps on one subtask with no qualifying release (0 = off).
     # A release gate strict enough to reject failed clenches is also strict enough to strand the
-    # arm, and this advancer has no other way out: measured at min_hold_steps 21 + 3 cm lift, 50%
-    # of episodes never advanced at all and 8% reached the last subtask, against 100% at the loose
-    # gate. VerifiedAdvancer carries the same escape under the same name.
+    # arm, and this advancer has no other way out. VerifiedAdvancer carries the same escape under
+    # the same name.
     attempt_stall_steps: int = 0
     cyclic_repair: bool = False  # after the last subtask, wrap to the first and keep re-attempting
 

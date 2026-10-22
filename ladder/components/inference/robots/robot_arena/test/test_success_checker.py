@@ -1,6 +1,6 @@
 """Tests for the binary task success checker.
 
-All tests are CPU-only — Genesis entities are mocked with simple position/AABB stubs.
+All tests are CPU-only. Genesis entities are mocked with simple position/AABB stubs.
 The grasp predicate is stubbed at the module level so importing the checker does not
 pull in Genesis (whose native core aborts at import in CPU-only contexts).
 """
@@ -451,7 +451,7 @@ class TestPickup(unittest.TestCase):
         checker = self._checker_with(target)
         target.move_to(0.2, 0.1, 0.10)
         self.assertEqual(_done(checker), [True])
-        target.move_to(0.2, 0.1, 0.02)  # dropped back — latch holds
+        target.move_to(0.2, 0.1, 0.02)  # dropped back, latch holds
         self.assertEqual(_done(checker), [True])
 
 

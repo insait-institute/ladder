@@ -31,7 +31,7 @@ def goal_progress(episode: Episode) -> Optional[Fraction]:
 
 @metric
 def goal_progress_best(episode: Episode) -> Optional[Fraction]:
-    """Most goals held at once at any step — progress ignoring later damage."""
+    """Most goals held at once at any step: progress ignoring later damage."""
     goals = episode.goals
     return (float(episode.goals_best), float(len(goals))) if goals else None
 
@@ -45,7 +45,7 @@ def goal_regression(episode: Episode) -> Optional[Fraction]:
 
 @metric
 def any_goal(episode: Episode) -> Optional[Fraction]:
-    """Episodes that completed at least one goal — separates "did nothing" from "stalled late"."""
+    """Episodes that completed at least one goal: separates "did nothing" from "stalled late"."""
     if not episode.goal_trace:
         return None
     return float(any(any(achieved) for _, achieved in episode.goal_trace)), 1.0
@@ -53,7 +53,7 @@ def any_goal(episode: Episode) -> Optional[Fraction]:
 
 @metric
 def order_violation(episode: Episode) -> Optional[Fraction]:
-    """Of the episodes that completed every goal, the share the env still failed — an ordered task
+    """Of the episodes that completed every goal, the share the env still failed: an ordered task
     done in the wrong sequence. Measured on robot_arena_scene76_2goal_ordered, where goal 1 landed at
     step 18 and goal 0 at step 200: goal_progress reads 2/2 and success 0, with nothing in between to
     say why. Only defined once all goals are in, so unordered scenes report nothing."""

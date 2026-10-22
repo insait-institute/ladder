@@ -18,7 +18,7 @@ env_config:
 init_range_config:
   robot_init_x_range: [0.127, 0.127, 1]  # [x_min, x_max, x_num]
   robot_init_y_range: [0.06, 0.06, 1]  # [y_min, y_max, y_num]
-  robot_init_quat_center: [0, 0, 1, 0]  # [x, y, z, w]   # TODO: Verify
+  robot_init_quat_center: [0, 0, 1, 0]  # [x, y, z, w]
   robot_init_roll_range: [0, 0, 1]  # [roll_min, roll_max, roll_num]
   robot_init_pitch_range: [0, 0, 1]  # [pitch_min, pitch_max, pitch_num]
   robot_init_yaw_range: [0, 0, 1]  # [yaw_min, yaw_max, yaw_num]

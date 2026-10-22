@@ -1,28 +1,8 @@
 autoclass: ladder.components.inference.api.client.hlc.vlm.openai_api.OpenAIVLM
-model: google-ai-studio/gemini-3.7-flash
-base_url: ${VLM_BASE_URL}  # any OpenAI-compatible endpoint serving the model
+model: ${VLM_MODEL}
+base_url: ${VLM_BASE_URL}
 api_key_env: VLM_API_KEY
 timeout: 600.0
-
-# max_image_side is available here and deliberately NOT set. The frame is nearly all of what a hosted
-# call is billed for -- 133,719 verifier calls in one day measured 2314 input tokens each, 309M total,
-# and shrinking the longest side to 512 cuts the encoded frame ~1.6x -- but the verifier's answer is
-# what the advancer rests on, and 88.1% advance precision measured against the episodes' gt flag is
-# the number a smaller frame could quietly cost. Set it only with that A/B in hand.
-
-# Same model, a different provider and a separate quota. NVIDIA refused 16% of calls (260 of 1665)
-# with 36 units live while a 20-way burst here came back 20/20, and the ceilings differ threefold:
-# 4.0/s there against 12.0/s here. Measured 2026-09-20, the endpoint does not move the score -- three
-# SimplerEnv units scored 47/72 on each -- so this is throughput, not behaviour. The limiter is
-# NODE-WIDE, so 12/s is the budget for every cell on the box together, and at 0.36 calls/s per lane
-# it is what lets a card carry eight lanes instead of three.
 max_rps: 12.0
-
-# Tokens banked for a spike. Sustained demand is well under the ceiling, but lanes step in lockstep
-# and the synchronised burst peaks at 25 calls in one second; banking four seconds' worth absorbs
-# that WITHOUT raising sustained pressure.
 rate_limit_burst: 48
-
-# A refused call is a lost grounding, and a lost grounding fails the goal. This endpoint recovers in
-# well under a second, so retrying is far cheaper than giving up on the answer.
 rate_limit_attempts: 16

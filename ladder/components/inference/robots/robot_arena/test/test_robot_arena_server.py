@@ -1,7 +1,7 @@
 """
 Integration test for RobotArena: start server, connect client, run episodes.
 
-Follows the same pattern as test_simpler_server.py — verifies observation shapes,
+Follows the same pattern as test_simpler_server.py: verifies observation shapes,
 deterministic checksums, and runs action steps through the full ZMQ round-trip with Genesis.
 
 Requires GPU (Genesis uses CUDA for physics and rendering).

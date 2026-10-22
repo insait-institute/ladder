@@ -30,7 +30,7 @@ ENV_NAMES="widowx_put_carrot_on_plate" \
 ./ladder/components/inference/models/vlams/scripts/vlam_simpler_bridge.sh
 ```
 
-### 4. Debug with `ipdb`
+### 3. Debug with `ipdb`
 
 WidowX
 ```bash
@@ -131,7 +131,7 @@ The server collects requests into a batch up to `max_batch_size` or
 `HIGH_LEVEL_INFER`) as its own forward, and returns each client its own
 reply. Clients expose the same `low_level_step(obs_list)` /
 `high_level_step(obs_list)` interface as local `VLAMInference`, so
-`VLAMRobotInference` accepts either backend — selected via
+`VLAMRobotInference` accepts either backend, selected via
 `inference_config.autoclass`.
 
 ```python
@@ -176,7 +176,7 @@ client = RemoteInferenceClient(
 **Parameter tuning.** `max_batch_size` is bounded by VRAM; pick it so the
 typical real-eval batch at the configured worker count fits comfortably. The
 right `batch_timeout_ms` balances "GPU idle on under-filled batches" (too low)
-against "queueing latency without throughput gain" (too high) — the optimum is
+against "queueing latency without throughput gain" (too high). The optimum is
 GPU- and model-specific, so run a sweep on the target hardware before
 committing.
 
@@ -186,7 +186,7 @@ the server reports total batches and requests served before exiting.
 ### Hang recovery (`max_idle_ms`)
 
 Long-running evals occasionally stall when one worker hangs (for example, a
-RobotArena worker stuck in a Genesis physics/render kernel) — the remaining
+RobotArena worker stuck in a Genesis physics/render kernel): the remaining
 workers complete their partition and exit, leaving the batch server idle while
 still holding the GPU. `max_idle_ms` causes the server to exit cleanly after
 this many ms with no `INFER` request, once at least one batch has been served.

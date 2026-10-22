@@ -80,8 +80,8 @@ class SimplerServer(Configurable[SimplerServerConfig]):
         )
         if n_envs > len(base_ids) and n_envs % len(base_ids) == 0:
             # More parallel envs than object positions (language-perturbation eval): tile the
-            # position layout so every instruction block — assigned by the runner's
-            # instruction_override / default_block_size — spans the same object positions, making
+            # position layout so every instruction block (assigned by the runner's
+            # instruction_override / default_block_size) spans the same object positions, making
             # each perturbation's score directly comparable to the default's. One batch of n_envs.
             self._batches: List[List[int]] = [base_ids * (n_envs // len(base_ids))]
         else:

@@ -16,7 +16,7 @@ filegroup(
 # py3.12 (isaacsim 6 cp312 wheels) is selected automatically: this package's pip env
 # (inference-robots-robolab) declares python_version = "3.12", so pip_defs transitions every
 # py_binary/py_test here to py3.12 (`bazel run`/`bazel test` need no --python_version flag) and
-# constrains the py_libraries with target_compatible_with — no per-target select needed.
+# constrains the py_libraries with target_compatible_with, so no per-target select is needed.
 
 # Stage the @robolab_assets_archive asset tree into this package as assets/ (next to the entry
 # points in runfiles); they set ROBOLAB_ASSET_DIR here since the code-only @robolab_repo ships none.
@@ -98,10 +98,10 @@ py_binary(
     deps = [":robolab"],
 )
 
-# Post-hoc integrity gate for a finished campaign: flags episodes whose scene stopped being
+# Post-hoc integrity gate for a finished eval run: flags episodes whose scene stopped being
 # rendered. env_server refuses to start an episode on a full card, so this is the backstop for
-# anything that reaches the same end state by another route -- and the tool that found the first
-# 188. Manual: it shells out to ffmpeg over a campaign's recorded videos.
+# anything that reaches the same end state by another route. Manual: it shells out to ffmpeg over
+# a run's recorded videos.
 py_binary(
     name = "check_scene_rendered",
     srcs = ["composition/check_scene_rendered.py"],
@@ -127,7 +127,7 @@ py_binary(
     ],
 )
 
-# Maps a campaign to RoboLab's episode_results.jsonl (dashboard compatibility).
+# Maps an eval run to RoboLab's episode_results.jsonl (dashboard compatibility).
 py_binary(
     name = "export_robolab_results",
     srcs = ["export_robolab_results.py"],
@@ -135,9 +135,8 @@ py_binary(
     pip_deps = ["pyyaml"],
 )
 
-# Lint only: the composition specs' unit tests are kept out of the branch, as they are on the
-# SimplerEnv and RobotArena composition PRs. :robolab_srcs and not :robolab so ruff reads the
-# package sources without materialising the isaacsim wheel set.
+# Lint only. :robolab_srcs and not :robolab so ruff reads the package sources without
+# materialising the isaacsim wheel set.
 make_py_checks(
     name = "robolab_tests",
     test_srcs = glob(["test/*.py"]),

@@ -69,8 +69,8 @@ class MotionParams:
     rim_grasp_min_span_m: float = 0.0
     rim_inset_m: float = 0.012
     # Take the wall across the jaws' home closing axis (base Y), on the side nearer the robot's
-    # centreline, so the wrist keeps its home yaw -- the grip a learned policy uses on RobotArena's
-    # bowl -- instead of the wall facing the base with the wrist turned a quarter.
+    # centreline, so the wrist keeps its home yaw (the grip a learned policy uses on RobotArena's
+    # bowl) instead of the wall facing the base with the wrist turned a quarter.
     rim_along_jaw: bool = False
     # Rim grasps close the jaws this far above the grasp point and keep descending while they close.
     # Opened full width over a thin wall, the inner finger lands on the bowl's floor and presses down
@@ -245,10 +245,9 @@ def _over_goal(
 
     A container's goal point is at its FLOOR, so transit measured from it would drag the carried
     object through the rim: ``release_z_m`` raises the approach above it. The RELEASE itself must
-    not be raised the same way, though -- opening the jaws above the rim drops every arrival onto
-    the pile already in the container, which bounces the earlier ones back out. Measured on
-    RoboLab's bins, where deliveries were credited and then lost: 18-20 goals per lane went
-    True->False. So transit clears the rim and the release descends to the goal.
+    not be raised the same way, though. Opening the jaws above the rim drops every arrival onto
+    the pile already in the container, which bounces the earlier ones back out and loses goals
+    that were already credited. So transit clears the rim and the release descends to the goal.
     """
     point = cond.goal_point_m.astype(np.float64).reshape(3).copy()
     if clear_rim:
@@ -397,7 +396,7 @@ def step(  # noqa: C901, PLR0911, PLR0912, PLR0915 -- one flat phase dispatch; s
 
     if state.phase == Phase.CENTER:
         # Lowering and centring cannot happen at once, so centring gets its own phase.
-        # It does converge precisely at a HELD height, so the two are separated -- descend, then slide
+        # It does converge precisely at a HELD height, so the two are separated: descend, then slide
         # onto the object before the jaws move.
         over = grasp_pt.copy()
         over[2] = float(eef_m[2])
@@ -428,7 +427,7 @@ def step(  # noqa: C901, PLR0911, PLR0912, PLR0915 -- one flat phase dispatch; s
         elif state.phase_steps >= params.max_grasp_steps:
             # Nothing was picked up. Flying the empty gripper through carry and place would spend a
             # third of a goal's budget achieving nothing, so end the chain and let the caller
-            # restart it -- the retry re-reads where the object actually ended up.
+            # restart it. The retry re-reads where the object actually ended up.
             advance(Phase.DONE)
         return grasp_pt, False
 

@@ -88,7 +88,7 @@ class TestRevisitFamily(unittest.TestCase):
 
 
 class TestRelayIsUnchanged(unittest.TestCase):
-    """Relay was two legs before and must still be two legs, with the same op count and plan."""
+    """Relay stays a two-leg chain, with the expected op count and plan."""
 
     def _relays(self):
         return [spec for spec in SPECS.values() if spec.family == "relay"]

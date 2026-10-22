@@ -2,8 +2,9 @@
 
 [CaP-X](https://github.com/capgym/cap-x) (arXiv:2603.22435) for the three composition benchmarks.
 This is the paper's Tier M3 agent: high-level primitives, multi-turn interaction,
-visual differencing in text. A VLM writes a Python program against the robot API, the program drives the arm, and a second VLM
-pass describes the before/after frames and decides to regenerate or finish. No learned policy runs.
+visual differencing in text. A VLM writes a Python program against the robot API, the program
+drives the arm, and a second VLM pass describes the before/after frames and decides to regenerate
+or finish. No learned policy runs.
 
 Upstream's `control.py` defines the six primitives the program is written against:
 `get_object_pose`, `sample_grasp_pose`, `goto_pose`, `open_gripper`, `close_gripper`,
@@ -40,10 +41,11 @@ hardware.
 | `configs/robot_arena/composition/capx_robot_arena_composition_tiered.yaml` | RobotArena (WidowX) |
 | `configs/simpler/composition/capx_simpler_composition_tiered.yaml` | SimplerEnv (WidowX) |
 
-The policy brings its own pip environment, so it has its own runner: `RUN_MODEL=models/capx:run_model`.
-No checkpoint is served. RoboLab takes `INFERENCE_SERVER=0`; RobotArena and SimplerEnv take
-`NO_VLA=1` and any `SESSION_NAME` (it only labels the output). Depth is off by default, so all three also need `PUBLISH_DEPTH=True`. SAM 3's weights are gated on Hugging Face: accept the license at
-[`facebook/sam3`](https://huggingface.co/facebook/sam3) and export `HF_TOKEN` first.
+The policy brings its own pip environment, so it has its own runner:
+`RUN_MODEL=models/capx:run_model`. No checkpoint is served. RoboLab takes `INFERENCE_SERVER=0`; RobotArena and SimplerEnv take
+`NO_VLA=1` and any `SESSION_NAME` (it only labels the output). Depth is off by default, so all
+three also need `PUBLISH_DEPTH=True`. SAM 3's weights are gated on Hugging Face: accept the license
+at [`facebook/sam3`](https://huggingface.co/facebook/sam3) and export `HF_TOKEN` first.
 
 ## Deviations from upstream
 

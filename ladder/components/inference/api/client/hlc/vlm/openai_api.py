@@ -23,8 +23,7 @@ def _resolve_headers(headers: Dict[str, str]) -> Dict[str, str]:
         value = os.environ.get(match.group(1))
         if value is None:
             # An empty substitution is never what the config meant, and the failure it causes is
-            # remote and opaque (the ai-gateway rejects empty cf-aig-metadata fields with a bare
-            # 400 'Chat completion bad format').
+            # remote and opaque (some gateways reject an empty metadata header with a bare 400).
             LOGGER.warn(f"Header references ${{{match.group(1)}}} but it is unset; sending it empty")
             return ""
         return value
@@ -63,8 +62,8 @@ class OpenAIVLMConfig(VLMConfig):
     default_headers: Optional[Dict[str, str]] = None  # values may reference ${ENV_VAR}
     # Named per endpoint: a second provider does not share the first one's key.
     api_key_env: str = "VLM_API_KEY"
-    # Some models reject `temperature` outright (claude-opus-5 on the NVIDIA gateway answers 400
-    # "deprecated for this model"). Omitting it costs determinism, so leave it on where it works.
+    # Some models reject `temperature` outright with a 400. Omitting it costs determinism, so leave
+    # it on where it works.
     send_temperature: bool = True
     # SDK-level retries with its own backoff. Raise it for a gateway that throttles.
     max_retries: int = 2
@@ -137,8 +136,7 @@ class OpenAIVLM(VLM[OpenAIVLMConfig]):
             return self._get().chat.completions.create(**kwargs)
         # A rate-limited call must PAUSE, not kill the episode. VoLo swallows its own 429s and
         # degrades to a one-element plan, so an arm of ours that dies on the same 429 is scored
-        # ABSENT while VoLo is scored degraded-but-alive -- the comparison is then unfair in both
-        # directions at once (measured 2026-09-01: every nvlive cell dead, every volo cell alive).
+        # ABSENT while VoLo is scored degraded-but-alive, and the comparison is unfair.
         attempts = max(1, self.config.rate_limit_attempts)
         for attempt in range(attempts):
             with limiter.hold():

@@ -21,7 +21,7 @@ flowchart TD
     more -- "no, replan" --> plan
 ```
 
-Three model calls per goal at most -- plan, choose, and one box to ground each name -- and step 4
+Three model calls per goal at most (plan, choose, and one box to ground each name), and step 4
 makes none. Every reply is strict JSON. The examples below are made up; the shapes are the real ones.
 
 **1 - PLAN.** Once per pass. In: the frame, the task, and every goal already tried with what came
@@ -56,7 +56,7 @@ too, so the right one can be told apart:
  {"box_2d": [400, 190, 470, 260], "label": "the green lime"}]
 ```
 
-`[ymin, xmin, ymax, xmax]`, normalised to 0-1000 -- y first. `best_match` takes the box whose label
+`[ymin, xmin, ymax, xmax]`, normalised to 0-1000, y first. `best_match` takes the box whose label
 answers the name; the rest are kept as rivals.
 
 *Box to solid.* Pixels inside the box are unprojected into the robot base frame, then cut:
@@ -68,8 +68,8 @@ answers the name; the rest are kept as rivals.
 - more than 8 cm behind the nearest surface in the box
 - inside a rival box
 
-What survives is clustered for contiguity around the ray through the box middle -- which separates
-two touching lemons -- and fitted to an upright solid closed down to the support plane, since only
+What survives is clustered for contiguity around the ray through the box middle (which separates
+two touching lemons) and fitted to an upright solid closed down to the support plane, since only
 the top shell is visible from above. Out: centre, extent, yaw. The plane is the modal bin of the
 cloud's z histogram.
 
@@ -77,12 +77,12 @@ cloud's z histogram.
 across the narrowest span. `transit_to` rises above the tallest measured point in the corridor,
 travels, descends. Each leg issues `EndEffectorPoseAction(translation, rotation)` every step until
 the pose is inside the arrive tolerance or stops improving; the gripper rides in the same
-`ManipulatorAction`. No motion planner and no simulator collision scene -- the obstacle set is the
+`ManipulatorAction`. No motion planner and no simulator collision scene: the obstacle set is the
 observed cloud.
 
 Nothing below that is ours: the action is an *absolute end-effector pose in the base frame*, the same
 action a learned policy emits on the same wire protocol, and the backend does the IK and the joint
-tracking -- ManiSkill3's absolute `PDEEPoseController` on SimplerEnv, Franka IK on RoboLab. With
+tracking (ManiSkill3's absolute `PDEEPoseController` on SimplerEnv, Franka IK on RoboLab). With
 `blocking_waypoint` the same target is re-issued every step until the arm arrives; otherwise the
 step is capped at `max_translation_per_step_m`. A leg gives up after `move_steps`.
 

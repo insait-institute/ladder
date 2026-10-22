@@ -25,7 +25,7 @@ from ladder.core.databib.config import Config, Configurable
 CAMERA_NAME = "3rd_view_camera"
 # WidowX gripper finger joint range, from ManiSkill3's stock bridge gripper controller
 # (mani_skill/envs/tasks/digital_twins/bridge_dataset_eval/base_env.py: PDJointPosMimicControllerConfig
-# lower=0.015, upper=0.037 — nominal, excluding its +0.001 grasp clearance). ManiSkill3 reports the raw
+# lower=0.015, upper=0.037, nominal, excluding its +0.001 grasp clearance). ManiSkill3 reports the raw
 # joint position, so normalise it to the [0, 1] openness the policy expects (ManiSkill2 served this
 # pre-normalised in obs['agent']['eef_pos'][7]).
 GRIPPER_LOWER_M = 0.015

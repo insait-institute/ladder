@@ -1,2 +1,4 @@
 /bzl-build/
 docs/static/data/submissions.json
+/out/
+__pycache__/

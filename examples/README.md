@@ -82,7 +82,7 @@ done) is not given to plugged-in systems. That is what keeps the comparison fair
   under `out/<suite>/<low-level policy>/<name>_c1/`. The default name is the class name, or
   `policy_server`.
 - The dashboard replays your episodes next to the paper's:
-  `bazel run //ladder/components/dashboard:serve -- --results $PWD/out`.
+  `scripts/dashboard.sh`.
 - To put your system on the [leaderboard](https://ladderrobotics.ai/#leaderboard), see
   [`leaderboard/README.md`](../leaderboard/README.md).
 

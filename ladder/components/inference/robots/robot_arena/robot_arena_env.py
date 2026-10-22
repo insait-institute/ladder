@@ -1,4 +1,4 @@
-"""Genesis-based RobotArena env. K=1 is bit-identical to the legacy path;
+"""Genesis-based RobotArena env. K=1 runs a single env;
 K>=2 replicates the scene and steps all envs in lockstep with per-env (dx,
 dy) reset offsets, per-env gripper commands, and per-env weld-constraint
 grasping. ``step``/``reset`` always return length-K lists."""
@@ -332,13 +332,13 @@ class RobotArenaEnv(Configurable[RobotArenaEnvConfig]):
             and self.config.robot_name == new_config.robot_name
             and self.config.n_envs == new_config.n_envs
             # The composed instruction, conjunction checker, and reported env_name are fixed at
-            # construction — reconfigure() cannot swap them, so a composition change must rebuild.
+            # construction. reconfigure() cannot swap them, so a composition change must rebuild.
             and self.config.composition_task == new_config.composition_task
         )
 
     def reconfigure(self, new_config: "RobotArenaEnvConfig") -> None:
         """Apply lightweight config changes without rebuilding the Genesis scene."""
-        # Validate before mutating any state — a half-applied reconfigure
+        # Validate before mutating any state: a half-applied reconfigure
         # leaves _config and _ctx out of sync. (new_config is field-validated at
         # construction via __post_init__; the n_envs guard is reconfigure-specific.)
         old_config = self.config
@@ -478,7 +478,7 @@ class RobotArenaEnv(Configurable[RobotArenaEnvConfig]):
     def _apply_action_single(
         self, target_pos: np.ndarray, target_quat: np.ndarray, gripper_cmd: float
     ) -> None:
-        """K=1 path — bit-identical to the legacy implementation."""
+        """K=1 path."""
         robot_config = ROBOT_CONFIGS[self.config.robot_name]
         ee_link = self._ctx.robot.get_link(name=robot_config.ee_link)
         des_q = self._ctx.robot.inverse_kinematics(link=ee_link, pos=target_pos, quat=target_quat)

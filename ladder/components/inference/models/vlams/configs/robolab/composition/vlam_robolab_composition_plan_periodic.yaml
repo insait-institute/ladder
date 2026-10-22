@@ -9,18 +9,10 @@ runner_config:
     source:
       cache_path: ladder/components/inference/robots/robolab/composition/decomp_cache.json
     advancer:
-      # The shared config's 27 is SimplerEnv's. The rule it states is "the oracle's median time on a
-      # SUBTASK", and RoboLab's own is 257 steps: over 696 oracle episodes the median gap between
-      # consecutive goal FIRST-ACHIEVEMENTS is 257 (p25 194, p75 392, p90 665; 2071 gaps) against
-      # SimplerEnv's 34 (p25 27, p75 50, p90 95) -- a 7x difference in timescale, at 15 Hz control.
-      # The earlier 243 came from 15 episode files and is reproduced within 6% by that larger sample.
-      #
-      # The previous 75 came from the median gap between consecutive subtask COMMANDS, which is a
-      # different quantity: a command changes whenever the advancer retargets, so a thrashing advancer
-      # drives that number down and 75 measured the thrash rather than the placement. At 75 the clock
-      # fires ~3x per placement, and the arm's premature-switch rate on RoboLab was 99.0% -- all but
-      # one switch in a hundred left the goal it was leaving unmet. Sweep from the command line
-      # (--runner_config.hlc_config.advancer.interval N) rather than by adding a config per rung.
+      # The shared 27 is SimplerEnv's median time per subtask. RoboLab's median gap between
+      # consecutive goal achievements is ~250 steps (~7x longer at 15 Hz control), so the clock is
+      # rescaled to match. A faster clock switches subtasks before the placement finishes. Sweep from
+      # the command line (--runner_config.hlc_config.advancer.interval N) rather than adding configs.
       interval: 250
   recorder_config:
     output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_plan_periodic/$CKPT_NAME/$ENV_NAME

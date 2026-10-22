@@ -44,8 +44,7 @@ def reset_frame(scene: str, path: str) -> None:
         env.close()
 
 
-# `Spec` carries no family field -- the registry groups by name prefix. Mirrors dump_sim.py, which
-# feeds the protocol site from the same registry; the two must not drift.
+# `Spec` carries no family field, so the registry groups by name prefix.
 _FAMILIES = (
     ("all", "single_destination"),
     ("split", "split"),
@@ -114,7 +113,7 @@ def main() -> None:
                 "ordered": bool(spec.ordered),
                 "revisits": bool(spec.revisits),
                 # Part of the published schema. The registry carries distractors directly; the
-                # family is read off the name, the same table dump_sim.py uses for the site.
+                # family is read off the name.
                 "family": family_of(name),
                 "distractors": [show(d) for d in spec.distractors],
                 # Scene contents, so a task that changes what it PLACES invalidates samples cut

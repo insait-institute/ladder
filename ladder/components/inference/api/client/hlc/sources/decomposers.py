@@ -34,8 +34,8 @@ intermediate stops that must precede a final placement) and false when the subta
 any order."""
 
 # How objects are named in the plan. Colour + type names the object the way it is seen, for the policy
-# and the completion check alike: under a bare noun pi0.5 grasps a look-alike (the lemon for the orange)
-# in a third of its grasps.
+# and the completion check alike: under a bare noun the policy often grasps a look-alike (the lemon
+# for the orange).
 _OBJECT_NAMING = {
     False: 'Name each object by its plain type noun as it appears ("the lemon", "the banana").',
     True: (
@@ -120,9 +120,8 @@ class Decomposer(SubtaskSource[DecomposerConfig]):
                 )
             return Decomposition(list(cached))
         if self._vlm is None:
-            # Returning None here used to surface much later as an assertion inside
-            # SubtaskSource.commands(), which said nothing about which env was uncached. A cache-only
-            # Decomposer that cannot serve the env can never recover, so fail here with the cause.
+            # A cache-only Decomposer that cannot serve the env can never recover, so fail here
+            # with the cause rather than with an opaque assertion later in SubtaskSource.commands().
             raise KeyError(
                 f"Decomposer: env {scene!r} has no entry in {self.config.cache_path!r} and no vlm "
                 f"backend is configured, so no plan can be produced. Either regenerate the cache for "

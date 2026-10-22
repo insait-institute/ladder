@@ -4,12 +4,12 @@ Bazel-packages NVIDIA's [RoboLab](https://github.com/NVlabs/RoboLab) manipulatio
 (DROID/Franka), from [a fork](https://github.com/psi-robotics/RoboLab) that upgrades it to Isaac Sim
 6.0.0.1 and Isaac Lab 3.0.0b2.
 
-- **`env_server.py`** — serves RoboLab envs over
+- **`env_server.py`** serves RoboLab envs over
   ladder's RobotServer ZMQ protocol to the standard `run_model` + `SimplerEpisodeRunner` stack,
   so runner-side features (HLC configs, RecorderWrapper, dashboard-format outputs)
   apply to RoboLab exactly as to RobotArena/SimplerEnv. One Isaac app serves the whole
-  (task x run) campaign. Model/behavior config:
-  `models/vlams/configs/robolab/vlam_robolab.yaml` — it lives with the other per-benchmark `run_model`
+  (task x run) sweep. Model/behavior config:
+  `models/vlams/configs/robolab/vlam_robolab.yaml`. It lives with the other per-benchmark `run_model`
   configs (`vlam_simpler.yaml`, `vlam_robot_arena_*.yaml`) because `run_model`'s bazel target
   packages that directory and the config imports `vlam_simpler.yaml`.
 
@@ -33,11 +33,11 @@ keeps the integration frame-convention-free.
 
 ## Packaging (see `http-assets.MODULE.bazel`)
 
-- **Code** — `@robolab_repo`: the RoboLab source archive (sha256-pinned, code only). A `constants.py`
+- **Code**: `@robolab_repo`: the RoboLab source archive (sha256-pinned, code only). A `constants.py`
   patch makes it resolve assets from `ROBOLAB_ASSET_DIR`.
-- **Assets** — `@robolab_assets_archive`: the ~1 GB asset tree the tasks load, staged into
+- **Assets**: `@robolab_assets_archive`: the ~1 GB asset tree the tasks load, staged into
   `assets/` by `copy_to_directory`. First build on a fresh machine fetches it once.
-- **openpi client** — `@openpi_client_repo` vendors `openpi_client` as source (its `numpy<2` pin
+- **openpi client**: `@openpi_client_repo` vendors `openpi_client` as source (its `numpy<2` pin
   conflicts with isaacsim's numpy 2.x; the source runs fine on 2.x).
 
 ## Running an eval
@@ -59,17 +59,17 @@ LADDER_CONFIG=ladder/components/inference/models/external/openpi/configs/robolab
 Manual invocation of the individual pieces (the launcher does all of this for you):
 
 ```bash
-# env server — serves RoboLab envs over the RobotServer ZMQ protocol
+# env server: serves RoboLab envs over the RobotServer ZMQ protocol
 bazel run //ladder/components/inference/robots/robolab:env_server -- \
     --port 5556 --task BananaOnPlateTask --num-envs 8 --num-runs 1 --headless
-# dashboard export — map a campaign to episode_results.jsonl
+# dashboard export: map a run to episode_results.jsonl
 bazel run //ladder/components/inference/robots/robolab:export_robolab_results -- \
-    --episode-log <campaign>/all/episode_log.yaml --output-dir <campaign>
+    --episode-log <run_dir>/all/episode_log.yaml --output-dir <run_dir>
 ```
 
-Runs write `results.yaml`, `episode_log.yaml` and per-env mp4s AND —
-via `export_robolab_results.py`, run automatically at campaign end — RoboLab's
-`episode_results.jsonl`, so their dashboard reads our campaigns too. Env-side diagnostics (hdf5
+Runs write `results.yaml`, `episode_log.yaml` and per-env mp4s, and
+(via `export_robolab_results.py`, run automatically at the end of a run) RoboLab's
+`episode_results.jsonl`, so RoboLab's dashboard can read the results too. Env-side diagnostics (hdf5
 trajectories, SPARC/path-length metrics, event streams) are the one thing only RoboLab's own runner
 ever wrote.
 
@@ -88,7 +88,7 @@ this benchmark's plan cache and RoboLab's own timing:
 
 | `LADDER_CONFIG` (`…/configs/robolab/composition/`) | Shared system | Plan | Switches on |
 |---|---|---|---|
-| `vlam_robolab_composition.yaml`                       | — (flat, no HLC)         | — (raw instruction) | — |
+| `vlam_robolab_composition.yaml`                       | none (flat, no HLC)      | none (raw instruction) | n/a |
 | `…_oracle.yaml`                                       | `oracle`                 | from the env        | per-goal `achieved` |
 | `…_plan_gripper.yaml`                                 | `plan_gripper`           | cached              | the gripper cycle |
 | `…_plan_periodic.yaml`                                | `plan_periodic`          | cached              | a step clock (no feedback) |
@@ -103,7 +103,7 @@ this benchmark's plan cache and RoboLab's own timing:
 | `…_volo.yaml`                                         | `volo`                   | cached              | VoLo's own tool loop |
 
 `…_plan_verifier_live.yaml` is the one file that is not a system: it is `_plan_verifier` with
-`cache_path` omitted, so the VLM decomposes the reset frame — the pass that mints a plan for a newly
+`cache_path` omitted, so the VLM decomposes the reset frame. This is the pass that mints a plan for a newly
 added task. `composition/language/` holds the same paraphrase probes the other two benchmarks ship.
 This is the same set, file for file, as SimplerEnv's and RobotArena's composition configs, so a
 system compares across all three.
@@ -121,8 +121,8 @@ sits beside the composition package exactly as it does on the other two benchmar
 by task class name (`CompBin4Task`).
 
 The oracle needs no cache: `oracle.py` synthesizes the per-goal `metadata['oracle']` signal from the
-task's OWN subtask spec — one `(command, check)` pair per score-carrying goal, rendered from the
-goal's terminating predicate (verb + object/target nouns), the RoboLab-side analogue of SimplerEnv's
+task's OWN subtask spec: one `(command, check)` pair per score-carrying goal, rendered from the
+goal's terminating predicate (verb + object/target nouns). It is the RoboLab-side analogue of SimplerEnv's
 `oracle_subtasks`. Commands and `achieved` are built in one pass so `oracle.achieved[i]` lines up
 with commanded subtask `i` by construction.
 
@@ -135,14 +135,14 @@ goal mid-reach and reads as a difficulty wall that is not there.
 ## Throughput
 
 `NUM_ENVS` parallel Isaac envs are stacked into one batched model forward per decode, sharing the
-fixed model cost across N episodes — raise it for throughput (`MAX_BATCH_SIZE >= NUM_ENVS`).
+fixed model cost across N episodes. Raise it for throughput (`MAX_BATCH_SIZE >= NUM_ENVS`).
 Per-step wall is dominated by the upstream Isaac render, not the model.
 
 ## Parity contract vs the native runner
 
 Validated against RoboLab's native runner:
 clean-start success 86.4% ladder vs 86.7% native; frame-level camera/action-input equivalence
-verified; ladder path measured equal-to-30% faster.
+verified; the ladder path ran as fast as native or up to 30% faster.
 
 Identical by construction (any change here must keep both paths in lockstep):
 - Task iteration = `run_evaluation`'s loop: `create_env` per task (same args, seed 0 default),
@@ -162,6 +162,6 @@ Known, deliberate differences:
   env's terminal step, so `export_robolab_results.py` fills `metrics`; `events`/`timing` stay
   empty.
 - The ladder runner queries the model for frozen envs too (results-neutral; the batched
-  server amortizes it — measured net-faster than native).
+  server amortizes it, and the ladder path is still faster than native overall).
 - Ladder videos are the 224x224 letterboxed model-input frames (native records 720p half-scale);
   each env's recording ends at its own terminal step.

@@ -1,4 +1,4 @@
-# Flat (no HLC) RobotArena composition eval — the model sees only the composed multi-goal instruction.
+# Flat (no HLC) RobotArena composition eval: the model sees only the composed multi-goal instruction.
 # Base for the oracle / plan_gripper / plan_verifier RA composition configs (they import this).
 import: ../vlam_robot_arena_batched_envs.yaml
 

@@ -32,10 +32,8 @@ class IsaacLabEpisodeRunner(Configurable[IsaacLabEpisodeRunnerConfig]):
         self.episode_count += 1
         LOGGER.info(f"Starting episode {self.episode_count} ...")
 
-        # Reset the policy
         self.policy.reset()
 
-        # Reset the environment
         observation: RobotObservation = self.env.reset(instruction="")
 
         env_name = observation.metadata["env_name"]
@@ -54,7 +52,6 @@ class IsaacLabEpisodeRunner(Configurable[IsaacLabEpisodeRunnerConfig]):
 
         self.stats[env_name].append(success)
 
-        # End the current episode
         self.env.end_episode()
 
         LOGGER.info(f"Completed episode {self.episode_count}")

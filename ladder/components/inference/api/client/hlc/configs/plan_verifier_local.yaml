@@ -1,7 +1,7 @@
 autoclass: ladder.components.inference.api.client.hlc.controller.SubtaskController
-# plan_verifier with every VLM role answered by the run's OWN batch inference server instead of the API
-# gateway, so the arm needs no credentials and no network. The server holds one copy of the model for
-# every lane sharing it; start it with api/client/batch_inference/configs/vlm_server.yaml, or
+# plan_verifier with every VLM role answered by the run's OWN batch inference server instead of a
+# hosted API, so the arm needs no credentials and no network. The server holds one copy of the model
+# for every lane sharing it; start it with api/client/batch_inference/configs/vlm_server.yaml, or
 # VLM_COMPLETE comes back as "server has no vlm_config".
 #
 # Written out rather than importing plan_verifier.yaml, and it has to be: a config that imports it and

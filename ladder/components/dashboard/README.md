@@ -10,11 +10,10 @@ logs. It reads the output of `scripts/eval.sh` and the baselines' evaluation epi
 From the repository root:
 
 ```bash
-bazel run //ladder/components/dashboard:serve -- --results <dir> [<dir> ...] --port 8080
+scripts/dashboard.sh [<dir> ...] [--port 8080]
 ```
 
-Then open `http://localhost:8080`. `--results` takes one or more directories, and the flag may
-repeat. Open your own runs and the baselines' episodes side by side to compare them.
+Then open `http://localhost:8080`. Without a directory it shows `out/`. Open your own runs and the baselines' episodes side by side to compare them.
 
 A run is found by its directory name: give the launcher an output directory (`OUT_ROOT` on
 SimplerEnv-Long, `CAMPAIGN_ROOT` on the other two) of the form
@@ -24,8 +23,8 @@ SimplerEnv-Long, `CAMPAIGN_ROOT` on the other two) of the form
 To browse the evaluation episodes of the baselines, download them first:
 
 ```bash
-bazel run //ladder/components/dashboard:fetch -- episodes --repo INSAIT-Institute/LADDER-Evaluation-Episodes --out ~/ladder_episodes
-bazel run //ladder/components/dashboard:serve -- --results ~/ladder_episodes/dashboard ~/ladder_episodes/dashboard_real
+scripts/dashboard.sh fetch
+scripts/dashboard.sh ~/ladder_episodes/dashboard ~/ladder_episodes/dashboard_real
 ```
 
 ## What it reads

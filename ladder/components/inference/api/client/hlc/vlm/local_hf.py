@@ -18,7 +18,7 @@ class LocalVLMConfig(VLMConfig):
 
 class LocalVLM(VLM[LocalVLMConfig]):
     """A locally-loaded transformers image-text-to-text model behind the same ``complete`` interface
-    as the API backends, so the verifier/decomposer swap Gemini <-> local Qwen by config alone.
+    as the API backends, so the verifier/decomposer swap a hosted model for a local one by config alone.
     Generation is serialized under a lock (transformers ``generate`` is not thread-safe)."""
 
     def __init__(self, config: LocalVLMConfig) -> None:

@@ -34,7 +34,7 @@ package = false
 prerelease = "allow"
 # Force single versions where ladder's pins collide with isaaclab 3.0.
 override-dependencies = [
-  # ladder-core's StrEnum backport (py<3.11 only, no 3.12 release) — marker-exclude it here.
+  # ladder-core's StrEnum backport (py<3.11 only, no 3.12 release), so marker-exclude it here.
   "backports-strenum==1.3.1; python_version < '3.11'",
   "pillow==12.1.1",
   "tqdm==4.67.1",

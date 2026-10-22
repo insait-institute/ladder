@@ -127,11 +127,9 @@ class CompositionBridgeEnv(BaseBridgeEnv):
         """Per-axis mesh scale. A receptacle grows in the PLANE only.
 
         Scaling the third axis too raises the rim and lowers the underside, while the spawn height is
-        a per-model constant tuned for the native size -- so a 2.4x plate starts with its base 5 mm
-        under the table and its rim 19 mm above a mover's, and the solver ejects it across the table
-        into the objects the packer had carefully spaced 1 cm away. Measured on the shipped layouts:
-        105 of 1296 episodes began with a mover overlapping a receptacle, up to 9 cm deep, and 36 of
-        them were scored as partly solved before the policy acted. Growing x and y alone leaves
+        a per-model constant tuned for the native size. A 2.4x plate would then start with its base
+        under the table, and the solver would eject it into the movers around it, so some episodes
+        would begin partly solved. Growing x and y alone leaves
         thickness, spawn height and table clearance exactly as the native case that was tuned.
         """
         base = strip_instance_id(model_id)
@@ -151,11 +149,10 @@ class CompositionBridgeEnv(BaseBridgeEnv):
         base = strip_instance_id(model_id)
         axis = self._axis_scale(model_id, scale)
         # A receptacle is scenery: nothing in these tasks asks for it to be moved, and leaving it
-        # dynamic costs twice over. `BaseBridgeEnv._initialize_episode` grants the scene up to 6.5
-        # seconds of free simulation to settle, which was enough for an enlarged plate to travel
-        # 121 mm and come to rest on top of movers the packer had spaced 1 cm away -- see the count in
-        # _axis_scale. It also stops the policy shunting its own destination around mid-episode. The
-        # parent builds every object dynamic and pins only the sink.
+        # dynamic costs twice over. `BaseBridgeEnv._initialize_episode` grants the scene seconds of
+        # free simulation to settle, enough for an enlarged plate to slide onto nearby movers. It also
+        # stops the policy shunting its own destination around mid-episode. The parent builds every
+        # object dynamic and pins only the sink.
         if base in self._receptacles:
             kinematic = True
         # The parent takes one scalar, so anything scaled unevenly is built here.
@@ -266,7 +263,7 @@ class CompositionBridgeEnv(BaseBridgeEnv):
             stats["milestone"] = self._milestone.to(torch.int32)
 
         # The score and the oracle read ONE credit vector, so they cannot form separate opinions
-        # about what is done -- the defect this replaced was exactly such a divergence.
+        # about what is done.
         self.oracle_achieved = credit = self._credit(resting)
         matched, progress = credit.all(dim=1), credit.sum(dim=1)
         if self.SPEC.ordered and not self.SPEC.revisits:
@@ -329,6 +326,6 @@ for _spec in SPECS:
     )(type(_spec.name, (CompositionBridgeEnv,), {"SPEC": _spec}))
 
 
-if __name__ == "__main__":  # the campaign's task list: "<env-v0>|<max_episode_steps>" per registered task
+if __name__ == "__main__":  # the task list: "<env-v0>|<max_episode_steps>" per registered task
     for _spec in SPECS:
         print(f"{_spec.name}-v0|{_spec.max_steps}")

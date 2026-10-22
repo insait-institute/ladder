@@ -13,8 +13,8 @@ LOGGER = get_logger(__name__)
 
 
 # Every Franka joint limit is within +-3.1 rad, so anything past this is a diverged articulation
-# that merely has not reached NaN yet. Checking only for non-finite values let joint readings of
-# 1e27 through IK and commanded 1e34 back into the sim, feeding the runaway for ~40 more steps.
+# that merely has not reached NaN yet. Checking only for non-finite values would let huge joint
+# readings through IK and feed the runaway back into the sim.
 _JOINT_SANE_RAD = 6.5
 
 
@@ -33,9 +33,8 @@ class DroidJointposConverter:
         self._target_poses: List[Optional[np.ndarray]] = [None] * num_envs
         self._degenerate: List[bool] = [False] * num_envs  # logged once per env per episode
         # Last finite in-range joint vector per env: the freeze target for a diverged env.
-        # Commanding zeros there was a full-authority PD slam toward the upright pose that
-        # re-excited marginal (~6.5 rad) trips into 20-150 rad runaways and poisoned the
-        # next episode through reset (m10 oracle_b lane1 env8: 7.0 -> 8.5 -> 28.6 rad chain).
+        # Commanding zeros instead would be a full-authority PD slam toward the upright pose,
+        # which can turn a marginal trip into a runaway that carries into the next episode.
         self._last_sane: List[Optional[np.ndarray]] = [None] * num_envs
 
     def observation_dict(

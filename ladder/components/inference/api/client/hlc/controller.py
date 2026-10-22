@@ -22,7 +22,7 @@ class SubtaskControllerConfig(Config):
 
 class SubtaskController(Configurable[SubtaskControllerConfig]):
     """The high-level controller: one language command per env, composed from two YAML-selected,
-    independently-swappable pieces — a :class:`SubtaskSource` (where subtasks come from) and a
+    independently swappable pieces: a :class:`SubtaskSource` (where subtasks come from) and a
     :class:`SubtaskAdvancer` (when to switch). Every source pairs with every advancer, so all
     combinations are configs of this one class. Per-env state is keyed by ``env_idx`` (K>1 safe)."""
 
@@ -80,8 +80,8 @@ class SubtaskController(Configurable[SubtaskControllerConfig]):
         if not observations:
             return []
         # Resolve each plan once, keyed by (observed scene, task): a multi-scene session never
-        # serves another scene's plan, and a real rig — which publishes no env_name and gets a
-        # newly typed task each episode — never serves a previous task's plan.
+        # serves another scene's plan, and a real rig (which publishes no env_name and gets a
+        # newly typed task each episode) never serves a previous task's plan.
         scene = (observations[0].metadata or {}).get("env_name")
         plan_key = (scene, self._task(0))
         decomposition = self._plans.get(plan_key)

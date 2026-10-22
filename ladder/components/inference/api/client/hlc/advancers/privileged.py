@@ -13,17 +13,12 @@ class PrivilegedAdvancerConfig(Config):
     # unachieved, defer it at the next moment the gripper is open and rotate to the next unachieved
     # goal (revisited on wrap-around), so one ungraspable object can't freeze the episode;
     # completion also advances round-robin rather than snapping back to unachieved[0]. The count is
-    # TIME ON THE GOAL, not consecutive open-gripper steps -- gating the count on the gripper let a
-    # churning policy reset it forever and defeat the whole mechanism.
+    # TIME ON THE GOAL, not consecutive open-gripper steps, so a policy that keeps re-grasping cannot
+    # reset it forever.
     stuck_patience_steps: int = 0
     # Schedule placements onto a flat SURFACE after placements into a CONTAINER. A goal already
     # satisfied on an open surface stays exposed for every subtask that follows it, and the arm
     # crossing back over the table knocks it off; a container goal cannot be undone that way.
-    # Measured on the 20260827 suite over 198 oracle episodes of route + split_plate: 14.2 surface
-    # placements lost per episode against the direct instruction's 4.3, 68% of them while the arm
-    # was working on a DIFFERENT goal, ending with 40% of surface goals held against flat's 72%.
-    # 16 of those 17 tasks order every plate goal BEFORE every bin goal; on comp_route_2_binfirst,
-    # the one that reverses it, the same arm goes from -21 to +21 against the direct instruction.
     # Reads the destination off the oracle's own command vocabulary ("in the" = container,
     # "on the" = surface, per _TEMPLATES in robots/robolab/oracle.py). Off by default: it changes
     # WHICH goal is commanded, so it is a scheduling policy, not a correction. Ignored on tasks the
@@ -81,17 +76,12 @@ class PrivilegedAdvancer(SubtaskAdvancer[PrivilegedAdvancerConfig]):
             return current_idx
         # Skip-and-return is meaningless on a SEQUENCE: success needs the goals' FIRST satisfactions
         # in order, so rotating past an unfinished goal does not rescue the episode, it forfeits it.
-        # While the counter below was broken the rotation never fired and ordered tasks were
-        # protected by accident; fixing the counter removed that accident and dropped
-        # comp_ordered_bin_3's privileged arm from 8/12 to 0/12, every completion out of order.
         patience = 0 if ordered else self.config.stuck_patience_steps
 
         # Reordering is as meaningless on a SEQUENCE as the rotation above, and for the same reason:
         # an ordered task's success needs the goals' first satisfactions IN ORDER, so hoisting the
-        # containers ahead of the surfaces forfeits it. comp_relay_N and comp_revisit_N prescribe the
-        # surface leg FIRST ("put everything on the plate, THEN move it to the bin"), the exact order
-        # this inverts -- ungated it took relay from 39.6% to 0.0% and revisit from 19.4% to 2.8%
-        # over 43 units.
+        # containers ahead of the surfaces forfeits it. Some ordered tasks prescribe the surface leg
+        # FIRST ("put everything on the plate, THEN move it to the bin"), the exact order this inverts.
         containers: List[int] = []
         surfaces: List[int] = []
         if self.config.surface_last and not ordered and decomposition is not None:
@@ -109,18 +99,14 @@ class PrivilegedAdvancer(SubtaskAdvancer[PrivilegedAdvancerConfig]):
             return later[0] if later else unachieved[0]
 
         # Reordering only takes effect where an index is CHOSEN, and the arm opens on whatever
-        # index the controller starts with -- goal 0, which is a surface goal on every route and
-        # split_plate task. So redirect off a surface goal while containers remain, with the gripper
-        # OPEN: retargeting mid-carry would deliver the held object to the new goal's receptacle.
+        # index the controller starts with (goal 0, often a surface goal). So redirect off a surface
+        # goal while containers remain, with the gripper OPEN: retargeting mid-carry would deliver
+        # the held object to the new goal's receptacle.
         #
         # The test is that the current goal IS an unachieved surface goal, not merely that it is
         # absent from `containers`. A goal that has just been achieved is in neither list, so the
-        # looser test fired on every single-destination task the moment a goal completed -- there
-        # are no surface goals there and nothing to reorder -- and jumped to the next goal with the
-        # settle streak reset, bypassing advance_settle_steps entirely. That is precisely the hold
-        # the knob was raised from 10 to 120 to buy. Measured over the 25 suite units where this
-        # flag cannot legitimately do anything, 300 episodes an arm: -7.3 episode success against
-        # the same oracle with the flag off, against +12.7 on the 17 units where it can act.
+        # looser test would fire on every single-destination task the moment a goal completed and
+        # jump to the next goal with the settle streak reset, bypassing advance_settle_steps.
         if containers and current_idx in surfaces and not_clamping:
             self._achieved_streak[env_idx] = 0
             self._stuck_steps[env_idx] = 0
@@ -132,12 +118,9 @@ class PrivilegedAdvancer(SubtaskAdvancer[PrivilegedAdvancerConfig]):
             return _next_after(current_idx) if patience > 0 else unachieved[0]
 
         # Count time ON THE SUBTASK, not consecutive gripper-open steps. Gating the COUNTER on
-        # not_clamping meant every grasp reset it, so a policy that churns -- pi0.5 runs 4-6 grasp
-        # cycles per goal on the hard units -- never accumulated `patience` in a row and the arm
-        # froze on subtask 1 for the entire episode. Measured 2026-08-19: 7 of 33 oracle cells, with
-        # plan_exact 12/12 and plan_attempted 1/N, i.e. a correct plan whose later steps were never
-        # commanded. The gate belongs on the DEFERRAL, which is what it was for: do not retarget
-        # mid-grasp.
+        # not_clamping would reset it on every grasp, so a policy that runs several grasp cycles per
+        # goal would never accumulate `patience` and freeze on one subtask. The gate belongs on the
+        # DEFERRAL instead: do not retarget mid-grasp.
         if patience > 0 and not current_done:
             self._stuck_steps[env_idx] = self._stuck_steps.get(env_idx, 0) + 1
             if self._stuck_steps[env_idx] >= patience and not_clamping:

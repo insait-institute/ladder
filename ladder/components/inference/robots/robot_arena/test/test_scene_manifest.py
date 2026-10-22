@@ -1,7 +1,7 @@
 """CPU-only validation of success checker parse + match for ALL available scenes.
 
 Verifies that every scene's instruction can be parsed into a TaskSpec and that
-object references resolve correctly against the actual scene object list — without
+object references resolve correctly against the actual scene object list, without
 requiring Genesis or a GPU.
 
 Also validates structural invariants on TASK_SPEC_OVERRIDES.
@@ -60,7 +60,7 @@ class TestSceneManifest(unittest.TestCase):
                     objects=scene_data.objects,
                 )
             except Exception as exc:  # noqa: BLE001
-                # Record the error but don't fail setup — individual tests will skip.
+                # Record the error but don't fail setup; individual tests will skip.
                 cls.scenes[scene_name] = SceneInfo(
                     instruction="",
                     objects=[],

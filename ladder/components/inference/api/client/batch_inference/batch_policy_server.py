@@ -52,7 +52,7 @@ class BatchPolicyServerConfig(Config):
     max_batch_size: int = 128
     batch_timeout_ms: int = 30
     # The model samples its flow start state from the global RNG, so an unseeded process draws
-    # different noise on every launch and a campaign cannot be repeated. Same field and semantics as
+    # different noise on every launch and a run cannot be repeated. Same field and semantics as
     # run_model's: the launcher supplies the value, and leaving it unset keeps a run unseeded.
     seed: Optional[int] = None
     # If >0, exit cleanly after this many ms with no inference request (once at least
@@ -82,7 +82,7 @@ class BatchPolicyServer(Configurable[BatchPolicyServerConfig]):
         LOGGER.info(f"Loading policy {config.policy_config.autoclass} ...")
         self._policy: ModelInference = AutoConfigurable(config.policy_config)
 
-        # Warm eagerly so a VLM that cannot fit fails at startup, not mid-campaign.
+        # Warm eagerly so a VLM that cannot fit fails at startup, not mid-run.
         self._vlm: Optional[VLM] = None
         if config.vlm_config is not None:
             LOGGER.info("Loading auxiliary VLM ...")

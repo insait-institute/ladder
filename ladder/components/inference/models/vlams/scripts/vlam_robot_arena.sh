@@ -4,13 +4,12 @@
 #
 # Architecture: for each checkpoint we spawn one shared BatchPolicyServer
 # (one model copy in GPU memory) and then run a number of "lanes" in parallel
-# that all connect to it via ZMQ. A lane is one (checkpoint, scene) cell — a
+# that all connect to it via ZMQ. A lane is one (checkpoint, scene) cell: a
 # robot_arena_server (Genesis sim) plus a run_model client. The inference server
 # batches requests across all lanes so each step is one forward() at
 # batch = LANES_PER_GPU * envs_per_scene (137 in the unified config).
 #
-# LANES_PER_GPU defaults to 2 (fits an A6000, 48 GB). Set LANES_PER_GPU=6 on an
-# H200 (143 GB), which has been verified to fit the full pipeline.
+# LANES_PER_GPU defaults to 2 (fits a 48 GB GPU). A ~140 GB GPU fits LANES_PER_GPU=6.
 
 # Example usage:
 #

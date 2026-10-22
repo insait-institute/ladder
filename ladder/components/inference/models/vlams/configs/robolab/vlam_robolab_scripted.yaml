@@ -17,10 +17,10 @@ policy_config: !overwrite
   approach_height_m: 0.12
   # Transit height is what makes a multi-goal task finish: carried too low, the gripper clips the
   # objects it has already delivered and knocks them off, which pins a task at N-1 goals whatever
-  # budget it is given. Measured on RobotArena, where raising these solved two scenes outright.
+  # budget it is given.
   lift_height_m: 0.18
-  # Bins publish their rim height (release_z_m) and transit is measured from it: 22 cm on top put the
-  # flange near 0.9 m, where the arm oscillated and scattered the bin.
+  # Bins publish their rim height (release_z_m) and transit is measured from it. A large offset puts
+  # the flange so high that the arm oscillates and scatters the bin.
   carry_height_m: 0.08
   place_clearance_m: 0.035
   xy_tol_m: 0.012

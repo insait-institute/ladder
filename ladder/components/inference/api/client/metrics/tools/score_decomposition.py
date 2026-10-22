@@ -25,10 +25,9 @@ def build_decomposer(model: str, backend: str, max_tokens: int, object_attribute
     leaving ``cache_path`` unset is what makes it decompose from the frame rather than serve a stored
     plan -- so this measures the path an orchestrator actually takes at reset.
 
-    The system prompt is deliberately NOT overridable. Tuning it against this benchmark's own
-    failures gained 4.5 exact plans of 92 on average and exactly 0.0 once the same instructions were
-    restated without the dataset's object nouns, so a prompt knob here only invites reporting a
-    leaked answer key as an improvement.
+    The system prompt is deliberately NOT overridable. Gains from tuning it against this
+    benchmark's own failures vanished once the dataset's object nouns were removed from the prompt,
+    so a prompt knob here only invites reporting a leaked answer key as an improvement.
     """
     return AutoConfigurable(
         DecomposerConfig(
@@ -53,8 +52,8 @@ def load_hub_scenes(repo_id: str) -> List[Dict[str, Any]]:
         for name in huggingface_hub.list_repo_files(repo_id, repo_type="dataset")
         if name.endswith(".parquet")
     )
-    # The repo also carries the subtask-state samples as a second config (under subtask_states/); the scenes
-    # live under decomposition/ (data/ in repos published before the config was named). Without the
+    # The repo also carries the subtask-state samples as a second config (under subtask_states/); the
+    # scenes live under decomposition/ (data/ in repos published before the config was named). Without the
     # filter every sample row would be read as a scene; the fallbacks keep older repos loadable.
     for prefix in ("decomposition/", "data/"):
         scenes_only = [name for name in parquets if name.startswith(prefix)]
@@ -87,9 +86,8 @@ def load_hub_scenes(repo_id: str) -> List[Dict[str, Any]]:
 def publish(scenes: List[Dict[str, Any]], repo_id: str, private: bool) -> None:
     """Push the exported benchmark to the Hub, so it can be scored with `--dataset` and no simulator.
 
-    The schema must stay in step with what the exporters write -- `family` and `distractors` were
-    once absent here while the published dataset carried them, so a republish silently dropped two
-    columns.
+    The schema must stay in step with what the exporters write, or a republish silently drops the
+    missing columns.
     """
     import datasets  # only the authors' push needs it; it is not in the scoring env
 
@@ -158,7 +156,7 @@ def _as_published(image: np.ndarray, benchmark: str) -> np.ndarray:
 def _no_plan(row: Dict[str, Any]) -> bool:
     """The instruction handed straight back having scored nothing, which is what an empty reply
     becomes: ``complete`` returns "" on a transient failure and the Decomposer falls back to the task.
-    Six scenes are single-goal with the subtask equal to the instruction, so the score matters."""
+    Some scenes are single-goal with the subtask equal to the instruction, so the score matters."""
     return bool(row["error"]) or (row["predicted"] == [row["instruction"]] and row["exact"][0] == 0.0)
 
 
@@ -182,7 +180,7 @@ def main() -> None:
     parser.add_argument("--model", default="Qwen/Qwen3-VL-8B-Instruct")
     parser.add_argument("--backend", choices=BACKENDS, default="local")
     # 8192, because hidden thinking tokens count against this and a truncated reply scores as a plan
-    # that missed every goal: over 803 gateway calls, 1024 truncated 22.5% and 8192 none (p99 7940).
+    # that missed every goal. 1024 truncates a large share of reasoning-model replies; 8192 does not.
     parser.add_argument("--max-tokens", type=int, default=8192)
     parser.add_argument(
         "--object-attributes",
@@ -222,7 +220,7 @@ def main() -> None:
             }
         )
         # A backend answering nothing must not read as a planner that plans badly. The VLM's own
-        # failure budget cannot catch it: its rate check needs 200 calls and this is 143 scenes.
+        # failure budget cannot catch it: its rate check needs more calls than a run makes.
         streak = streak + 1 if _no_plan(results[-1]) else 0
         if streak >= 10:
             raise SystemExit(f"{scene['id']}: 10 scenes in a row with no usable plan")

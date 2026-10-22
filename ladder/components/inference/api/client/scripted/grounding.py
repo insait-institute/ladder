@@ -29,7 +29,7 @@ def ground_subtask(subtask: str, state: PrivilegedState) -> Optional[PrivilegedC
     "put/place/move/stack X on/in Y" -> pick_and_place(X -> resting-on Y); a verb with no
     destination ("pick up X", "grasp X") -> pickup(X). Object phrases are matched to scene objects
     by display name (see :meth:`PrivilegedState.find_object`). ``goal_point`` is the resting height
-    of X's center on Y -- the same geometry the structured path uses.
+    of X's center on Y, the same geometry the structured path uses.
     """
     text = subtask.strip().rstrip(".").lower()
     if not text:

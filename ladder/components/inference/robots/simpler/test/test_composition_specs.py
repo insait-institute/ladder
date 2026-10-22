@@ -25,8 +25,8 @@ def _by_name() -> Dict[str, Spec]:
 
 class TestEverySpecPacks(unittest.TestCase):
     """The packer is the only gate a new rung passes before it costs GPU hours. A spec whose
-    receptacles leave no room for its movers raises 'cannot pack' here rather than after a
-    campaign."""
+    receptacles leave no room for its movers raises 'cannot pack' here rather than during an
+    eval run."""
 
     def test_every_spec_packs_over_the_full_layout_grid(self):
         for spec in SPECS:

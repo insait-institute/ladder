@@ -78,11 +78,9 @@ class TestSurfaceLast(unittest.TestCase):
 
     def test_a_single_destination_task_is_left_alone(self):
         """With no surface goal there is nothing to schedule late, so the flag must not change what
-        is commanded OR when. comp_bin_N, comp_identical_N and comp_transfer_N are all of this shape
-        -- 25 of the suite's 42 units -- and the redirect below used to fire on them the instant a
-        goal flipped achieved, jumping to the next goal with the settle streak reset and so
-        bypassing advance_settle_steps entirely. Measured cost over those 25 units, 300 episodes an
-        arm: -7.3 episode success against the same oracle with the flag off."""
+        is commanded OR when. comp_bin_N, comp_identical_N and comp_transfer_N are all of this shape.
+        Firing the redirect the instant a goal flips achieved would jump to the next goal with the
+        settle streak reset, bypassing advance_settle_steps entirely."""
         for achieved, current in (
             ([False, False, False], 0),
             ([True, False, False], 0),
@@ -102,14 +100,14 @@ class TestSurfaceLast(unittest.TestCase):
     def test_an_achieved_surface_goal_does_not_short_circuit_the_settle(self):
         """The redirect exists to steer the arm OFF an unachieved surface goal while containers
         remain. Once that goal is achieved the settle clock owns the decision, so redirecting on it
-        would hand back the 8 s hold that advance_settle_steps was raised to 120 to buy."""
+        would skip the 8 s hold that advance_settle_steps=120 provides."""
         advancer = self._advancer(surface_last=True, advance_settle_steps=120)
         observation = _observation([True, False, False, False])
         self.assertEqual(advancer.next_index(observation, 0, 0, self.PLAN), 0)
 
     def test_rotation_walks_the_prioritised_order_not_the_index_order(self):
         # Leaving the first container goal under patience must land on the SECOND container goal.
-        # The old index-based rotation would have returned 3 here too, so the discriminating case is
+        # An index-based rotation would return 3 here too, so the discriminating case is
         # the wrap: from the last container it must go to a surface, not back to index 0 blindly.
         advancer = self._advancer(surface_last=True, stuck_patience_steps=1, advance_settle_steps=99)
         observation = _observation([False] * 4)

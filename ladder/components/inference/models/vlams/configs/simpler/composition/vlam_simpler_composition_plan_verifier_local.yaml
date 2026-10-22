@@ -1,7 +1,7 @@
 import: vlam_simpler_composition.yaml
 
 # SimplerEnv composition -- verifier-advanced over the tracked plans, with the VLM running in-process
-# rather than against the API gateway. Same system as _plan_verifier, so the two are directly
+# rather than against a remote API. Same system as _plan_verifier, so the two are directly
 # comparable and the difference between them is the verifier's judgement alone.
 runner_config:
   hlc_config:

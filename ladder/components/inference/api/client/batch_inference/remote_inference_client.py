@@ -44,7 +44,7 @@ class _RemoteProcessor:
     """Stand-in for the real VLAM processor that exposes only the surface the eval
     wrappers (``VLAMRobotInference``, ``BatchPolicyServer``) read from a
     processor: ``image_sizes``, ``config.control_io_config``, and ``resize_image``.
-    Resize is a pass-through — the server runs the real resize before inference."""
+    Resize is a pass-through; the server runs the real resize before inference."""
 
     def __init__(self, image_sizes: Dict[str, _ImageSize], config: _RemoteProcessorConfig) -> None:
         self.image_sizes = image_sizes

@@ -48,7 +48,7 @@ TASK_SPEC_OVERRIDES: Dict[str, TaskSpec] = {
     # ---- default scenes ----
     "default1": TaskSpec(TaskType.PICK_AND_PLACE, "spoon", "cloth", spatial_relation="on"),
     # ---- standard scenes: object-name mismatches or unparseable instructions ----
-    # Objects verified against bundled data (ipython3.runfiles/.../bridge/<scene>/masks/result.json).
+    # Objects verified against the bundled data (bridge/<scene>/masks/result.json).
     "scene1": TaskSpec(TaskType.PICK_AND_PLACE, "metal bowl", "blue cloth", spatial_relation="on"),
     "scene2": TaskSpec(TaskType.MOVE_TO_REGION, "blue cloth", table_region="upper_right"),
     "scene3": TaskSpec(TaskType.PICK_AND_PLACE, "sauce_pan", "cloth", spatial_relation="on"),
@@ -62,16 +62,15 @@ TASK_SPEC_OVERRIDES: Dict[str, TaskSpec] = {
     "scene11": TaskSpec(TaskType.PICK_AND_PLACE, "white toy spoon", "orange toy pan", spatial_relation="on"),
     "scene12": TaskSpec(TaskType.MOVE_RELATIVE, "toy corn cob", "metal pot lid", spatial_relation="right"),
     "scene14": TaskSpec(TaskType.MOVE_RELATIVE, "white cloth", "tin can", spatial_relation="left"),
-    # lang.txt: "put the blue block on top of the red block". Old override said
-    # "green cube" (authored against garbled result.json names); physical_properties
-    # has the correct blue block_target / red block_destination.
+    # lang.txt: "put the blue block on top of the red block". result.json names are
+    # garbled here; physical_properties has the correct blue block_target / red block_destination.
     "scene15": TaskSpec(TaskType.STACK, "blue block", "red block"),
     "scene16": TaskSpec(TaskType.STACK, "wooden cube block", "wooden rectangular block"),
     "scene18": TaskSpec(TaskType.MOVE_RELATIVE, "toy potato", "toy carrot", spatial_relation="left"),
     # Source-data swap: the mesh NAMED "blue spiky ball_target" is physically the
     # cloth, and the mesh named "orange folded cloth" is physically the blue object
     # (the actual target). So point target_ref at "orange folded cloth" to grab the
-    # real blue object. (user-verified 2026-05-28)
+    # real blue object.
     "scene20": TaskSpec(TaskType.PICK_AND_PLACE, "orange folded cloth", "metal pot", spatial_relation="in"),
     "scene21": TaskSpec(TaskType.MOVE_TO_REGION, "salt shaker", table_region="lower"),
     "scene23": TaskSpec(
@@ -123,9 +122,8 @@ TASK_SPEC_OVERRIDES: Dict[str, TaskSpec] = {
         TaskType.MOVE_TO_REGION, "toy food can with red and yellow label", table_region="lower"
     ),
     "scene84": TaskSpec(TaskType.MOVE_RELATIVE, "blue cloth", "metal bowl", spatial_relation="left"),
-    # "place the fork NEAR the yellow cloth": proximity only, no direction. Was
-    # mis-authored as MOVE_RELATIVE/left (added a spurious left-of check). REACH
-    # with a destination evaluates is_near(target, dest) — pure proximity.
+    # "place the fork NEAR the yellow cloth": proximity only, no direction. REACH
+    # with a destination evaluates is_near(target, dest), which is pure proximity.
     "scene85": TaskSpec(TaskType.REACH, "fork", "folded cloth"),
     "scene90": TaskSpec(TaskType.PICK_AND_PLACE, "toy pot lid", "toy pot", spatial_relation="on"),
     "scene93": TaskSpec(TaskType.MOVE_TO_REGION, "rectangular block", table_region="center"),
@@ -242,7 +240,7 @@ def parse_instruction(instruction: str, scene_name: str) -> Optional[TaskSpec]: 
                 if region is not None:
                     fields["table_region"] = region
                 else:
-                    # Couldn't classify as a region — treat the text as a destination object.
+                    # Couldn't classify as a region; treat the text as a destination object.
                     fields["destination_ref"] = value
                     # Reclassify as MOVE_RELATIVE if there's no region.
                     if task_type == TaskType.MOVE_TO_REGION:

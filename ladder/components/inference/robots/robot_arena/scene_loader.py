@@ -27,9 +27,8 @@ FIXED_OBJECT_KEYWORDS = ("table", "tray", "plate", "bowl", "colander")
 TABLE_PLANE_HEIGHT = 0.88  # Default-scene ground plane z offset (meters)
 OVERLAP_RESOLVE_ITERATIONS = 5  # Passes to lift overlapping objects after scene build
 SETTLE_STEPS = 400  # Physics steps to run after reset for settling (400 @ 200Hz = 2.0s).
-# Raised from 100 (0.5s) on 2026-05-27: a drop-test found 42/74 scenes had objects still
-# settling/sliding after 100 steps, so init positions (and the success-checker baseline)
-# were captured mid-settle, causing 'floating' look + noisy initial positions.
+# Shorter settles leave objects in many scenes still sliding, so the initial positions (and the
+# success-checker baseline) would be captured mid-settle.
 GROUND_CLIP_HEIGHT = 0.01  # Minimum z position for objects (clip below-ground objects)
 GRIPPER_OPEN_FORCE = 10.0  # Force magnitude for opening gripper (N)
 GRIPPER_CLOSE_FORCE = -10.0  # Force magnitude for closing gripper (N)
@@ -58,7 +57,7 @@ class RobotConfig:
 
 ROBOT_CONFIGS: Dict[RobotName, RobotConfig] = {
     RobotName.WIDOWX: RobotConfig(
-        # Textured WidowX (OBJ+MTL) — shows matte surface detail under Madrona's
+        # Textured WidowX (OBJ+MTL): shows matte surface detail under Madrona's
         # diffuse path, vs the flat-black STL in trossen_wx250s/.
         urdf_path="utils/assets/descriptions/widowx_description/wx250s.urdf",
         ee_link="ee_gripper_link",

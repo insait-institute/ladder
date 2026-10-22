@@ -97,8 +97,8 @@ class VerifiedAdvancer(SubtaskAdvancer[VerifiedAdvancerConfig]):
         if idx >= len(subtasks):
             return
         # A repeated line asks for a second copy only when the plan says the copies are distinct
-        # objects. On a revisit chain it is the same object visiting again -- relay leg 7 sends the
-        # one carrot back to the plate -- and counting it asks for two carrots that do not exist.
+        # objects. On a revisit chain it is the same object visiting again (a later leg sends the
+        # one carrot back to the plate), and counting it asks for two carrots that do not exist.
         required = 1 if revisits else subtasks[: idx + 1].count(subtasks[idx])
         done_now, reply = self._verifier.check(
             observation, subtasks[idx], prev_image=state.last_image, required=required

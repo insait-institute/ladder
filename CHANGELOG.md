@@ -5,7 +5,7 @@ Every release of this repository is listed here, newest first. Releases follow
 layouts, success predicates, step budgets) bumps the major version, so that scores reported against
 different major versions are never compared.
 
-## [1.0.0] - 2026-10-01
+## [1.0.0] - 2026-10-22
 
 First public release.
 

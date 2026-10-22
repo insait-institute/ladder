@@ -1,6 +1,20 @@
-# LADDER: A Long-Horizon Robot Manipulation Benchmark
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/static/images/logo/ladder-lockup-white.svg">
+    <img src="docs/static/images/logo/ladder-lockup.svg" alt="LADDER" height="72">
+  </picture>
+</p>
 
-[🌐 Website](https://ladderrobotics.ai) · [📄 Paper](https://arxiv.org/abs/2610.18053) · [🤗 Models and datasets](https://huggingface.co/collections/INSAIT-Institute/ladder-6abbbddc46691080f5d954c8)
+<h3 align="center">A Long-Horizon Robot Manipulation Benchmark</h3>
+
+<p align="center">
+  <a href="https://ladderrobotics.ai">🌐 Website</a> ·
+  <a href="https://arxiv.org/abs/2610.18053">📄 Paper</a> ·
+  <a href="https://huggingface.co/collections/INSAIT-Institute/ladder-6abbbddc46691080f5d954c8">🤗 Models and datasets</a>
+</p>
+
+> [!NOTE]
+> LADDER is still under heavy development. Commands and outputs may change between releases.
 
 **LADDER** is a benchmark for long-horizon robot manipulation: 145 tasks of 1 to 10 subgoals in
 three simulated suites, each subgoal checked automatically.
@@ -11,16 +25,12 @@ three simulated suites, each subgoal checked automatically.
 
 ## Installation
 
-Install [Bazelisk](https://github.com/bazelbuild/bazelisk#installation) as `bazel` (below into
-`~/.local/bin`, which has to be on your `PATH`), then clone the repository:
-
 ```bash
-curl -L --create-dirs -o ~/.local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 && chmod +x ~/.local/bin/bazel
 git clone https://github.com/insait-institute/ladder.git && cd ladder
 ```
 
-Everything else (Python environments, simulators, assets, the Bridge policy) is installed by Bazel
-on the first run.
+Everything else (Bazel, Python environments, simulators, assets, the Bridge policy) is installed on
+the first run.
 
 ## Running an evaluation
 
@@ -86,17 +96,15 @@ The dashboard replays episodes next to their subgoals and events, and compares m
 </div>
 
 ```bash
-bazel run //ladder/components/dashboard:serve -- --results $PWD/out
-# open http://localhost:8080
+scripts/dashboard.sh    # open http://localhost:8080
 ```
 
 The evaluation episodes of every method ([`INSAIT-Institute/LADDER-Evaluation-Episodes`](https://huggingface.co/datasets/INSAIT-Institute/LADDER-Evaluation-Episodes))
 open in it too, here those of one method on one suite:
 
 ```bash
-bazel run //ladder/components/dashboard:fetch -- episodes --repo INSAIT-Institute/LADDER-Evaluation-Episodes --out ~/ladder_episodes \
-    --suite robolab_long --method psp_agent
-bazel run //ladder/components/dashboard:serve -- --results $PWD/out ~/ladder_episodes/dashboard
+scripts/dashboard.sh fetch --suite robolab_long --method psp_agent
+scripts/dashboard.sh out ~/ladder_episodes/dashboard
 ```
 
 ## Offline VLM benchmark
@@ -106,8 +114,7 @@ verification, state tracking, subgoal switching), on 145 scenes and 562 frames, 
 simulator ([`INSAIT-Institute/LADDER-Offline-VLM-Benchmark`](https://huggingface.co/datasets/INSAIT-Institute/LADDER-Offline-VLM-Benchmark)):
 
 ```bash
-bazel run //ladder/components/inference/models/vlams:score_decomposition -- \
-    --dataset INSAIT-Institute/LADDER-Offline-VLM-Benchmark --out decomposition.json --model <model>
+scripts/vlm_benchmark.sh decomposition --model <model>
 ```
 
 See [EVALUATION.md](EVALUATION.md#offline-vlm-benchmark) for the other tasks.

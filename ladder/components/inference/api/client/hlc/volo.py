@@ -40,7 +40,7 @@ class _EnvState:
 class VoloOrchestratorConfig(Config):
     vlm: AutoConfig
 
-    # Upstream SubgoalConfig. 512 truncates a reply mid-JSON on our gateway models.
+    # Upstream SubgoalConfig. 512 truncates a reasoning model's reply mid-JSON.
     check_mode: str = "vlm"  # "vlm" | "timer" | "hybrid"
     subgoal_timeout: int = 9999
     vlm_temperature: float = 0.0

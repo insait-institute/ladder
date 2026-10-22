@@ -1,7 +1,7 @@
 import: vlam_simpler_composition.yaml
 
-# SimplerEnv composition -- a not-done verdict re-commands the SAME subtask instead of deferring it to the round-robin.
-# The losing arm of the scheduling comparison, kept runnable because it is the natural thing to try.
+# SimplerEnv composition -- a not-done verdict re-commands the SAME subtask instead of deferring it
+# to the round-robin.
 runner_config:
   hlc_config:
     import: ../../../../../api/client/hlc/configs/plan_verifier_retry.yaml

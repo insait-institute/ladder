@@ -64,12 +64,12 @@ These are `robot_arena_server` flags. The launcher's default server config is
 
 ## Long-horizon composition benchmark
 
-`composition/registry.py` defines 47 tasks (1–10 goals) over these scenes. They run through
+`composition/registry.py` defines 47 tasks (1 to 10 goals) over these scenes. They run through
 the SAME launcher as the single-goal scenes: the server resolves a composition task name passed in
 `--test_config.scene_names`, so `SCENES` takes task names instead of scene names.
 
 ```bash
-SESSION_NAME=sess_… CKPT_NAMES=model-checkpoint-ema-030000.pt \
+SESSION_NAME=sess_... CKPT_NAMES=model-checkpoint-ema-030000.pt \
 RA_SERVER_CONFIG=ladder/components/inference/robots/robot_arena/configs/widowx_composition_k8.yaml \
 RA_CLIENT_CONFIG=ladder/components/inference/models/vlams/configs/robot_arena/composition/vlam_robot_arena_composition.yaml \
 SCENES="scene45_2goal scene45_4goal scene54_3goal" \
@@ -78,7 +78,7 @@ RUN_LABEL=robot_arena_composition LANES_PER_GPU=2 \
 ```
 
 `RA_CLIENT_CONFIG` selects the system: `vlam_robot_arena_composition.yaml` is flat, and one
-`_<system>` variant exists per hierarchical system in `api/client/hlc/configs/`, named after it —
+`_<system>` variant exists per hierarchical system in `api/client/hlc/configs/`, named after it:
 `_oracle`, `_plan_gripper`, `_plan_periodic`, `_plan_verifier`, `_plan_verifier_interval`,
 `_plan_verifier_local`, `_stepwise_gripper`, `_stepwise_interval`. `_plan_verifier_live` is not a ninth
 system: it is `_plan_verifier` with `cache_path` omitted (see **Plans** below). The two `_unified*`
@@ -89,9 +89,8 @@ all three.
 The three plan-driven arms are meant to be read together: `_plan_periodic` switches on a clock with no
 feedback, `_plan_gripper` on an event the robot produces, `_plan_verifier` on a judgement about the
 scene, so a gap to `_plan_periodic` is what makes either feedback signal worth its cost. Its clock is
-the shared config's 27 steps — SimplerEnv's median subtask, not yet re-derived from RA's own oracle
-trace. `_plan_verifier_local` is `_plan_verifier` with the VLM in-process (Qwen3-VL) instead of a
-hosted API.
+the shared config's 27 steps, which is SimplerEnv's median subtask length. `_plan_verifier_local` is `_plan_verifier` with the VLM
+in-process (Qwen3-VL) instead of a hosted API.
 
 `SCENES` is the only env control. Omit it to sweep the single-goal scenes; pass task names to run
 composition. The 47 tasks (`COMPOSITION_TASKS` in `composition/registry.py`):
@@ -135,17 +134,17 @@ the ones it does not use in `remove_objects`; each scene's background plate is a
 removed object leaves bare wood.
 
 A lane picks up the next task as soon as any lane frees up, so ordering affects only the tail; step
-budgets are 100 per goal (100–1000 here).
+budgets are 100 per goal (100 to 1000 here).
 
 **Plans** are a config concern, not the launcher's: only the `_plan_*` systems (and
 `_unified_plan_verifier`) read `composition/decomp_cache.json`, via
 `hlc_config.source.cache_path`. Flat and `_oracle` need no plans at all (the oracle's come from the
-env) and the `_stepwise_*` systems hold none by design — each switch generates the next subtask from
+env) and the `_stepwise_*` systems hold none by design: each switch generates the next subtask from
 the current frame. `_plan_verifier_live` just omits `cache_path`, so the VLM decomposes the reset
-frame instead — that is the pass that mints a plan for a newly added task.
+frame instead. That is the pass that mints a plan for a newly added task.
 
 **Language probes.** Two independent knobs on the runner, for testing how much instruction following
-matters — the same pair the SimplerEnv composition benchmark uses.
+matters. They are the same pair the SimplerEnv composition benchmark uses.
 `runner_config.instruction_override` rewords the TASK instruction, keyed by the env_name the server
 reports (`robot_arena_<task>`, not the bare task name); a key matching no task is silently ignored.
 It lives in `models/vlams/configs/robot_arena/composition/language/`:
@@ -172,7 +171,7 @@ concatenation of the three `scenes.json` files is the benchmark -- see
 The `success_checker/` module provides deterministic, per-step success evaluation
 using object geometry (positions and AABBs). It sets `metadata["done"]` on every
 observation, following the same convention as SimplerEnv. This runs server-side
-inside `RobotArenaEnv` and is independent of the client-side VLA model — language
+inside `RobotArenaEnv` and is independent of the client-side VLA model. Language
 perturbation configs (paraphrase, negation, etc.) do not affect it since the
 checker always evaluates against the original scene instruction.
 

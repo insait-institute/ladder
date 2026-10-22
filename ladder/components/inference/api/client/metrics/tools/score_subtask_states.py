@@ -31,7 +31,7 @@ TASKS = ("verification", "state_tracking", "next_subtask")
 
 
 def load_samples(samples_dir: str) -> List[Dict[str, Any]]:
-    """Every suite's subtask_states.json under ``samples_dir``, frames resolved to absolute paths — the same
+    """Every suite's subtask_states.json under ``samples_dir``, frames resolved to absolute paths: the same
     relocatable-manifest contract the decomposition benchmark's frames directory uses."""
     samples = []
     for manifest in sorted(glob.glob(os.path.join(samples_dir, "*", "subtask_states.json"))):
@@ -88,7 +88,7 @@ def load_hub_samples(repo_id: str) -> List[Dict[str, Any]]:
 
 
 def load_hub_reference(repo_id: str) -> Dict[str, Dict[str, Any]]:
-    """The decomposition config of the same repo, keyed by scene — the published copy of the
+    """The decomposition config of the same repo, keyed by scene: the published copy of the
     reference the samples were cut against."""
     reference: Dict[str, Dict[str, Any]] = {}
     for local in _hub_parquets(repo_id, "decomposition"):
@@ -123,8 +123,7 @@ def check_reference(
         sample["revisits"] = ref["revisits"]
         # Scene CONTENTS, not wording. A task that drops an object leaves every wording field below
         # byte-identical, so a sample cut before the change still passes them while its frame shows a
-        # scene the task no longer builds. Measured on the 2026-09-12 distractor cleanup: 43 of 47
-        # RobotArena scenes changed frames and not one changed a word.
+        # scene the task no longer builds.
         if "objects" in sample and sorted(sample["objects"]) != sorted(ref["objects"]):
             drifted.append(sample["id"])
             continue
@@ -173,7 +172,7 @@ def observation(sample: Dict[str, Any], cameras: List[str]) -> RobotObservation:
 
 def distinct_queries(sample: Dict[str, Any]) -> List[Tuple[str, bool, int]]:
     """(subtask text, done, copies) per DISTINCT subtask of the sample's plan. A text that appears several
-    times counts done only when every copy is achieved — a yes/no on the text cannot single out one
+    times counts done only when every copy is achieved: a yes/no on the text cannot single out one
     instance, and under 'put everything ...' the subtask is finished exactly when no more of that
     object needs moving. The copy count comes back with it because that is the threshold matching
     the label: asking for 1 answers done as soon as one of two carrots is placed."""
@@ -186,8 +185,8 @@ def distinct_queries(sample: Dict[str, Any]) -> List[Tuple[str, bool, int]]:
 
 def classify_next(command: str, subtasks: List[str], achieved: List[bool], ordered: bool) -> str:
     """'valid' when the generated subtask names a goal still to do (the NEXT one, on an ordered
-    task), 'redundant' when it re-commands a goal already achieved — the bookkeeping error an
-    orchestrator pays budget for — and 'invalid' for anything else."""
+    task), 'redundant' when it re-commands a goal already achieved (the bookkeeping error an
+    orchestrator pays budget for) and 'invalid' for anything else."""
     pair = goal_of(command)
     if pair is None:
         return "invalid"
