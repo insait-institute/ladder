@@ -9,8 +9,8 @@ different major versions are never compared.
 
 First public release.
 
-- The three benchmark suites: SimplerEnv-Long (54 tasks), RobotArena-&infin;-Long (47 tasks) and
-  RoboLab-Long (44 tasks), with their programmatic per-subgoal success predicates.
+- The three benchmark suites: RoboLab-Long (44 tasks), SimplerEnv-Long (54 tasks) and
+  RobotArena-&infin;-Long (47 tasks), with their programmatic per-subgoal success predicates.
 - Ten baseline methods: the orchestrator and its configurations, PSP-Agent, and the
   adapters for VoLo, CaP-X, TiPToP and GPT-Policy.
 - The low-level policies: the Bridge policy ([`INSAIT-Institute/LADDER-Bridge-Policy`](https://huggingface.co/INSAIT-Institute/LADDER-Bridge-Policy))

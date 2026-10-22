@@ -2,6 +2,7 @@ import collections
 import dataclasses
 import enum
 import inspect
+from abc import ABCMeta
 from typing import Any, Callable, ClassVar, Dict, List, Type, TypeVar, Union
 
 import numpy as np
@@ -17,7 +18,6 @@ from ladder.core.databib.dataclasses.dataclass_dict import DataclassDict
 from ladder.core.databib.dataclasses.dataclass_interface import DataclassInterface
 from ladder.core.databib.dataclasses.dataclass_list import DataclassList
 from ladder.core.databib.dataclasses.dataclass_utils import maybe_chained_keys_to_nested_dict
-from ladder.core.databib.template.template_dataclass import TemplateDataclass, TemplateDataclassMeta
 from ladder.core.databib.utils.classproperty import cached_classproperty
 from ladder.core.databib.utils.typing_utils import (
     ITERABLE_TYPES,
@@ -47,9 +47,6 @@ def _prevent_forbidden_type_annotations(cls):
     for field in getattr(cls, "__dataclass_fields__", {}).values():
         field_type = get_maybe_optional_type(field.type)
 
-        if isinstance(field_type, TypeVar):
-            # TemplateDataclassMeta deals with making sure the class is templated on the TypeVar. No extra checks here
-            continue
         # Forbid Union or Tuple with any member of type
         # [DataclassInterface, Dict, List, Set, Tuple, TypeVar, Union, Optional]
         if annotation_is_union(field_type) or annotation_is_tuple(field_type):
@@ -64,7 +61,7 @@ def _prevent_forbidden_type_annotations(cls):
                     raise TypeError(
                         f"Class {cls} has field {field.name}: {field.type}, but {etype} with members of type "
                         f"DataclassInterface, Dict, List, Set, Tuple, Sequence, Union, Optional, TypeVar "
-                        f"are unsafe and not allowed. Try using Template or remove the Union instead."
+                        f"are unsafe and not allowed. Remove the Union instead."
                     )
             continue
         if annotation_is_dict(field_type) or annotation_is_list(field_type):
@@ -79,11 +76,11 @@ def _prevent_forbidden_type_annotations(cls):
         ):
             raise TypeError(
                 f"Forbidden type annotation in {cls} for field '{field.name}: {field.type}'. "
-                f"Expected a class, TypeVar, Optional[class], Optional[TypeVar], Dict, List, Tuple or Union"
+                f"Expected a class, Optional[class], Dict, List, Tuple or Union"
             )
 
 
-class DataclassMeta(TemplateDataclassMeta):
+class DataclassMeta(ABCMeta):
     def __new__(mcs, name, bases, attributes, *args, **kwargs):  # noqa: N804
         new_cls = super().__new__(mcs, name, bases, attributes, *args, **kwargs)
         new_cls._define_dict_and_list_attribute_classes()  # noqa: SLF001
@@ -141,15 +138,7 @@ class DataclassMeta(TemplateDataclassMeta):
 
 
 @dataclass
-class Dataclass(DataclassInterface, TemplateDataclass, metaclass=DataclassMeta):
-    def __new__(cls, *args, **kwargs):
-        if cls._has_type_var_annotations:  # pylint: disable=using-constant-test
-            error_msg = f"Cannot instantiate {cls} because of the following fields with type variables:"
-            for field in [f for f in cls.fields.values() if isinstance(f.type, TypeVar)]:
-                error_msg += f"\n{field.name}: {field.type.__name__}"
-            raise TypeError(error_msg)
-        return super().__new__(cls, *args, **kwargs)
-
+class Dataclass(DataclassInterface, metaclass=DataclassMeta):
     def __post_init__(self):
         self._cast_dict_and_list_attrs()
         self._make_type_checks()
@@ -188,11 +177,6 @@ class Dataclass(DataclassInterface, TemplateDataclass, metaclass=DataclassMeta):
                     f"Incorrect type provided for {self.__class__.__name__}.{field_name}: "
                     f"expected {self.types[field_name]}, but got value {value} with type {type(value)}"
                 )
-
-    @cached_classproperty
-    def _has_type_var_annotations(cls) -> bool:  # noqa: N805
-        # pylint: disable=no-self-argument
-        return len([f for f in cls.fields.values() if isinstance(f.type, TypeVar)]) > 0  # type: ignore
 
     @cached_classproperty
     def fields(cls) -> Dict[str, dataclasses.Field]:  # noqa: N805

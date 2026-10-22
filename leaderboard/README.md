@@ -10,7 +10,7 @@ Plug your system in ([`examples/README.md`](../examples/README.md)) and run each
 `--task all`. Keep the default number of episodes:
 
 ```bash
-for suite in simplerenv_long robotarena_long robolab_long; do
+for suite in robolab_long simplerenv_long robotarena_long; do
   scripts/eval.sh --suite $suite --task all --policy-server localhost:8000 --name my_policy
 done
 ```

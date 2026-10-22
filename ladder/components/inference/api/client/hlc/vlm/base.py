@@ -11,7 +11,6 @@ import PIL.Image
 from ladder.components.inference.api.client.policy import Policy
 from ladder.core.common.logger import get_logger
 from ladder.core.databib.config import Config, Configurable
-from ladder.core.databib.template import Template
 
 LOGGER = get_logger(__name__)
 
@@ -54,7 +53,7 @@ def _from_openai_content(content: Any) -> Any:
     return converted
 
 
-class VLM(Configurable[VLMConfigT], Template[VLMConfigT]):
+class VLM(Configurable[VLMConfigT]):
     """Chat-style vision-language backend shared by every VLM role (decomposition, verification,
     generation). Messages are OpenAI-style ``{role, content}`` dicts; ``content`` is a string or a
     list of ``{"type": "text"|"image", ...}`` items, with images as raw HxWx3 uint8 arrays."""

@@ -1,7 +1,7 @@
 import argparse
 import os
 import pathlib
-from typing import List
+from typing import List, Optional
 
 import huggingface_hub
 
@@ -20,9 +20,9 @@ LEARNED = {
 }
 
 
-def fetch_policy(repo: str, out: pathlib.Path) -> None:
-    huggingface_hub.snapshot_download(repo_id=repo, local_dir=out)
-    LOGGER.info(f"{repo} -> {out}")
+def fetch_policy(repo: str, out: Optional[pathlib.Path]) -> None:
+    # Without --out the policy stays in the Hugging Face cache. The path is printed for the launchers.
+    print(huggingface_hub.snapshot_download(repo_id=repo, local_dir=out))
 
 
 def fetch_episodes(repo: str, out: pathlib.Path, suites: List[str], methods: List[str], videos: bool) -> None:
@@ -75,7 +75,7 @@ def main() -> None:
     sub = parser.add_subparsers(dest="what", required=True)
     policy = sub.add_parser("policy", help="a policy session directory, e.g. the Bridge policy")
     policy.add_argument("--repo", required=True, help="Hugging Face model id")
-    policy.add_argument("--out", type=pathlib.Path, required=True)
+    policy.add_argument("--out", type=pathlib.Path, help="default: the Hugging Face cache")
     episodes = sub.add_parser("episodes", help="the evaluation episodes, for the dashboard")
     episodes.add_argument("--repo", required=True, help="Hugging Face dataset id")
     episodes.add_argument("--out", type=pathlib.Path, required=True)
@@ -83,7 +83,7 @@ def main() -> None:
     episodes.add_argument("--method", nargs="+", default=[], help="default: all")
     episodes.add_argument("--no-videos", dest="videos", action="store_false", help="the logs only")
     args = parser.parse_args()
-    out = args.out.expanduser()
+    out = args.out.expanduser() if args.out else None
     if args.what == "policy":
         fetch_policy(args.repo, out)
     else:

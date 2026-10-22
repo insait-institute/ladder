@@ -6,7 +6,6 @@ import numpy as np
 
 from ladder.components.inference.api.client.batch_inference.batch_protocol import PolicyMetadataPayload
 from ladder.core.databib.config import Config, Configurable
-from ladder.core.databib.template import Template
 
 
 def _as_array(value: Optional[Any]) -> Optional[np.ndarray]:
@@ -175,7 +174,7 @@ class RobotInferenceControl:
 PolicyConfigT = TypeVar("PolicyConfigT", bound=Config)
 
 
-class ModelInference(Configurable[PolicyConfigT], Template[PolicyConfigT]):
+class ModelInference(Configurable[PolicyConfigT]):
     """The model itself, stateless and batched: what ``BatchPolicyServer`` serves, whether that is a
     ladder checkpoint or an off-the-shelf VLA, selected by the server config's single
     ``policy_config``.

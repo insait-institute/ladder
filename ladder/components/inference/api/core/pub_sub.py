@@ -7,7 +7,6 @@ from typing_extensions import Protocol
 from ladder.components.inference.api.core.serialization import deserialize, serialize
 from ladder.core.common.logger import get_logger
 from ladder.core.databib.config import Config, Configurable
-from ladder.core.databib.template import Template
 
 LOGGER = get_logger(__name__)
 
@@ -19,7 +18,7 @@ class PublisherConfig(Config):
 PublisherConfigT = TypeVar('PublisherConfigT', bound=PublisherConfig)
 
 
-class Publisher(Configurable[PublisherConfigT], Template[PublisherConfigT]):
+class Publisher(Configurable[PublisherConfigT]):
     @abstractmethod
     def publish(self, data: Dict[str, Any]) -> None:
         pass
@@ -37,7 +36,7 @@ class SubscriberConfig(Config):
 SubscriberConfigT = TypeVar('SubscriberConfigT', bound=SubscriberConfig)
 
 
-class Subscriber(Configurable[SubscriberConfigT], Template[SubscriberConfigT]):
+class Subscriber(Configurable[SubscriberConfigT]):
     @abstractmethod
     def start(self, on_message_cb: SubscriberCallbackT) -> None:
         pass

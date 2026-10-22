@@ -3,7 +3,7 @@
 #
 #   scripts/eval.sh --suite SUITE SYSTEM [--task TASK ...] [--episodes N] [--output DIR]
 #
-#   --suite     simplerenv_long | robotarena_long | robolab_long
+#   --suite     robolab_long | simplerenv_long | robotarena_long
 #   SYSTEM, one of:
 #   --method METHOD           a method of the paper: low_level_policy | periodic_trigger |
 #                             proprioceptive_trigger | proprioceptive_verifier | volo |
@@ -98,12 +98,9 @@ if [ $learned = 1 ] && [ "$suite" = robolab ]; then
   export RUN_MODEL=models/external/openpi:run_model INFERENCE_SERVER=0
 elif [ $learned = 1 ]; then
   policy=bridge config=$M/vlams/configs/$suite/composition/vlam_${suite}_composition$suffix.yaml
-  export SESSIONS_HOME=${SESSIONS_HOME:-$LADDER_CACHE/policies}
-  export SESSION_NAME=sess_bridge_policy CKPT_NAMES=model-checkpoint-ema-030000.pt
-  if [ ! -f "$SESSIONS_HOME/$SESSION_NAME/checkpoints/$CKPT_NAMES" ]; then
-    echo "Downloading the Bridge policy (11 GB) to $SESSIONS_HOME/$SESSION_NAME"
-    bazel run //ladder/components/dashboard:fetch -- policy --repo INSAIT-Institute/LADDER-Bridge-Policy --out "$SESSIONS_HOME/$SESSION_NAME"
-  fi
+  # the Bridge policy, from the Hugging Face cache (11 GB, downloaded on the first run)
+  snapshot=$(bazel run //ladder/components/dashboard:fetch -- policy --repo INSAIT-Institute/LADDER-Bridge-Policy | tail -1)
+  export SESSIONS_HOME=$(dirname "$snapshot") SESSION_NAME=$(basename "$snapshot") CKPT_NAMES=model-checkpoint-ema-030000.pt
 elif [ "${pkg:-}" = scripted ]; then
   # the launchers see the scripted policy in the config: nothing to download or serve
   policy=none config=$M/vlams/configs/vlam_simpler_scripted.yaml

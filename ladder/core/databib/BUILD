@@ -21,7 +21,6 @@ py_library(
     deps = [
         "//ladder/core/databib/config",
         "//ladder/core/databib/dataclasses",
-        "//ladder/core/databib/template",
         "//ladder/core/databib/utils:classproperty",
         "//ladder/core/databib/utils:typing_utils",
     ],

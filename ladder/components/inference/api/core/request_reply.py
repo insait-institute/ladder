@@ -8,7 +8,6 @@ from ladder.components.inference.api.core.requests import RequestType, parse_req
 from ladder.components.inference.api.core.serialization import deserialize, serialize
 from ladder.core.common.logger import get_logger
 from ladder.core.databib.config import Config, Configurable
-from ladder.core.databib.template import Template
 
 LOGGER = get_logger(__name__)
 
@@ -25,7 +24,7 @@ class RequestReplyServerConfig(Config):
 RequestReplyServerConfigT = TypeVar('RequestReplyServerConfigT', bound=RequestReplyServerConfig)
 
 
-class RequestReplyServer(Configurable[RequestReplyServerConfigT], Template[RequestReplyServerConfigT]):
+class RequestReplyServer(Configurable[RequestReplyServerConfigT]):
     """
     Abstract base class for a request-reply server that listens
     for requests, dispatches them to the provided callback, and
@@ -47,7 +46,7 @@ class RequestReplyClientConfig(Config):
 RequestReplyClientConfigT = TypeVar('RequestReplyClientConfigT', bound=RequestReplyClientConfig)
 
 
-class RequestReplyClient(Configurable[RequestReplyClientConfigT], Template[RequestReplyClientConfigT]):
+class RequestReplyClient(Configurable[RequestReplyClientConfigT]):
     """
     Abstract base class for a request-reply client that sends
     requests to the server and receives the output from the server.

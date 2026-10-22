@@ -17,13 +17,13 @@ scripts/eval.sh --suite SUITE --method METHOD [--task TASK ... | --task all] [--
 
 | `--suite` | suite | simulator | robot | tasks | episodes per task |
 |---|---|---|---|---|---|
+| `robolab_long` | RoboLab-Long | Isaac Sim | Franka | 44 | 8 |
 | `simplerenv_long` | SimplerEnv-Long | SAPIEN | WidowX | 54 | 24 |
 | `robotarena_long` | RobotArena-&infin;-Long | Genesis | WidowX | 47 | 8 |
-| `robolab_long` | RoboLab-Long | Isaac Sim | Franka | 44 | 8 |
 
 The tasks of each suite are in [TASKS.md](TASKS.md) and `scripts/tasks/<suite>.txt`.
-`--task lite` runs LADDER-Lite, a fixed 10-task subset (`scripts/tasks/<suite>_lite.txt`: 2 SimplerEnv-Long,
-4 RobotArena-&infin;-Long and 4 RoboLab-Long tasks, 112 episodes), about 1/18 of the episodes of the full benchmark.
+`--task lite` runs LADDER-Lite, a fixed 10-task subset (`scripts/tasks/<suite>_lite.txt`: 4 RoboLab-Long,
+2 SimplerEnv-Long and 4 RobotArena-&infin;-Long tasks, 112 episodes), about 1/18 of the episodes of the full benchmark.
 On it, the two best systems of the paper keep their places, and every system's score is within 5% of its
 full-benchmark score.
 
@@ -123,9 +123,9 @@ The metrics are in [`api/client/metrics/README.md`](ladder/components/inference/
 
 | suite | launcher | config | tasks |
 |---|---|---|---|
+| `robolab_long` | `robots/robolab/scripts/vlam_robolab.sh` | `LADDER_CONFIG` | `TASKS` |
 | `simplerenv_long` | `models/vlams/scripts/vlam_simpler_bridge.sh` | `SIMPLER_CONFIG` | `ENV_NAMES` |
 | `robotarena_long` | `models/vlams/scripts/vlam_robot_arena.sh` | `RA_CLIENT_CONFIG` | `SCENES` |
-| `robolab_long` | `robots/robolab/scripts/vlam_robolab.sh` | `LADDER_CONFIG` | `TASKS` |
 
 The configs of the methods that drive a low-level policy are in
 `models/vlams/configs/<suite>/composition/` (pi0.5: `models/external/openpi/configs/robolab/composition/`),

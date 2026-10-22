@@ -1,8 +1,9 @@
+import functools
 import inspect
 import pprint
 from typing import Any, Type, TypeVar
 
-from ladder.core.databib.template import Template
+from ladder.core.databib.dataclasses.dataclass_utils import parametrize
 
 from .config import (
     AutoRecordsManager,
@@ -15,22 +16,15 @@ from .config import (
 
 
 class AutoConfigMeta(ConfigMeta):
-    def __getitem__(cls, params) -> type:  # type: ignore[override]  # noqa: N805
-        if cls is AutoConfig and type(params) is not tuple:
-            # Prevent things like AutoConfig[TypeVar] or AutoConfig[Any]
-            if not inspect.isclass(params):
-                raise TypeError(
-                    f"{cls.__name__} does not allow non-classes as template arugment, but got {params}"
-                )
-        return super().__getitem__(params)
-
-    def _update_dataclass_fields(cls):  # noqa: N805
-        """
-        Override from TemplateDataclassMeta since calling dataclass on a Config fails with
-        setting __setattr__ as Config has a custom implementation. The operations in this
-        function aren't necessary anyway since AutoConfig doesn't define any extra fields.
-        """
-        return cls
+    @functools.lru_cache(maxsize=None, typed=True)  # noqa: B019
+    def __getitem__(cls, config_type) -> type:  # noqa: N805
+        """AutoConfig[ModelConfig]: an AutoConfig that only creates subclasses of ModelConfig."""
+        if cls is not AutoConfig:
+            raise TypeError(f"Only AutoConfig can be subscripted, not {cls.__name__}")
+        # Prevent things like AutoConfig[TypeVar] or AutoConfig[Any]
+        if not inspect.isclass(config_type):
+            raise TypeError(f"{cls.__name__} expects a config class, but got {config_type}")
+        return parametrize(cls, (config_type,), ConfigT=config_type)
 
     def __instancecheck__(cls, maybe_config):  # noqa: N805
         """
@@ -46,13 +40,13 @@ class AutoConfigMeta(ConfigMeta):
         return super().__instancecheck__(maybe_config)
 
 
-class AutoConfig(Config, Template[ConfigT], metaclass=AutoConfigMeta):
+class AutoConfig(Config, metaclass=AutoConfigMeta):
     """
     A generic config class that will be instantiated as a specific config class returned by __new__.
     Selecting the correct config class requires setting the correct class path to a corresponding
     Configurable class in the autoclass attribute, e.g. databib.config.config.Configurable. The returned
     config class is the one to which `ConfigT` attribute points to. Note that only Configurable classes
-    which don't expect Template arguments can be specified.
+    whose config class is concrete (not a TypeVar) can be specified.
 
     Example:
         class ModelConfig(Config):
@@ -68,9 +62,11 @@ class AutoConfig(Config, Template[ConfigT], metaclass=AutoConfigMeta):
         assert isinstance(model, Model)  # True
     """
 
+    ConfigT = ConfigT  # a TypeVar until the class is subscripted, e.g. AutoConfig[ModelConfig]
+
     def __new__(cls, *args, **kwargs):
         ConfigType = cls._get_actual_config_class(kwargs)
-        # Make sure AutoConfig Template argument is respected
+        # Make sure the AutoConfig[...] argument is respected
         if not isinstance(cls.ConfigT, TypeVar):
             if not issubclass(ConfigType, cls.ConfigT):
                 raise TypeError(
@@ -108,8 +104,8 @@ class AutoConfigurable:
     """
     A generic configurable class that will be instantiated as a specific instance of Configurable returned by __new__.
     Selecting the correct config class requires passing a config instance with autoclass attribute set to
-    a full class path, e.g. databib.config.config.Configurable. Note that only Configurable classes which don't
-    expect Template arguments can be specified. Note that only Configurable classes will be created
+    a full class path, e.g. databib.config.config.Configurable. Note that only Configurable classes whose config
+    class is concrete (not a TypeVar) can be specified. Note that only Configurable classes will be created
 
     Example:
         class ModelConfig(Config):

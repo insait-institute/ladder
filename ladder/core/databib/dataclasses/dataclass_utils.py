@@ -1,4 +1,15 @@
+import sys
 from typing import Any, Dict, Iterator, Tuple
+
+
+def parametrize(cls: type, args: Tuple[Any, ...], **class_attrs: Any) -> type:
+    """The subclass `cls[args]`, with `class_attrs` set on it (e.g. DataclassDict[int] with ValueT = int).
+    It is registered on the module of `cls` under its name, which is how pickling finds it again."""
+    names = ", ".join(a.__name__ if isinstance(a, type) else repr(a) for a in args)
+    name = f"{cls.__name__}[{names}]"
+    new_cls = type(cls)(name, (cls,), {"__module__": cls.__module__, "__qualname__": name, **class_attrs})
+    setattr(sys.modules[cls.__module__], name, new_cls)
+    return new_cls
 
 
 def zip_dataclass_items(*dataclasses, recursive: bool) -> Iterator[Tuple[str, Tuple[Any, ...]]]:

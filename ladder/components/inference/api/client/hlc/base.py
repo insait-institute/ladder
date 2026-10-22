@@ -5,7 +5,6 @@ from typing import Dict, List, Optional, Protocol, TypeVar
 from ladder.components.inference.api.client.policy import Policy
 from ladder.components.inference.api.core.observation import RobotObservation
 from ladder.core.databib.config import Config, Configurable
-from ladder.core.databib.template import Template
 
 
 @dataclasses.dataclass
@@ -44,7 +43,7 @@ class Orchestrator(Protocol):
 SourceConfigT = TypeVar("SourceConfigT", bound=Config)
 
 
-class SubtaskSource(Configurable[SourceConfigT], Template[SourceConfigT]):
+class SubtaskSource(Configurable[SourceConfigT]):
     def reset(self, env_idx: int) -> None:
         """Clear per-env state at episode start."""
 
@@ -80,7 +79,7 @@ class SubtaskSource(Configurable[SourceConfigT], Template[SourceConfigT]):
 AdvancerConfigT = TypeVar("AdvancerConfigT", bound=Config)
 
 
-class SubtaskAdvancer(Configurable[AdvancerConfigT], Template[AdvancerConfigT]):
+class SubtaskAdvancer(Configurable[AdvancerConfigT]):
     def __init__(self, config: AdvancerConfigT) -> None:
         super().__init__(config)
         # Per-env episode-event channel: advancers append event dicts here (e.g. a verifier

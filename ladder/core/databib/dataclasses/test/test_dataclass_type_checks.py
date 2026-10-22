@@ -4,16 +4,11 @@ from typing import Any, Dict, List, Optional, Set, Tuple, TypeVar, Union
 import numpy as np
 
 from ladder.core.databib.dataclasses import Dataclass, DataclassDict, DataclassList, dataclass
-from ladder.core.databib.template import Template
 
 AnyT = TypeVar("AnyT")
 
 
-class TemplatedClass(Template[AnyT]):
-    pass
-
-
-class ConcreteClass(TemplatedClass[str]):
+class ConcreteClass:
     pass
 
 
@@ -52,7 +47,7 @@ class DataclassTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             Dataclass1(a=5, b=ConcreteClass(), c=DataclassInner())
 
-        # Incorrect templated class field
+        # Incorrect class field
         with self.assertRaises(TypeError):
             Dataclass1(a="test", b=5, c=DataclassInner())
 
@@ -77,7 +72,7 @@ class DataclassTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             obj.replace(a=5)
 
-        # Incorrect templated class field
+        # Incorrect class field
         with self.assertRaises(TypeError):
             obj.replace(b=5)
 
@@ -159,13 +154,6 @@ class DataclassTest(unittest.TestCase):
         self.assertEqual(my_data.e, DataclassList[SimpleData]([SimpleData(data=11.0), SimpleData(data=12.0)]))
 
     def test_dataclass_decorator_type_checks(self):
-        # Make sure TypeVars are allowed
-        @dataclass
-        class A(Dataclass, Template[AnyT]):
-            a: int
-            b: float
-            c: AnyT
-
         # Make sure Union is allowed
         @dataclass
         class B(Dataclass):

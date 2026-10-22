@@ -20,7 +20,6 @@ py_library(
     ],
     deps = [
         "//ladder/core/databib/dataclasses",
-        "//ladder/core/databib/template",
     ],
 )
 

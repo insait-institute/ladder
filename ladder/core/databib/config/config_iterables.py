@@ -1,13 +1,9 @@
-from typing import Dict, List, Tuple, Type, TypeVar
+from typing import Dict, List, Tuple, Type
 
 # Import as modules to avoid potential circular import problems
 import ladder.core.databib.config.auto_config as auto_config
 from ladder.core.databib.dataclasses import DataclassDict, DataclassList
-from ladder.core.databib.template import Template
 from ladder.core.databib.utils.typing_utils import value_type_is_annotation_type
-
-ValueT = TypeVar("ValueT")
-
 
 def _auto_config_isinstance(value, field_type) -> bool:
     """
@@ -19,7 +15,7 @@ def _auto_config_isinstance(value, field_type) -> bool:
     return type(value) is field_type
 
 
-class ConfigDict(DataclassDict[ValueT], Template[ValueT]):
+class ConfigDict(DataclassDict):
     @classmethod
     def _container_classes(cls) -> Tuple[Type, Type]:
         return ConfigList, ConfigDict
@@ -46,7 +42,7 @@ class ConfigDict(DataclassDict[ValueT], Template[ValueT]):
         return super().replace(strict=strict, **kwargs)
 
 
-class ConfigList(DataclassList[ValueT], Template[ValueT]):
+class ConfigList(DataclassList):
     @classmethod
     def _container_classes(cls) -> Tuple[Type, Type]:
         return ConfigList, ConfigDict

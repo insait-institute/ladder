@@ -1,12 +1,14 @@
 import collections
 import dataclasses
 import enum
+import functools
 import importlib
 import inspect
 import os
 import pprint
 import sys
-from typing import Any, ClassVar, Dict, List, Sequence, TextIO, Tuple, Type, TypeVar
+from abc import ABCMeta
+from typing import Any, ClassVar, Dict, Generic, List, Sequence, TextIO, Tuple, Type, TypeVar
 
 from deepdiff import DeepDiff
 from frozendict import FrozenOrderedDict, frozendict
@@ -19,7 +21,7 @@ from ladder.core.databib.dataclasses import (
     DataclassList,
     DataclassMeta,
 )
-from ladder.core.databib.template import Template
+from ladder.core.databib.dataclasses.dataclass_utils import parametrize
 from ladder.core.databib.utils.classproperty import cached_classproperty
 from ladder.core.databib.utils.typing_utils import (
     annotation_is_dict,
@@ -77,14 +79,14 @@ class ConfigMeta(DataclassMeta):
     @staticmethod
     def _assert_config_is_non_generic(name, bases):
         """
-        Make sure that the Config subclass doesn't inherit from Generic or Template.
+        Make sure that the Config subclass doesn't inherit from Generic.
         This functionality is not supported and causes multiple problems
         """
-        # Allow AutoConfig inherit from Template
+        # AutoConfig[X] is the one parametrized config class
         if name == "AutoConfig" or name.startswith("AutoConfig["):
             return
         for base in bases:
-            if getattr(base, "__parameters__", False):
+            if base is Generic or getattr(base, "__parameters__", False):
                 raise TypeError(f"Generic config classes are not allowed. Please make {name} non-generic.")
 
     @staticmethod
@@ -215,7 +217,7 @@ class ConfigMeta(DataclassMeta):
             ):
                 raise TypeError(
                     f"Forbidden type annotation in {cls} for field '{field.name}: {field.type}'. "
-                    f"Expected a class, TypeVar, Optional[class], Optional[TypeVar], Dict, List, Tuple or Union"
+                    f"Expected a class, Optional[class], Dict, List, Tuple or Union"
                 )
 
 
@@ -596,7 +598,24 @@ class ConfigAttributeInvalidValueError(ConfigAttributeError):
 ConfigT = TypeVar("ConfigT", bound=Config)
 
 
-class Configurable(Template[ConfigT]):
+class ConfigurableMeta(ABCMeta):
+    @functools.lru_cache(maxsize=None, typed=True)  # noqa: B019
+    def __getitem__(cls, config_type):  # noqa: N805
+        """Configurable[ModelConfig] (or Model[ModelConfig]): the class with its config class set."""
+        if not isinstance(cls.ConfigT, TypeVar):
+            raise TypeError(f"{cls.__name__} already has a config class: {cls.ConfigT}")
+        new_cls = parametrize(cls, (config_type,))
+        # Set after creation, so only named subclasses (class Model(Configurable[ModelConfig])) register
+        new_cls.ConfigT = config_type
+        return new_cls
+
+
+class Configurable(metaclass=ConfigurableMeta):
+    """A class built from a config, e.g. `class Model(Configurable[ModelConfig])`, which has
+    `Model.ConfigT is ModelConfig`. A class whose ConfigT is still a TypeVar can be subscripted again."""
+
+    ConfigT = ConfigT
+
     def __init__(self, config: ConfigT):
         if not config.__class__ == self.ConfigT:
             raise TypeError(
@@ -614,8 +633,9 @@ class Configurable(Template[ConfigT]):
         config = cls.ConfigT(**kwargs)
         return cls(config)
 
-    def __init_subclass__(cls) -> None:
-        # Don't add any classes which are still templated to the registry
+    def __init_subclass__(cls, **kwargs) -> None:
+        super().__init_subclass__(**kwargs)
+        # Don't add any classes whose config class is still a TypeVar to the registry
         if not isinstance(cls.ConfigT, TypeVar) and issubclass(cls.ConfigT, Config):
             AutoRecordsManager.add_to_records(cls)
 

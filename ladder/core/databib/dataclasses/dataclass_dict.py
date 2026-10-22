@@ -1,11 +1,13 @@
+import functools
 import inspect
 import sys
+from abc import ABCMeta
 from typing import Any, Callable, Dict, Tuple, Type, TypeVar
 
 from frozendict import frozendict
 
 from ladder.core.databib.dataclasses.dataclass_interface import DataclassInterface
-from ladder.core.databib.template import Template, TemplateMeta
+from ladder.core.databib.dataclasses.dataclass_utils import parametrize
 from ladder.core.databib.utils.typing_utils import (
     cast_container_types,
     get_maybe_optional_type,
@@ -18,18 +20,20 @@ ValueT = TypeVar("ValueT")
 DataclassDictT = TypeVar("DataclassDictT", bound="DataclassDict")
 
 
-class DataclassDictMeta(TemplateMeta):
-    def __getitem__(cls, params):  # noqa: N805
+class DataclassDictMeta(ABCMeta):
+    @functools.lru_cache(maxsize=None, typed=True)  # noqa: B019
+    def __getitem__(cls, value_type):  # noqa: N805
+        if not isinstance(cls.ValueT, TypeVar):
+            raise TypeError(f"{cls.__name__} already has a value type")
         # Substitute nested List / Dict in the value type with their DataclassList / DataclassDict
         # equivalents (ConfigList / ConfigDict for the Config variants)
         ListType, DictType = cls._container_classes()
-        new_cls = super().__getitem__(substitute_annotation_container_types(params, ListType, DictType))
+        value_type = substitute_annotation_container_types(value_type, ListType, DictType)
+        new_cls = parametrize(cls, (value_type,), ValueT=value_type)
         new_cls._raise_on_forbidden_value_type()  # noqa: SLF001
         return new_cls
 
     def _raise_on_forbidden_value_type(cls):  # noqa: N805
-        if cls.__parameters__:
-            return
         assert cls.ValueT is not Ellipsis
 
         if isinstance(get_maybe_optional_type(cls.ValueT), TypeVar):
@@ -39,7 +43,7 @@ class DataclassDictMeta(TemplateMeta):
             raise TypeError(f"TypeVar annotation allowed only directly or Optional[TypeVar], but got {cls}")
 
 
-class DataclassDict(DataclassInterface, frozendict, Template[ValueT], metaclass=DataclassDictMeta):
+class DataclassDict(DataclassInterface, frozendict, metaclass=DataclassDictMeta):
     """
     Immutable Dict container compatible with DataclassInterface API.
     Assumes key type is always a str. Value type provided at runtime.
@@ -48,6 +52,9 @@ class DataclassDict(DataclassInterface, frozendict, Template[ValueT], metaclass=
         Any, Dict, List, Optional, Tuple, Union
     TypeVar annotation is also allowed, but it can't be nested under any of the above containers
     """
+
+    ValueT = ValueT  # a TypeVar until the class is subscripted, e.g. DataclassDict[int]
+
 
     @classmethod
     def _container_classes(cls) -> Tuple[Type, Type]:
@@ -169,18 +176,10 @@ class DataclassDict(DataclassInterface, frozendict, Template[ValueT], metaclass=
         """
         Needed so we properly support pickling for classes with square brackets in their names.
 
-        Consider a Template subclass `DataclassDict[typing.Any]`. `Template.__getitem__` assigns
-        the class at creation time to the module `databib.template.template`. However, directly
-        accessing the class via `databib.template.template.DataclassDict[typing.Any]` doesn't work
-        due to the name of the class containing square brackets. Because of that, pickle can't access
-        the class when it has to pickle it.
-
-        This method gets called when pickling and returns a tuple (callable, args, state), where
-        `callable` will be called with the provided `args` to create an initial object instance
-        and `state` will be passed to __setstate__ after creation to update its state. Note that
-        the returned tuple must be pickle-able and we can't return a lambda or a local function.
-
-        NOTE: Not yet clear why only DataclassDict and DataclassList need __reduce__, but Template doesn't
+        A subscripted class such as `DataclassDict[typing.Any]` is created at runtime and registered on
+        its module under that name (`dataclass_utils.parametrize`). pickle cannot look such a name up
+        itself, so this returns (callable, args, state): `get_dynamic_class` finds the class by name and
+        rebuilds the object from its JSON form, and `state` is passed to __setstate__ afterwards.
         """
         return (
             get_dynamic_class,

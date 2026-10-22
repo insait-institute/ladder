@@ -11,7 +11,6 @@ from ladder.components.inference.api.core.action import RobotAction
 from ladder.components.inference.api.core.observation import RobotObservation
 from ladder.core.common.logger import get_logger
 from ladder.core.databib.config import AutoConfig, AutoConfigurable, Config, Configurable
-from ladder.core.databib.template import Template
 
 LOGGER = get_logger(__name__)
 
@@ -36,7 +35,7 @@ class RobotEpisodeRunnerConfig(Config):
 RunnerConfigT = TypeVar("RunnerConfigT", bound=RobotEpisodeRunnerConfig)
 
 
-class EpisodeRunnerBase(Configurable[RunnerConfigT], Template[RunnerConfigT]):
+class EpisodeRunnerBase(Configurable[RunnerConfigT]):
     """The episode loop, the recorder, and the optional orchestrator. Subclasses say where the
     task comes from (``get_instruction``) and what to set up before it (``prepare_episode``)."""
 

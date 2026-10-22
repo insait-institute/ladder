@@ -1,6 +1,6 @@
 import os
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple, TypeVar
+from typing import Dict, Generic, List, Optional, Tuple, TypeVar
 
 import pytest
 from backports.strenum import StrEnum
@@ -15,7 +15,6 @@ from ladder.core.databib.config.config import (
     UnexpectedConfigAttributeError,
 )
 from ladder.core.databib.config.yaml_util import _load_raw_yaml_with_import_tree
-from ladder.core.databib.template import Template
 
 CONFIG_FILES_DIR = os.path.join(os.path.dirname(__file__), 'config_files')
 
@@ -131,7 +130,7 @@ def test_generic_config_is_invalid():
 
     with pytest.raises(TypeError):
 
-        class TestGenericConfig(Config, Template[T]):  # pylint: disable=unused-variable
+        class TestGenericConfig(Config, Generic[T]):  # pylint: disable=unused-variable
             my_list: List[T] = []
 
 

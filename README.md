@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/static/images/logo/ladder-lockup-white.svg">
-    <img src="docs/static/images/logo/ladder-lockup.svg" alt="LADDER" height="72">
+    <source media="(prefers-color-scheme: dark)" srcset="docs/static/images/logo/ladder-logo-on-dark.svg">
+    <img src="docs/static/images/logo/ladder-logo-on-light.svg" alt="LADDER" height="72">
   </picture>
 </p>
 
@@ -81,11 +81,11 @@ To put it on the [leaderboard](https://ladderrobotics.ai/#leaderboard), run ever
 [TASKS.md](TASKS.md) lists every task with its instruction and a video of it being solved.
 
 <div align="center">
+  <img src="docs/static/readme/robolab.gif" width="32%" alt="RoboLab-Long">
   <img src="docs/static/readme/simpler.gif" width="32%" alt="SimplerEnv-Long">
   <img src="docs/static/readme/robot_arena.gif" width="32%" alt="RobotArena-Long">
-  <img src="docs/static/readme/robolab.gif" width="32%" alt="RoboLab-Long">
 </div>
-<p align="center"><sub>Flawless episodes from the released evaluation: GPT-Policy on tasks of 10, 8 and 7 subgoals. All play at 4&times; speed.</sub></p>
+<p align="center"><sub>Flawless episodes from the released evaluation: GPT-Policy on tasks of 7, 10 and 8 subgoals. All play at 4&times; speed.</sub></p>
 
 ## Dashboard
 
@@ -123,18 +123,18 @@ See [EVALUATION.md](EVALUATION.md#offline-vlm-benchmark) for the other tasks.
 
 Task success rate (%) of the baselines, from the paper.
 
-| method | SimplerEnv-Long | RobotArena-&infin;-Long | RoboLab-Long | all tasks |
+| method | RoboLab-Long | SimplerEnv-Long | RobotArena-&infin;-Long | all tasks |
 |---|---:|---:|---:|---:|
-| Low-level policy | 8.7 | 10.9 | 19.6 | 11.0 |
-| Periodic trigger | 17.4 | 15.2 | 25.6 | 18.4 |
-| Proprioceptive trigger | 21.5 | 16.2 | 28.1 | 21.7 |
-| Proprioceptive verifier | 25.2 | **24.2** | 25.6 | 25.0 |
-| VoLo | **25.5** | 21.3 | **29.0** | **25.3** |
-| Privileged verifier | 29.5 | 25.5 | 34.4 | 29.6 |
-| CaP-X | 28.7 | 16.2 | 20.7 | 25.0 |
-| TiPToP | 6.7 | 11.2 | 17.3 | 9.4 |
-| PSP-Agent | 37.1 | 39.9 | 51.4 | 40.1 |
-| GPT-Policy | **60.3** | **66.8** | **62.8** | **62.0** |
+| Low-level policy | 19.6 | 8.7 | 10.9 | 11.0 |
+| Periodic trigger | 25.6 | 17.4 | 15.2 | 18.4 |
+| Proprioceptive trigger | 28.1 | 21.5 | 16.2 | 21.7 |
+| Proprioceptive verifier | 25.6 | 25.2 | **24.2** | 25.0 |
+| VoLo | **29.0** | **25.5** | 21.3 | **25.3** |
+| Privileged verifier | 34.4 | 29.5 | 25.5 | 29.6 |
+| CaP-X | 20.7 | 28.7 | 16.2 | 25.0 |
+| TiPToP | 17.3 | 6.7 | 11.2 | 9.4 |
+| PSP-Agent | 51.4 | 37.1 | 39.9 | 40.1 |
+| GPT-Policy | **62.8** | **60.3** | **66.8** | **62.0** |
 
 <div align="center">
   <img src="docs/static/images/length_ladder.png" alt="Success rate by number of subgoals" width="800"/>

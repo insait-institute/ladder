@@ -4,7 +4,6 @@ from ladder.components.inference.api.client.robot_env import RobotEnv
 from ladder.components.inference.api.core.action import RobotAction
 from ladder.components.inference.api.core.observation import RobotObservation
 from ladder.core.databib.config import Config, Configurable
-from ladder.core.databib.template import Template
 
 
 class EnvWrapperConfig(Config):
@@ -14,7 +13,7 @@ class EnvWrapperConfig(Config):
 EnvWrapperConfigT = TypeVar('EnvWrapperConfigT', bound=EnvWrapperConfig)
 
 
-class EnvWrapper(Configurable[EnvWrapperConfigT], Template[EnvWrapperConfigT]):
+class EnvWrapper(Configurable[EnvWrapperConfigT]):
     """
     Base class for a wrapper around a RobotEnv. Overload to execute additional functionality with every
     env operation, for example, logging, recording videos, action clipping, etc.

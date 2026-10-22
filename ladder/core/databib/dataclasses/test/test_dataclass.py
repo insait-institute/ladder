@@ -297,7 +297,7 @@ class DataclassTest(unittest.TestCase):
             list_int=[1, 2, '3', 4],
             dict_dict={'1': {'2': 3}, '4': {'5': 6}},
             list_list=[[5.6, 7.8], [10.11, 13.14]],
-            p_data=MemPickleDataclass[int](value=10),
+            p_data=MemPickleDataclass(value=10),
         )
 
         with tempfile.TemporaryDirectory() as tmp:
@@ -319,7 +319,7 @@ class DataclassTest(unittest.TestCase):
             list_int=[1, 2, '3', 4],
             dict_dict={'1': {'2': 3}, '4': {'5': 6}},
             list_list=[[5.6, 7.8], [10.11, 13.14]],
-            p_data=MemPickleDataclass[int](value=10),
+            p_data=MemPickleDataclass(value=10),
         )
 
         with tempfile.TemporaryDirectory() as tmp:

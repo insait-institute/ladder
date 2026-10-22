@@ -9,7 +9,6 @@ from ladder.core.databib.config.config import (
     Configurable,
     MissingConfigAttributeError,
 )
-from ladder.core.databib.template import Template
 
 from .helper import ConfigJ, ConfigurableJ as ConfigurableJ1
 
@@ -89,11 +88,11 @@ class TestAutoConfig(unittest.TestCase):
         self.assertIs(AutoRecordsManager.CONFIGURABLE_CLS_PATH_TO_CONFIG_CLS[class_path], ConfigC)
         self.assertIs(AutoRecordsManager.CONFIGURABLE_CLS_PATH_TO_CONFIGURABLE_CLS[class_path], ConfigurableC)
 
-    def test_templated_configurables_are_not_registered(self):
-        class ConfigurableC(Configurable[ConfigT], Template[ConfigT]):
+    def test_generic_configurables_are_not_registered(self):
+        class ConfigurableC(Configurable[ConfigT]):
             pass
 
-        class_path = "ladder.core.databib.config.test.test_auto_config.TestAutoConfig.test_templated_configurables_are_not_registered.<locals>.ConfigurableC"
+        class_path = "ladder.core.databib.config.test.test_auto_config.TestAutoConfig.test_generic_configurables_are_not_registered.<locals>.ConfigurableC"
 
         self.assertNotIn(class_path, AutoRecordsManager.CONFIGURABLE_CLS_PATH_TO_CONFIG_CLS)
         self.assertNotIn(class_path, AutoRecordsManager.CONFIGURABLE_CLS_PATH_TO_CONFIGURABLE_CLS)
@@ -249,8 +248,8 @@ class TestAutoConfig(unittest.TestCase):
         with self.assertRaises(ValueError):
             ConfigD.from_json(data)
 
-    def test_autoconfig_with_template_arg(self):
-        # Test templated AutoConfig classes can be defined
+    def test_autoconfig_with_config_class_arg(self):
+        # Test parametrized AutoConfig classes can be defined
         class ConfigC(Config):
             a: AutoConfig[ConfigA]
             b: AutoConfig[ConfigB]
@@ -272,12 +271,12 @@ class TestAutoConfig(unittest.TestCase):
             },
         }
 
-        # Test templated AutoConfig can be instantiated
+        # Test parametrized AutoConfig can be instantiated
         config = ConfigD.from_json(data)
         self.assertEqual(config.c.a, 10)
         self.assertEqual(config.c.b, 13.0)
 
-        # Test templated AutoConfig respects bounds
+        # Test parametrized AutoConfig respects bounds
         with self.assertRaises(TypeError):
             data['c']['autoclass'] = "ladder.core.databib.config.test.test_auto_config.ConfigurableA"
             ConfigD.from_json(data)

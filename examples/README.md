@@ -70,7 +70,7 @@ The same observation, as a plain dictionary of numpy arrays, in all three cases:
 | `gripper` | 1.0 open ... 0.0 closed |
 | `joints` | `[n]` joint positions, radians |
 | `depth` | agents only: `{camera: {depth_m [H, W], intrinsics [3, 3], base_from_camera [4, 4]}}` |
-| `robot` | `widowx` (SimplerEnv-Long, RobotArena-&infin;-Long) or `franka` (RoboLab-Long) |
+| `robot` | `franka` (RoboLab-Long) or `widowx` (SimplerEnv-Long, RobotArena-&infin;-Long) |
 | `step` | control steps since the episode started |
 
 This is all a real robot would have. The simulator's own state (object poses, which subgoals are
