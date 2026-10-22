@@ -23,8 +23,6 @@ py_library(
         "//ladder/core/databib/dataclasses",
         "//ladder/core/databib/template",
         "//ladder/core/databib/utils:classproperty",
-        "//ladder/core/databib/utils:date_utils",
-        "//ladder/core/databib/utils:json_utils",
         "//ladder/core/databib/utils:typing_utils",
     ],
 )

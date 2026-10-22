@@ -44,6 +44,5 @@ make_py_checks(
     with_coverage = True,
     deps = [
         ":config",
-        "//ladder/core/databib/utils:json_utils",
     ],
 )

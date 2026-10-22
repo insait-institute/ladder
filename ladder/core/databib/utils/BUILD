@@ -9,22 +9,6 @@ py_library(
 )
 
 py_library(
-    name = "date_utils",
-    srcs = ["date_utils.py"],
-    pip_deps = ["python-dateutil"],
-)
-
-py_library(
-    name = "json_utils",
-    srcs = ["json_utils.py"],
-    pip_deps = ["numpy"],
-    deps = [
-        ":date_utils",
-        "//ladder/core/databib/dataclasses",
-    ],
-)
-
-py_library(
     name = "typing_utils",
     srcs = ["typing_utils.py"],
     pip_deps = ["numpy"],

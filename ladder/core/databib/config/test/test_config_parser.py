@@ -7,7 +7,6 @@ from frozendict import frozendict
 
 from ladder.core.databib.config.config import Config, UnexpectedConfigAttributeError
 from ladder.core.databib.config.config_parser import ConfigParser
-from ladder.core.databib.utils.json_utils import to_json_serialisable
 
 
 class FakeNestedConfig(Config):
@@ -112,7 +111,7 @@ class TestConfigParser(unittest.TestCase):
 
         # Dump the yaml config
         with open(self.config_path, 'w') as f:
-            yaml.safe_dump(to_json_serialisable(yaml_config), f)
+            yaml.safe_dump(yaml_config, f)
 
         config = ConfigParser(FakeConfig).parse_args(
             [
