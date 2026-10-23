@@ -87,7 +87,7 @@ cache-first with model fallback, so `cache_path` is the benchmark's only knob:
 
 There is no separate cached-vs-live config, because that is one component either way. A missing plan
 falls back to the VLM rather than failing, which is safe here because each benchmark's own tests assert
-its plan file covers its registry exactly, so a gap is caught in CI rather than at eval time.
+its plan file covers its registry exactly, so a gap is caught by the tests rather than at eval time.
 
 ## Not covered
 

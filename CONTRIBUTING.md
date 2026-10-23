@@ -11,7 +11,7 @@ log. The launchers print the path of every log they write. For a wrong score, at
 ## Pull requests
 
 - Keep a pull request to one change, and describe what it fixes or adds.
-- Run the checks CI runs before you push:
+- Run the tests before you push (CI does not run them):
   ```bash
   bazel test //ladder/... --test_tag_filters=-needs-gpu
   ```

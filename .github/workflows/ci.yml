@@ -2,11 +2,7 @@
 #
 # - repo: fast checks without Bazel (citation metadata, YAML syntax, shell syntax, README links, and
 #   every leaderboard submission, scored the way the page shows it).
-# - tests: the CPU test suite, `bazel test //ladder/... --test_tag_filters=-needs-gpu` (the command
-#   CONTRIBUTING.md asks for). Its first run fetches every suite's Python environment (tens of GB),
-#   so the runner's preinstalled toolchains are removed first and Bazel's repository cache is kept
-#   between runs.
-# GPU tests (tag needs-gpu) and full evaluations need a GPU runner and are not run here.
+# The test suite runs locally, not here (CONTRIBUTING.md).
 name: ci
 
 on:
@@ -45,28 +41,3 @@ jobs:
           entries=(leaderboard/submissions/*/)
           [ ${#entries[@]} -eq 0 ] || scripts/leaderboard.py check "${entries[@]}"
 
-  tests:
-    # The build downloads its pinned simulation assets anonymously from the repository's asset
-    # release. They are downloadable once the repository is public; until then this job skips.
-    if: ${{ !github.event.repository.private }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 240
-    steps:
-      - name: Free disk space
-        run: |
-          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL \
-                      /usr/local/share/boost "$AGENT_TOOLSDIRECTORY"
-          sudo docker image prune --all --force >/dev/null || true
-          df -h /
-      - uses: actions/checkout@v7
-      - uses: bazel-contrib/setup-bazel@0.19.0
-        with:
-          bazelisk-cache: true
-          repository-cache: true
-      - name: bazel test
-        run: |
-          bazel test //ladder/... --test_tag_filters=-needs-gpu --keep_going \
-            --local_resources=memory=HOST_RAM*.7 --local_test_jobs=2
-      - name: Disk left
-        if: always()
-        run: df -h /
