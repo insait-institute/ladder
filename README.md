@@ -18,7 +18,7 @@
 three simulated suites, each subgoal checked automatically.
 
 <div align="center">
-  <img src="docs/static/images/teaser.png" alt="LADDER overview" width="800"/>
+  <img src="docs/static/images/teaser.webp" alt="LADDER overview" width="800"/>
 </div>
 
 ## Installation
