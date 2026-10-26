@@ -1,8 +1,6 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/static/images/logo/ladder-logo-on-dark.svg">
-    <img src="docs/static/images/logo/ladder-logo-on-light.svg" alt="LADDER" height="72">
-  </picture>
+  <img src="docs/static/images/logo/ladder-logo-on-light.svg#gh-light-mode-only" alt="LADDER" height="72">
+  <img src="docs/static/images/logo/ladder-logo-on-dark.svg#gh-dark-mode-only" alt="LADDER" height="72">
 </p>
 
 <h3 align="center">A Long-Horizon Robot Manipulation Benchmark</h3>
