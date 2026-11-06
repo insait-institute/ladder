@@ -27,7 +27,13 @@ TASKS = yaml.safe_load(open(os.path.join(ROOT, "leaderboard", "tasks.yaml")))
 SUITES = {"simplerenv_long": 24, "robotarena_long": 8, "robolab_long": 8}  # episodes per task
 # the suite's directory name in scripts/eval.sh's output
 SUITE_DIRS = {"simpler": "simplerenv_long", "robot_arena": "robotarena_long", "robolab": "robolab_long"}
+# LADDER-Lite, the fixed task subset that scripts/eval.sh --task lite runs
+LITE = {
+    suite: open(os.path.join(ROOT, "scripts", "tasks", f"{suite}_lite.txt")).read().split() for suite in SUITES
+}
 KINDS = ["policy", "orchestrator", "agent"]
+# the fields leaderboard/display.yaml may set for the page; never a score or a claim about the system
+DISPLAY_FIELDS = ["name", "vlm", "low_level_policy", "inputs", "results_url"]
 REQUIRED = [
     "name",
     "kind",
@@ -271,24 +277,57 @@ def report(submission_dir):
     return bad
 
 
+def display():
+    """leaderboard/display.yaml: how the maintainers show a submission on the page, by its directory
+    name. A field set there replaces the submission's own on the page only; submission.yaml stays as
+    its authors wrote it. Returns (overrides, problems)."""
+    path = os.path.join(ROOT, "leaderboard", "display.yaml")
+    table = (yaml.safe_load(open(path)) if os.path.exists(path) else None) or {}
+    out = []
+    if not isinstance(table, dict):
+        return {}, ["display.yaml: must map a submission's directory name to its fields"]
+    for entry, fields in table.items():
+        if not isinstance(fields, dict):
+            out.append(f"display.yaml: {entry} must map field names to values")
+            continue
+        for key, value in fields.items():
+            if key not in DISPLAY_FIELDS:
+                out.append(f"display.yaml: {entry}.{key} cannot be set here, only {DISPLAY_FIELDS}")
+            elif not isinstance(value, str) or not value.strip():
+                out.append(f"display.yaml: {entry}.{key} must be a non-empty string")
+    return table, out
+
+
 def check(args):
     failed = False
     for d in args.submissions:
         print(d)
         failed |= bool(report(d))
+    for p in display()[1]:
+        print("  TODO:", p)
+        failed = True
     sys.exit(1 if failed else 0)
 
 
 def build(args):
     """docs/static/data/submissions.json, in the shape the leaderboard page draws (suites se/ra/rl)."""
     short = {"simplerenv_long": "se", "robotarena_long": "ra", "robolab_long": "rl"}
+    shown, bad = display()
+    if bad:
+        sys.exit("\n".join(bad))
     entries = []
     for d in sorted(glob.glob(os.path.join(ROOT, "leaderboard", "submissions", "*", ""))):
         d = d.rstrip(os.sep)
         if problems(d):
             sys.exit(f"{d} is not a valid submission: run scripts/leaderboard.py check {d}")
-        meta = yaml.safe_load(open(os.path.join(d, "submission.yaml")))
-        s = score(read_episodes(os.path.join(d, "episodes.jsonl")))
+        meta = {
+            **yaml.safe_load(open(os.path.join(d, "submission.yaml"))),
+            **shown.get(os.path.basename(d), {}),
+        }
+        rows = read_episodes(os.path.join(d, "episodes.jsonl"))
+        s = score(rows)
+        # the same episodes on the LADDER-Lite tasks, as the paper's systems are scored on LADDER-Lite
+        lite = score([r for r in rows if r["task"] in LITE[r["suite"]]])
         by_suite = lambda table, total: {short[k]: {**v, "All tasks": total[k]} for k, v in table.items()}  # noqa: E731
         entries.append(
             {
@@ -303,6 +342,15 @@ def build(args):
                 "horizon": by_suite(s["horizon"], {k: v["v"] for k, v in s["suites"].items()}),
                 "horizon_progress": by_suite(s["horizon_progress"], s["progress"]),
                 "category": by_suite(s["category"], {k: v["v"] for k, v in s["suites"].items()}),
+                "lite": {
+                    "scale": {"tasks": lite["tasks"], "episodes": lite["episodes"]},
+                    "suites": {short[k]: v for k, v in lite["suites"].items()},
+                    "mean": lite.get("mean"),
+                    "pooled": lite.get("pooled"),
+                    "progress": {short.get(k, k): v for k, v in lite["progress"].items()},
+                }
+                if lite["episodes"]
+                else None,
             }
         )
     out = args.out or os.path.join(ROOT, "docs", "static", "data", "submissions.json")

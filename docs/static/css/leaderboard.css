@@ -79,6 +79,7 @@
 .lb-badge { display: inline-block; padding: .05rem .4rem; border-radius: 999px; font-size: .68rem; font-weight: 600;
   color: #8a5a00; background: #fff4dc; vertical-align: middle; white-space: nowrap; }
 .lb-badge.is-verified { color: #0b6b4f; background: #ddf5ec; }
+.lb-badge.is-external { color: var(--muted); background: transparent; box-shadow: inset 0 0 0 1px var(--line); font-weight: 500; cursor: help; }
 
 .lb-howto { margin-top: 2.8rem; padding-top: 1.6rem; border-top: 1px solid var(--line); max-width: 52rem; }
 .lb-howto h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: .4rem; }

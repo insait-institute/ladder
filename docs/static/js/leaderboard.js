@@ -7,7 +7,9 @@ document.addEventListener('DOMContentLoaded', function () {
   var FULL = D.systems;
   var SUITES = D.suites;
   var GROUP = {}; D.groups.forEach(function (g) { GROUP[g.id] = g.name; });
-  var COLORS = { e2e: '#9aa0aa', orch: '#e08a1e', tool: '#e63e3e', ref: '#9aa0aa', sub: '#1a9e77' };
+  var COLORS = { e2e: '#9aa0aa', orch: '#e08a1e', tool: '#e63e3e', ref: '#9aa0aa' };
+  // a submitted system takes the colour of its kind, so the legend covers it; its tag says it is external
+  var color = function (s) { return COLORS[s.group === 'sub' ? { Policy: 'e2e', Orchestrator: 'orch', Agent: 'tool' }[s.type] : s.group]; };
   var state = { view: 'overall', sort: 'mean', suite: 'mean', metric: 'success' };
   var $ = function (s) { return document.querySelector(s); };
   var fmt = function (v) { return v == null ? '&ndash;' : v.toFixed(1); };
@@ -44,12 +46,13 @@ document.addEventListener('DOMContentLoaded', function () {
   function label(s) { return who(s).main; }
   function name(s) {
     var w = who(s);
-    return '<span class="lb-name"><i style="background:' + COLORS[s.group] + '"></i><span class="lb-who"><span class="lb-main">' + w.main +
+    return '<span class="lb-name"><i style="background:' + color(s) + '"></i><span class="lb-who"><span class="lb-main">' + w.main +
       (s.liteOnly || state.bench === 'lite' ? ' <span class="lb-badge is-lite" title="' + (s.liteOnly ? LITE_TIP : LITE_ALL_TIP) + '">Lite</span>' : '') +
       (s.partial ? ' <span class="lb-badge" title="Scored on ' + s.partial + ' of LADDER-Lite; the last one is still running">' + s.partial + '</span>' : '') +
-      (s.submission && s.submission !== 'Placeholder' ? ' <span class="lb-badge' + (s.verified ? ' is-verified' : '') + '" title="' +
-        (s.verified ? 'Re-run by the maintainers' : 'Results as submitted; the episode logs are public') + '">' +
-        (s.verified ? 'verified' : 'self-reported') + '</span>' : '') +
+      (s.submission && s.submission !== 'Placeholder' ? ' <span class="lb-badge ' + (s.verified ? 'is-verified' : 'is-external') + '" title="' +
+        (s.verified ? 'Submitted by its authors and re-run by the LADDER team' :
+          'Submitted by its authors. Scored by LADDER from their episode logs; not re-run by the LADDER team') + '">' +
+        (s.verified ? 'verified' : 'external') + '</span>' : '') +
       '</span>' + (w.sub ? '<span class="lb-sub">' + w.sub + '</span>' : '') + '</span></span>';
   }
   // how closely LADDER-Lite follows the full benchmark, from the data: how many of the leaders keep their place, and
@@ -221,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
       placed.push([x1, x2, ty]);
       var mark = s.liteOnly
         ? '<path d="M' + cx + ' ' + (cy - 9) + 'L' + (cx + 9) + ' ' + cy + 'L' + cx + ' ' + (cy + 9) + 'L' + (cx - 9) + ' ' + cy + 'Z" class="lite-mark"/>'
-        : '<circle cx="' + cx + '" cy="' + cy + '" r="7" style="fill:' + COLORS[s.group] + '"/>';
+        : '<circle cx="' + cx + '" cy="' + cy + '" r="7" style="fill:' + color(s) + '"/>';
       // a label pushed away from its mark keeps a thin leader line back to it
       var lead = Math.abs(ty - 4 - cy) > 6 ? '<line class="pt-lead" x1="' + cx + '" y1="' + cy + '" x2="' + (right ? x1 - 2 : x2 + 2) + '" y2="' + (ty - 4) + '"/>' : '';
       var tipd = { h: w2.main + (w2.sub ? ' ' + w2.sub.replace(/<sub>(.*?)<\/sub>/g, '$1').replace(/&pi;/g, '\u03c0').replace(/<[^>]+>/g, '') : '') + (s.liteOnly ? ' (LADDER-Lite)' : ''), r: [
@@ -450,26 +453,37 @@ document.addEventListener('DOMContentLoaded', function () {
     if (s.group === 'orch') return 'Fixed plan + policy';
     return 'Policy only';
   }
+  // submitted text is drawn as HTML, so everything a submitter typed is escaped, and only https links are followed
+  var esc = function (v) {
+    return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+  };
+  var link = function (u) { return /^https:\/\/[^\s"'<>]+$/.test(u || '') ? u : null; };
   // submitted systems join the paper's: one row each, and a column in every per-suite table
   function merge(entries) {
     if (!entries.length) return;
     D.groups.push({ id: 'sub', name: 'Submitted' });
     entries.forEach(function (e) {
-      var into = e.benchmark === 'lite' && D.lite ? D.lite.systems : FULL;
-      into.push({ liteOnly: e.benchmark === 'lite',
-        name: e.name, group: e.privileged ? 'ref' : 'sub', type: { policy: 'Policy', orchestrator: 'Orchestrator', agent: 'Agent' }[e.kind],
-        ranked: !e.privileged && ['se', 'ra', 'rl'].every(function (k) { return e.suites[k]; }), cost_ep: null, cost_succ: null, vlm: e.vlm === 'none' ? '' : e.vlm, policy: e.low_level_policy,
-        inputs: e.inputs, submission: 'Submitted ' + e.kind, verified: e.verified, evaluated: e.date ? [e.date, e.date] : null, results_url: e.results_url, scale: e.scale,
-        mean: e.mean || { v: null }, pooled: e.pooled || { v: null }, progress: e.progress,
-        suites: { se: e.suites.se || { v: null }, ra: e.suites.ra || { v: null }, rl: e.suites.rl || { v: null } },
-        cost: { se: null, ra: null, rl: null }
-      });
-      if (e.benchmark === 'lite') return;
+      var name = esc(e.name);
+      var row = function (s, liteOnly) {
+        return { liteOnly: liteOnly,
+          name: name, group: e.privileged ? 'ref' : 'sub', type: { policy: 'Policy', orchestrator: 'Orchestrator', agent: 'Agent' }[e.kind],
+          ranked: !e.privileged && ['se', 'ra', 'rl'].every(function (k) { return s.suites[k]; }), cost_ep: null, cost_succ: null,
+          vlm: e.vlm === 'none' ? '' : esc(e.vlm), policy: esc(e.low_level_policy), inputs: esc(e.inputs), submission: 'Submitted ' + e.kind,
+          verified: e.verified, evaluated: e.date ? [e.date, e.date] : null, results_url: link(e.results_url), scale: s.scale,
+          mean: s.mean || { v: null }, pooled: s.pooled || { v: null }, progress: s.progress,
+          suites: { se: s.suites.se || { v: null }, ra: s.suites.ra || { v: null }, rl: s.suites.rl || { v: null } },
+          cost: { se: null, ra: null, rl: null }
+        };
+      };
+      if (e.benchmark === 'lite') { if (D.lite) D.lite.systems.push(row(e, true)); return; }
+      FULL.push(row(e, false));
+      // a full-benchmark entry is also scored on the LADDER-Lite tasks (scripts/leaderboard.py build)
+      if (e.lite && D.lite) D.lite.systems.push(row(e.lite, false));
       [['horizon', 'success', e.horizon], ['horizon', 'progress', e.horizon_progress], ['category', 'success', e.category]].forEach(function (t) {
         Object.keys(t[2] || {}).forEach(function (suite) {
-          Object.keys(t[2][suite]).forEach(function (row) {
+          Object.keys(t[2][suite]).forEach(function (r) {
             var table = D[t[0]][t[1]][suite];
-            (table[row] = table[row] || {})[e.name] = t[2][suite][row];
+            (table[r] = table[r] || {})[name] = t[2][suite][r];
           });
         });
       });
