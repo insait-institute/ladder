@@ -1,0 +1,9 @@
+# How submitted systems appear on the leaderboard page, set by the maintainers.
+# Keyed by the submission's directory under submissions/. A field here replaces the submission's own
+# on the page only; its submission.yaml stays as its authors wrote it. Only name, vlm,
+# low_level_policy, inputs and results_url can be set (scripts/leaderboard.py check enforces it).
+
+pat:
+  vlm: "Qwen3.8-27B"
+  # the snapshot of their results that was reviewed, so the link shows what the scores came from
+  results_url: "https://huggingface.co/datasets/juyil/PAT-leaderboard-results/tree/45720b6eee257e199f868e23878875d38904f9b7/ladder"

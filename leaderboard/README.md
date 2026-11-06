@@ -29,7 +29,9 @@ This writes `leaderboard/submissions/my_policy/` with two files:
 - `episodes.jsonl`: one line per episode (suite, task, success, subgoals completed, steps). It is
   read from your evaluation's episode logs, never typed in.
 - `submission.yaml`: who you are and what the system is. Fill in every field. The command prints
-  what is still missing, and the scores the leaderboard will show.
+  what is still missing, and the scores the leaderboard will show. The maintainers may shorten how
+  `name` and `vlm` appear on the page ([`display.yaml`](display.yaml)); your `submission.yaml` stays
+  as you wrote it.
 
 Upload the whole results directory (`out/`, with the episode logs and videos) somewhere public,
 such as a Hugging Face dataset, and put its link in `results_url`. Anyone can then replay your
@@ -44,7 +46,7 @@ scripts/leaderboard.py check leaderboard/submissions/my_policy
 ```
 
 CI runs the same check. Once the pull request is merged, the entry appears on the leaderboard as
-**self-reported**. The maintainers mark it **verified** once they have re-run the system with the
+**external**. The maintainers mark it **verified** once they have re-run the system with the
 same code and seen the same scores within their intervals. That needs a public implementation
 (`code_url`) or access to it.
 
@@ -79,6 +81,8 @@ paper baseline are compared on equal terms:
   the same object (Relay, Revisit) counts only if it was completed after the earlier legs.
 - **By horizon and by task category.** Task success grouped by the subgoal count and the category in
   [`tasks.yaml`](tasks.yaml), the paper's task catalog.
+- **LADDER-Lite.** The same scores over the episodes of the LADDER-Lite tasks
+  ([`scripts/tasks/*_lite.txt`](../scripts/tasks)), so an entry with every task is also ranked there.
 
 `scripts/leaderboard.py build` writes the page's data (`docs/static/data/submissions.json`) from
 every submission. The Pages workflow runs it on every merge, so do not edit that file by hand.
