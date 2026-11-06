@@ -1,0 +1,29 @@
+# Your system on the LADDER leaderboard. Fill in every field; leaderboard/README.md explains them.
+name: PAT                        # as shown on the leaderboard
+kind: agent                      # policy | orchestrator | agent
+authors: "Juyi Lin, Siyuan Ma, Yu Qi, Yanzhi Wang"
+organization: "Northeastern University, The Chinese University of Hong Kong"
+contact: "lin.juy@northeastern.edu"
+paper_url: ""                    # optional
+code_url: ""                     # optional: a public implementation lets the maintainers verify it
+results_url: "https://huggingface.co/datasets/juyil/PAT-leaderboard-results/tree/main/ladder"
+low_level_policy: "pi0.5 DROID, fine-tuned on its own episodes (RoboLab-Long) / Bridge (WidowX suites)"
+vlm: "Qwen3.8-27B (distilled, FP8); Molmo2, SAM3 on RoboLab-Long"
+inputs: "RGB, depth, camera calibration, proprioception"
+ladder_commit: 8703b9d02bfe5e20b7d544bd5ecd71234586246a
+date: 2026-11-05
+privileged: false                # true if the system reads simulator state a real robot would not have
+tuned_on_ladder: false           # true if any part was trained or tuned on LADDER's tasks or scenes
+description: >-
+  PAT: A Local Physical Agent That Teaches Its Own VLA. A local Qwen3.8-27B orchestrator, distilled from GPT-5.5
+  trajectories on 33 RoboLab-120 tasks, splits the instruction into subgoals, monitors execution from the camera
+  images and replans on failure. On RoboLab-Long it runs through the agent interface: for each subgoal it either
+  issues a language command to pi0.5 DROID (joint position) or calls a grasp or place primitive (SAM3 and Molmo2 for
+  perception, GraspGen and cuRobo for planning on the external camera's depth); joint chunks are executed the way
+  LADDER executes pi0.5. That pi0.5 is fine-tuned once on its own successful episodes, collected by the same
+  orchestrator on RoboLab tasks from a task generator, mixed with DROID. On the two WidowX suites only the
+  orchestrator runs, issuing language subgoals to the suite's Bridge policy, with no primitives and no fine-tuning.
+  Every model runs locally; no part was trained or tuned on LADDER's tasks or scenes, and the planning prompt is the
+  one used on RoboLab. A task whose run stopped before writing any result (GPU out of memory, or its shard stopped to
+  move to another card) was re-run whole; no written episode was re-run.
+verified: false                  # set by the maintainers once they have re-run the system
