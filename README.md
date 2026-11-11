@@ -74,6 +74,10 @@ To put it on the [leaderboard](https://ladderrobotics.ai/#leaderboard), run ever
 (`--task all`), then `scripts/leaderboard.py package --name my_policy` and open a pull request
 ([`leaderboard/README.md`](leaderboard/README.md)).
 
+A policy trained with [LeRobot](https://github.com/huggingface/lerobot) can also run on the three
+suites with `lerobot-eval`, without Bazel: they are LeRobot EnvHub environments
+([EVALUATION.md](EVALUATION.md#lerobot-envhub)).
+
 ## Tasks
 
 [TASKS.md](TASKS.md) lists every task with its instruction and a video of it being solved.
@@ -142,6 +146,7 @@ Task success rate (%) of the baselines, from the paper.
 
 - [Evaluation](EVALUATION.md): suites, methods, options and the launchers behind `scripts/eval.sh`
 - [Your own system](examples/README.md) and [the leaderboard](leaderboard/README.md)
+- [LeRobot EnvHub](EVALUATION.md#lerobot-envhub): the suites as LeRobot environments
 - [Tasks](TASKS.md)
 - [Dashboard](ladder/components/dashboard/README.md)
 - [Metrics](ladder/components/inference/api/client/metrics/README.md)
