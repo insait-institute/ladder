@@ -25,7 +25,9 @@ class ServedVLM(VLM[ServedVLMConfig]):
         max_tokens: int,
         temperature: float,
         reasoning_effort: Optional[str],
+        response_schema: Optional[Dict[str, Any]],
     ) -> str:
         del reasoning_effort
+        del response_schema
         assert self._inference is not None, "ServedVLM needs bind_policy(); is the policy remote?"
         return self._inference.vlm_complete(messages, max_tokens, temperature)

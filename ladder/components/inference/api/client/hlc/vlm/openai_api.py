@@ -65,6 +65,8 @@ class OpenAIVLMConfig(VLMConfig):
     # Some models reject `temperature` outright with a 400. Omitting it costs determinism, so leave
     # it on where it works.
     send_temperature: bool = True
+    # Enforce the caller's reply schema through `response_format`; not every endpoint accepts it.
+    json_schema_output: bool = False
     # SDK-level retries with its own backoff. Raise it for a gateway that throttles.
     max_retries: int = 2
     # Per-request bound. The default suits an eval, where a stalled call must not hold up a batch;
@@ -167,6 +169,7 @@ class OpenAIVLM(VLM[OpenAIVLMConfig]):
         max_tokens: int,
         temperature: float,
         reasoning_effort: Optional[str],
+        response_schema: Optional[Dict[str, Any]],
     ) -> str:
         kwargs: Dict[str, Any] = {
             "model": self.config.model,
@@ -175,6 +178,11 @@ class OpenAIVLM(VLM[OpenAIVLMConfig]):
         }
         if self.config.send_temperature:
             kwargs["temperature"] = temperature
+        if response_schema is not None and self.config.json_schema_output:
+            kwargs["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {"name": "reply", "schema": response_schema, "strict": True},
+            }
         if reasoning_effort is not None:
             kwargs["extra_body"] = {"reasoning_effort": reasoning_effort}
         response = self.request(**kwargs)

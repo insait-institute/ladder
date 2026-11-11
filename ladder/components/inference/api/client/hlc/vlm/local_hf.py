@@ -62,8 +62,10 @@ class LocalVLM(VLM[LocalVLMConfig]):
         max_tokens: int,
         temperature: float,
         reasoning_effort: Optional[str],
+        response_schema: Optional[Dict[str, Any]],
     ) -> str:
         del reasoning_effort  # no thinking-budget knob on a local transformers generate
+        del response_schema
         self.warmup()
         conv, images = self._to_chat(messages)
         with self._lock:

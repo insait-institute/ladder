@@ -96,6 +96,7 @@ class LadderVlmSession(Configurable[VlmSessionConfig]):
                 max_tokens=self.config.max_tokens,
                 temperature=self.config.temperature,
                 reasoning_effort=self.config.reasoning_effort,
+                response_schema=self._context.output_schema,
             )
             if not reply.strip():
                 raise gpt_policy.harness.errors.AgentOverloadedError(
