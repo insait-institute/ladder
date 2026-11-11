@@ -93,12 +93,13 @@ class VLM(Configurable[VLMConfigT]):
         max_tokens: int,
         temperature: float,
         reasoning_effort: Optional[str] = None,
+        response_schema: Optional[Dict[str, Any]] = None,
     ) -> str:
         """One completion; the reply text, or \"\" when the backend failed transiently and the failure
         budget allows skipping the call. Raises ``VLMUnavailableError`` once the budget is spent."""
         self._calls += 1
         try:
-            text = self._complete(messages, max_tokens, temperature, reasoning_effort)
+            text = self._complete(messages, max_tokens, temperature, reasoning_effort, response_schema)
         except self.transient_errors as error:
             self._failures += 1
             self._consecutive_failures += 1
@@ -125,6 +126,8 @@ class VLM(Configurable[VLMConfigT]):
         max_tokens: int,
         temperature: float,
         reasoning_effort: Optional[str],
+        response_schema: Optional[Dict[str, Any]],
     ) -> str:
         """One completion; returns the reply text. ``reasoning_effort`` is ignored by backends
-        without a thinking-budget knob."""
+        without a thinking-budget knob, ``response_schema`` (the JSON schema the reply must match) by
+        backends that cannot enforce one."""
