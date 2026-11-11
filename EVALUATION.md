@@ -7,6 +7,7 @@ scripts/eval.sh --suite SUITE --method METHOD [--task TASK ... | --task all] [--
 - [Suites](#suites)
 - [Methods](#methods)
 - [Your own system](#your-own-system)
+- [LeRobot EnvHub](#lerobot-envhub)
 - [Options](#options)
 - [Models and API keys](#models-and-api-keys)
 - [Offline VLM benchmark](#offline-vlm-benchmark)
@@ -60,6 +61,33 @@ Instead of `--method`, give your own system ([`examples/README.md`](examples/REA
 
 `--name` sets the name its results are filed under (default: the class name). The configs are in
 `ladder/components/inference/models/plugin/configs/<suite>/`.
+
+## LeRobot EnvHub
+
+The three suites are also [LeRobot EnvHub](https://huggingface.co/docs/lerobot/envhub) environments,
+one repository per simulator, so a policy trained with LeRobot runs on them with `lerobot-eval`,
+without Bazel:
+
+| suite | repository |
+|---|---|
+| RoboLab-Long | [`INSAIT-Institute/LADDER-RoboLab-Long`](https://huggingface.co/INSAIT-Institute/LADDER-RoboLab-Long) |
+| SimplerEnv-Long | [`INSAIT-Institute/LADDER-SimplerEnv-Long`](https://huggingface.co/INSAIT-Institute/LADDER-SimplerEnv-Long) |
+| RobotArena-&infin;-Long | [`INSAIT-Institute/LADDER-RobotArena-Long`](https://huggingface.co/INSAIT-Institute/LADDER-RobotArena-Long) |
+
+```bash
+# from a LeRobot checkout, with Docker and the NVIDIA Container Toolkit
+pip install -e ".[dataset,evaluation,remote]"
+lerobot-env-server --envhub=INSAIT-Institute/LADDER-SimplerEnv-Long@v1.0.0 --docker=true
+lerobot-eval --policy.path=<your checkpoint> --env.type=envhub \
+  --env.hub_path=INSAIT-Institute/LADDER-SimplerEnv-Long@v1.0.0 --env.server.endpoint=tcp/127.0.0.1:7448 \
+  --env.task=all2_plate --eval.batch_size=24 --eval.n_episodes=24 --eval.use_async_envs=false
+```
+
+They run this repository's code at release v1.0.0 with the settings of `scripts/eval.sh`: the same
+tasks, scene layouts, step budgets and success predicates. `pc_success` is the task success and
+`avg_sum_reward` the subgoal progress. They take a policy only; methods, orchestrators, agents and
+leaderboard submissions go through `scripts/eval.sh`. Each repository's model card lists its
+observations, actions and options.
 
 ## Options
 
