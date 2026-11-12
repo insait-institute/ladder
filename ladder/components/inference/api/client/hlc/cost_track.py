@@ -49,28 +49,37 @@ def log_call(
 
 
 def extract_usage(response: Any) -> Dict[str, Any]:
-    """Pull (input, output, thinking) token counts from an OpenAI-compat ``ChatCompletion``,
-    returning zeros for any field the response omits."""
+    """Pull (input, output, thinking) token counts from an OpenAI-compat ``ChatCompletion``.
+
+    ``output_tokens`` and ``thinking_tokens`` are disjoint, so a call costs ``input * input_price
+    + (output + thinking) * output_price`` on every endpoint. Endpoints disagree on whether
+    ``completion_tokens`` contains the reasoning: OpenAI-style ones (NVIDIA, OpenAI) count it
+    inside and also report it as ``reasoning_tokens``, Gemini counts it outside and reports it
+    only through ``total_tokens``. ``total_tokens - prompt_tokens`` is everything generated
+    under both conventions, so it is the reference whenever it is present.
+
+    ``usage_missing`` marks a call whose usage reports nothing generated; its cost cannot be
+    read from the record."""
     usage = getattr(response, "usage", None)
     if usage is None:
-        return {"input_tokens": 0, "output_tokens": 0, "thinking_tokens": 0}
+        return {"input_tokens": 0, "output_tokens": 0, "thinking_tokens": 0, "usage_missing": True}
 
     input_tokens = getattr(usage, "prompt_tokens", 0) or 0
-    output_tokens = getattr(usage, "completion_tokens", 0) or 0
-    # OpenAI / Gemini-thinking style: usage.completion_tokens_details.reasoning_tokens
+    completion_tokens = getattr(usage, "completion_tokens", 0) or 0
+    total_tokens = getattr(usage, "total_tokens", 0) or 0
     details = getattr(usage, "completion_tokens_details", None)
-    thinking_tokens = 0
-    if details is not None:
-        thinking_tokens = getattr(details, "reasoning_tokens", 0) or 0
-    # Fallback: some gateways omit the reasoning_tokens breakdown and report only total_tokens;
-    # recover thinking as the remainder so it isn't silently logged as 0.
-    if thinking_tokens == 0:
-        total_tokens = getattr(usage, "total_tokens", 0) or 0
-        remainder = total_tokens - input_tokens - output_tokens
-        if remainder > 0:
-            thinking_tokens = remainder
+    reasoning_tokens = (getattr(details, "reasoning_tokens", 0) or 0) if details is not None else 0
+
+    if total_tokens > input_tokens:
+        generated = total_tokens - input_tokens
+        thinking_tokens = reasoning_tokens or max(generated - completion_tokens, 0)
+    else:
+        # No usable total: assume the OpenAI convention, where completion includes the reasoning.
+        generated = max(completion_tokens, reasoning_tokens)
+        thinking_tokens = reasoning_tokens
     return {
         "input_tokens": int(input_tokens),
-        "output_tokens": int(output_tokens),
+        "output_tokens": int(generated - thinking_tokens),
         "thinking_tokens": int(thinking_tokens),
+        "usage_missing": generated == 0,
     }
