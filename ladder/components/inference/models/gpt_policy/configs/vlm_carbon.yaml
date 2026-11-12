@@ -1,0 +1,4 @@
+import: ../../../api/client/hlc/configs/vlm.yaml
+model: gemini-4-carbon
+send_temperature: false
+json_schema_output: true

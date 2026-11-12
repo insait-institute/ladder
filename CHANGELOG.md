@@ -5,6 +5,19 @@ Every release of this repository is listed here, newest first. Releases follow
 layouts, success predicates, step budgets) bumps the major version, so that scores reported against
 different major versions are never compared.
 
+## [1.1.0] - 2026-11-12
+
+Results of earlier versions stay valid: the benchmark itself is unchanged.
+
+- New LADDER-Lite entry: GPT-Policy with Gemini 4 Carbon.
+- Leaderboard: submissions may be scored on LADDER-Lite only, and external entries are tagged. PAT is
+  the first external entry (all three suites, self-reported).
+- GPT-Policy: an opt-in `json_schema_output` setting makes endpoints that support it enforce the
+  reply schema; the Gemini 4 Carbon configuration uses it.
+- API cost: output and reasoning tokens are logged without overlap on every endpoint, and the
+  LADDER-Lite costs were corrected (Claude Opus 5.5 counted its reasoning twice).
+- Docs: running the suites with LeRobot EnvHub.
+
 ## [1.0.0] - 2026-10-22
 
 First public release.
@@ -26,4 +39,5 @@ First public release.
   covered by their projects' licenses: `m2t2.pth` by the NVIDIA License (non-commercial, in
   `m2t2_src.tar.gz`) and `sam2.1_hiera_large.pt` by Apache-2.0 (in `sam2_src.tar.gz`).
 
+[1.1.0]: https://github.com/insait-institute/ladder/releases/tag/v1.1.0
 [1.0.0]: https://github.com/insait-institute/ladder/releases/tag/v1.0.0
