@@ -1,0 +1,38 @@
+# Your system on the LADDER leaderboard. Fill in every field; leaderboard/README.md explains them.
+name: ARP-Agent (async)          # as shown on the leaderboard
+kind: agent                      # policy | orchestrator | agent
+authors: "Sombit Dey, Luc Van Gool, Danda Pani Paudel"
+organization: "INSAIT"
+contact: "sombit.dey@insait.ai"
+paper_url: ""                    # optional
+code_url: ""                     # optional: a public implementation lets the maintainers verify it
+results_url: "https://huggingface.co/datasets/Sombit/ladder-robolab-long-arp-agent"
+low_level_policy: "ARP (our LAP-3B vision-language-action policy) plus scripted grasp, place and servo skills"
+vlm: "Qwen3-VL-32B-Instruct (FP8) planner; SAM 3 for perception"
+inputs: "RGB (scene, wrist), scene depth, camera calibration, proprioception"
+ladder_commit: 6c88eeadc8f5666fdf65f10b9c06bb7bdf1f7ca4
+date: 2026-11-16
+privileged: false                # true if the system reads simulator state a real robot would not have
+tuned_on_ladder: false           # true if any part was trained or tuned on LADDER's tasks or scenes
+description: >-
+  An asynchronous tool-using agent. A Qwen3-VL-32B planner (one prompt for every task) writes a plan of pick and
+  place items and keeps replanning from the freshest frame while an executor carries the items out with ARP, our
+  LAP-3B vision-language-action policy, and scripted grasp, servo and place skills; perception is SAM 3 lifted to 3D
+  with LADDER's published depth and calibration. The simulator pauses only for the first plan; after that it never
+  waits for the planner, and each new plan takes effect at its measured latency. The system reads only LADDER's agent
+  observation (scene and wrist RGB, scene depth with intrinsics and base_from_camera, joints, gripper, eef_pose, step);
+  the table height comes from depth. Actions are absolute joint-position chunks given through the program episode's
+  act() (JointAnglesAction), the way LADDER executes pi0.5. Our adapter logs LADDER's verdict from the final
+  observation after an episode has ended, for our records only; it never reaches the system. The planner runs on
+  vLLM servers on separate GPUs, each shared by up to seven tasks running in parallel (max context 24576 tokens).
+  No weights, prompts or thresholds were trained or tuned on LADDER's tasks or scenes; the agent was developed on
+  NVIDIA RoboLab (120 tasks), and only its infrastructure (session handling, logging) was debugged on RoboLab-Long
+  smoke runs. Every task ran with LADDER's default 8 episodes, one task per process, and every episode is reported.
+  Infrastructure re-launches (a whole task from scratch, decided without regard to outcome, never because episodes
+  failed): 2 tasks (comp_relay_5, comp_route_10) after their planner server was restarted mid-task; 7 tasks
+  (comp_bin_2, comp_relay_2, comp_revisit_1, comp_route_4, comp_split_plate_3, comp_split_plate_4, comp_transfer_3)
+  whose allocation hit its time limit before LADDER wrote any result, and again after a stale log-file lock stopped
+  their simulators at start-up. In the time-limit case 4 episodes had already ended with success but LADDER had not
+  written them; they were discarded with the rest of the task. One task (comp_split_plate_4) needed LADDER's automatic
+  retry because its simulator did not come up; nothing had run.
+verified: false                  # set by the maintainers once they have re-run the system
