@@ -466,7 +466,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (D.lite && ranked && !lite) note = '<span class="lb-badge is-lite">Lite</span> <b>LADDER-Lite</b> is a ' + liteCounts().tasks +
       '-task version of LADDER for testing new models quickly. ' + LITE_FIT + ' ' +
       'Rows marked Lite were scored on LADDER-Lite only.' + partialNote() + (note ? '<br>' + note : '');
-    if (D.lite && !ranked && !lite && liteOnly.length) note = (note ? note + '<br>' : '') + liteOnly.map(function (s) { return s.vlm; }).join(' and ') +
+    if (D.lite && !ranked && !lite && liteOnly.length) note = (note ? note + '<br>' : '') + liteOnly.map(label).join(' and ') +
       (liteOnly.length > 1 ? ' are' : ' is') + ' not shown here: scored on LADDER-Lite only, ' + liteCounts().tasks + ' tasks are too few to split this way.';
     if (lite) note = '<b>Every system on the same ' + liteCounts().tasks + ' LADDER-Lite tasks</b> (' + liteCounts().episodes +
       ' attempts each), for a direct comparison with the models scored on LADDER-Lite only. ' + LITE_FIT + partialNote() +
