@@ -143,6 +143,9 @@ def problems(submission_dir):
         out.append(f"submission.yaml: kind must be one of {KINDS}")
     if "One paragraph" in str(meta.get("description", "")):
         out.append("submission.yaml: description is still the template's")
+    lite = meta.get("benchmark") == "lite"
+    if meta.get("benchmark") not in (None, "lite"):
+        out.append("submission.yaml: benchmark must be lite or left out")
     rows = read_episodes(rows_path)
     by_task = {}
     for r in rows:
@@ -164,11 +167,14 @@ def problems(submission_dir):
     suites = sorted({s for s, _ in by_task})
     if not suites:
         out.append("episodes.jsonl: no episodes")
-    for suite in suites:
+    # a LADDER-Lite entry runs exactly the Lite tasks of all three suites
+    for suite in SUITES if lite else suites:
         for task in TASKS[suite]:
             n = len(by_task.get((suite, task), []))
-            if n != SUITES[suite]:
-                out.append(f"{suite}/{task}: {n} episodes, the suite runs {SUITES[suite]}")
+            want = SUITES[suite] if not lite or task in LITE[suite] else 0
+            if n != want:
+                runs = "LADDER-Lite runs" if lite else "the suite runs"
+                out.append(f"{suite}/{task}: {n} episodes, {runs} {want}")
     return out
 
 
@@ -245,6 +251,7 @@ def package(args):
         for r in rows:
             f.write(json.dumps(r) + "\n")
     meta = os.path.join(out, "submission.yaml")
+    lite = {(r["suite"], r["task"]) for r in rows} == {(s, t) for s in LITE for t in LITE[s]}
     if not os.path.exists(meta):
         commit = subprocess.run(
             ["git", "-C", ROOT, "rev-parse", "HEAD"], check=False, capture_output=True, text=True
@@ -256,6 +263,7 @@ def package(args):
                 commit=commit or '""',
                 date=datetime.date.today().isoformat(),
             )
+            + ("benchmark: lite\n" if lite else "")
         )
     print(f"wrote {out}: {len(rows)} episodes")
     report(out)
@@ -331,7 +339,10 @@ def build(args):
         by_suite = lambda table, total: {short[k]: {**v, "All tasks": total[k]} for k, v in table.items()}  # noqa: E731
         entries.append(
             {
-                **{k: meta.get(k) for k in REQUIRED + ["organization", "paper_url", "code_url", "verified"]},
+                **{
+                    k: meta.get(k)
+                    for k in REQUIRED + ["organization", "paper_url", "code_url", "verified", "benchmark"]
+                },
                 "id": os.path.basename(d),
                 "date": str(meta.get("date", "")),
                 "scale": {"tasks": s["tasks"], "episodes": s["episodes"]},

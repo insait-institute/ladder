@@ -18,6 +18,9 @@ done
 An entry may cover one, two or all three suites. With fewer, the page names the suites it covers and
 places it by its score on them, among the other systems' scores on the same suites.
 
+An entry may also cover LADDER-Lite only: run every suite with `--task lite` instead. It must have
+all 10 LADDER-Lite tasks, and the page shows it like the other LADDER-Lite rows.
+
 ## 2. Package the results
 
 ```bash
@@ -83,6 +86,7 @@ paper baseline are compared on equal terms:
   [`tasks.yaml`](tasks.yaml), the paper's task catalog.
 - **LADDER-Lite.** The same scores over the episodes of the LADDER-Lite tasks
   ([`scripts/tasks/*_lite.txt`](../scripts/tasks)), so an entry with every task is also ranked there.
+  A LADDER-Lite entry has `benchmark: lite` in `submission.yaml` (`package` sets it).
 
 `scripts/leaderboard.py build` writes the page's data (`docs/static/data/submissions.json`) from
 every submission. The Pages workflow runs it on every merge, so do not edit that file by hand.
