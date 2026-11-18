@@ -7,3 +7,8 @@ pat:
   vlm: "Qwen3.8-27B"
   # the snapshot of their results that was reviewed, so the link shows what the scores came from
   results_url: "https://huggingface.co/datasets/juyil/PAT-leaderboard-results/tree/45720b6eee257e199f868e23878875d38904f9b7/ladder"
+
+arp_agent_async:
+  name: "ARP-Agent"
+  vlm: "Qwen3-VL-32B"
+  results_url: "https://huggingface.co/datasets/Sombit/ladder-robolab-long-arp-agent/tree/2ecf1213b53347b626034888a3f55482a51dc651"
