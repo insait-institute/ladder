@@ -53,7 +53,8 @@ document.addEventListener('DOMContentLoaded', function () {
         (s.verified ? 'Submitted by its authors and re-run by the LADDER team' :
           'Submitted by its authors. Scored by LADDER from their episode logs; not re-run by the LADDER team') + '">' +
         (s.verified ? 'verified' : 'external') + '</span>' : '') +
-      '</span>' + (w.sub ? '<span class="lb-sub">' + w.sub + '</span>' : '') + '</span></span>';
+      '</span>' + (w.sub || s.only ? '<span class="lb-sub">' + (s.only ? '<span class="lb-badge" title="' + ONLY_TIP(s) + '">' + s.only + ' only</span> ' : '') +
+      w.sub + '</span>' : '') + '</span></span>';
   }
   // how closely LADDER-Lite follows the full benchmark, from the data: how many of the leaders keep their place, and
   // the largest gap between a system's Lite and full score
@@ -70,6 +71,14 @@ document.addEventListener('DOMContentLoaded', function () {
     return 'On it, the ' + (top === 2 ? 'two' : top === 3 ? 'three' : top) + ' best systems keep their places, and every score is within ' +
       gap.toFixed(1) + '% of its score on all ' + TOTAL_TASKS + ' tasks.';
   })();
+  // a submission may cover fewer than the three suites: it has no overall score, so it is ranked only in its suites' columns
+  var ONLY_TIP = function (s) {
+    return 'Tested on ' + s.only + ' only. It is placed where its ' + s.only + ' score ranks among the other systems\' scores there';
+  };
+  // the mean over the suites a submission covers; for every other system, the mean over the same suites
+  var onlyScore = function (s, of) {
+    return avg(SUITES.filter(function (x) { return s.suites[x.id].v != null; }).map(function (x) { return (of || s).suites[x.id].v; }));
+  };
   var LITE_ALL_TIP = 'Scored here on the LADDER-Lite tasks only; its full-benchmark score is in the other views';
   var LITE_TIP = 'Scored on LADDER-Lite, the ' + (D.lite ? SUITES.reduce(function (a, s) { return a + D.lite.tasks[s.id].length; }, 0) : '') +
     '-task version of LADDER, not on all ' + TOTAL_TASKS + ' tasks';
@@ -119,14 +128,27 @@ document.addEventListener('DOMContentLoaded', function () {
     var up = dir === 'asc';
     var key = function (s) { var v = sc.get(s); return v == null ? (up ? 1e9 : -1) : v; };
     var shown = D.systems.filter(function (s) { return state.type === 'all' || s.type === state.type || (s.group === 'sub' && s.type === state.type); });
-    var ranked = shown.filter(function (s) { return s.group !== 'ref' && s.ranked !== false; })
+    // a system without all three suites is ranked by the suites it has: in their columns, and in the default ranking
+    // at the place its score takes among the other systems' scores on the same suites
+    var bySuite = SUITES.some(function (x) { return x.id === state.sort; });
+    var byMean = state.sort === 'mean' && !up;
+    var counts = function (s) {
+      return s.group !== 'ref' && (s.ranked !== false || (bySuite && sc.get(s) != null) || (byMean && !!s.only));
+    };
+    var full = shown.filter(function (s) { return s.group !== 'ref' && s.ranked !== false; });
+    var slotOf = function (s) {
+      if (!(byMean && s.only)) return s.slot;
+      var mine = onlyScore(s);
+      return 1 + full.filter(function (t) { return onlyScore(s, t) > mine; }).length;
+    };
+    var ranked = shown.filter(counts)
       .sort(function (a, b) { return up ? key(a) - key(b) : key(b) - key(a); });
-    if (state.sort === 'mean' && !up) {
-      var slotted = ranked.filter(function (s) { return s.slot; }).sort(function (a, b) { return a.slot - b.slot; });
-      ranked = ranked.filter(function (s) { return !s.slot; });
-      slotted.forEach(function (s) { ranked.splice(Math.min(s.slot - 1, ranked.length), 0, s); });
+    if (byMean) {
+      var slotted = ranked.filter(function (s) { return slotOf(s); }).sort(function (a, b) { return slotOf(a) - slotOf(b); });
+      ranked = ranked.filter(function (s) { return !slotOf(s); });
+      slotted.forEach(function (s) { ranked.splice(Math.min(slotOf(s) - 1, ranked.length), 0, s); });
     }
-    var rows = ranked.concat(shown.filter(function (s) { return s.group === 'ref' || s.ranked === false; }));
+    var rows = ranked.concat(shown.filter(function (s) { return !counts(s); }));
     var TIP = { mean: 'Share of tasks the robot finished completely, with every object in the right place',
       progress: 'Share of all individual moves done, including those in unfinished tasks',
       cost: 'What the AI model charges for one try at a task',
@@ -145,17 +167,24 @@ document.addEventListener('DOMContentLoaded', function () {
       (simple ? '' : head('scale', 'Tasks &middot; attempts', 'lb-scale') + head('date', 'Date tested', 'lb-date') + '<th class="lb-files">Videos &amp; logs</th>') + '</tr></thead><tbody>';
     var rank = 0, last = null, n = 0;
     rows.forEach(function (s) {
-      var ref = s.group === 'ref' || s.ranked === false, v = sc.get(s), m = s.mean.v, pm = s.mean.pm;
-      if (!ref) { n += 1; if (s.slot && state.sort === 'mean') { rank = n; last = null; } else if (v !== last) rank = n; last = s.slot ? null : v; }
+      var ref = !counts(s), v = sc.get(s), m = s.mean.v, pm = s.mean.pm, slot = slotOf(s);
+      // a system on fewer suites shows its score on those (and its margin, when it has one suite)
+      var part = m == null && s.only ? onlyScore(s) : null;
+      if (part != null) {
+        var one = SUITES.filter(function (x) { return s.suites[x.id].v != null; });
+        m = part; pm = one.length === 1 ? s.suites[one[0].id].pm : null;
+      }
+      if (!ref) { n += 1; if (slot && state.sort === 'mean') { rank = n; last = null; } else if (v !== last) rank = n; last = slot ? null : v; }
       var on = function (k) { return state.sort === k ? ' is-on' : ''; };
       html += '<tr class="' + (ref ? 'lb-ref' : '') + (!ref && rank <= 3 && state.sort === 'mean' ? ' lb-top' : '') + '">' +
-        '<td class="lb-rank">' + (ref || state.sort === 'date' || state.sort === 'scale' || (v == null && !(s.slot && state.sort === 'mean')) ? '' : rank) + '</td><td class="lb-left">' + name(s) + (simple ? '' : '<span class="lb-when">' + (s.scale ? s.scale.tasks + ' tasks &middot; ' + s.scale.episodes.toLocaleString('en-US') + ' attempts<br>' : '') +
+        '<td class="lb-rank">' + (ref || state.sort === 'date' || state.sort === 'scale' || (v == null && !(slot && state.sort === 'mean')) ? '' : rank) + '</td><td class="lb-left">' + name(s) + (simple ? '' : '<span class="lb-when">' + (s.scale ? s.scale.tasks + ' tasks &middot; ' + s.scale.episodes.toLocaleString('en-US') + ' attempts<br>' : '') +
           'Tested ' + when(s) + ' &middot; ' + files(s) + '</span>') + '</td>' +
         '<td class="lb-score' + on('mean') + '"><div class="lb-scorebox"><div class="lb-meter"><span style="width:' + (m || 0) + '%"></span></div><b>' + (simple && m != null ? fmt(m) + '%' : fmt(m)) + '</b>' +
         '<small>' + (pm != null && !simple ? '&plusmn;' + fmt(pm) : '') + '</small></div></td>' +
         (simple ? '<td class="lb-num lb-money' + on('succ') + '">' + (s.cost_succ ? money(s.cost_succ) : '&ndash;') + '</td>' :
          suites ? SUITES.map(function (x) { return '<td class="lb-num' + on(x.id) + '">' + fmt(s.suites[x.id].v) + '<small class="lb-pm">' + (s.suites[x.id].pm != null ? '&plusmn;' + fmt(s.suites[x.id].pm) : '') + '</small></td>'; }).join('') :
-          '<td class="lb-num' + on('progress') + '">' + fmt(s.progress.mean) + '</td>' +
+          '<td class="lb-num' + on('progress') + '">' + fmt(s.progress.mean != null || !s.only ? s.progress.mean :
+            avg(SUITES.map(function (x) { return s.progress[x.id]; }))) + '</td>' +
           '<td class="lb-num lb-money' + on('cost') + '">' + money(s.cost_ep) + '</td>' +
           '<td class="lb-num lb-money lb-suite' + on('succ') + '">' + money(s.cost_succ) + '</td>') +
         (simple ? '' : '<td class="lb-num lb-scale' + on('scale') + '">' + scale(s) + '</td><td class="lb-num lb-date' + on('date') + '">' + when(s) + '</td><td class="lb-files">' + files(s) + '</td>') + '</tr>';
@@ -430,6 +459,10 @@ document.addEventListener('DOMContentLoaded', function () {
     more.onclick = function () { state.view = state.view === 'details' ? 'overall' : 'details'; state.bench = 'full'; state.sort = 'mean'; state.dir = null; draw(); };
     views.appendChild(more);
     var note = VIEWS.filter(function (v) { return v[0] === state.view; })[0][2](view, controls);
+    var only = D.systems.filter(function (s) { return s.only; }).map(function (s) {
+      return s.name + ' was tested on ' + s.only + ' only, so its row shows its ' + s.only + ' score, placed where it ranks among the other systems\' ' + s.only + ' scores.';
+    }).join(' ');
+    if (only) note = only + (note ? '<br>' + note : '');
     if (D.lite && ranked && !lite) note = '<span class="lb-badge is-lite">Lite</span> <b>LADDER-Lite</b> is a ' + liteCounts().tasks +
       '-task version of LADDER for testing new models quickly. ' + LITE_FIT + ' ' +
       'Rows marked Lite were scored on LADDER-Lite only.' + partialNote() + (note ? '<br>' + note : '');
@@ -464,8 +497,11 @@ document.addEventListener('DOMContentLoaded', function () {
     D.groups.push({ id: 'sub', name: 'Submitted' });
     entries.forEach(function (e) {
       var name = esc(e.name);
+      // the suites a submission covers, named when it is not all three
+      var has = SUITES.filter(function (x) { return e.suites[x.id]; });
+      var only = !e.privileged && has.length < SUITES.length ? has.map(function (x) { return x.name; }).join(' and ') : null;
       var row = function (s, liteOnly) {
-        return { liteOnly: liteOnly,
+        return { liteOnly: liteOnly, only: only,
           name: name, group: e.privileged ? 'ref' : 'sub', type: { policy: 'Policy', orchestrator: 'Orchestrator', agent: 'Agent' }[e.kind],
           ranked: !e.privileged && ['se', 'ra', 'rl'].every(function (k) { return s.suites[k]; }), cost_ep: null, cost_succ: null,
           vlm: e.vlm === 'none' ? '' : esc(e.vlm), policy: esc(e.low_level_policy), inputs: esc(e.inputs), submission: 'Submitted ' + e.kind,

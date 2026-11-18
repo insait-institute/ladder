@@ -15,8 +15,8 @@ for suite in robolab_long simplerenv_long robotarena_long; do
 done
 ```
 
-An entry may cover one, two or all three suites. It is ranked overall only with all three. On
-another suite it shows "&ndash;".
+An entry may cover one, two or all three suites. With fewer, the page names the suites it covers and
+places it by its score on them, among the other systems' scores on the same suites.
 
 ## 2. Package the results
 
