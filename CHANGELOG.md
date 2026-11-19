@@ -5,6 +5,12 @@ Every release of this repository is listed here, newest first. Releases follow
 layouts, success predicates, step budgets) bumps the major version, so that scores reported against
 different major versions are never compared.
 
+## [1.2.0] - 2026-11-19
+
+Results of earlier versions stay valid: the benchmark itself is unchanged.
+
+- New LADDER-Lite entry: GPT-Policy with Claude Fable 5.2.
+
 ## [1.1.0] - 2026-11-12
 
 Results of earlier versions stay valid: the benchmark itself is unchanged.

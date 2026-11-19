@@ -1,0 +1,11 @@
+import: gpt_policy_robolab_composition.yaml
+
+policy_config:
+  session:
+    max_tokens: 16384
+  vlm:
+    import: ../../vlm_fable52.yaml
+
+runner_config:
+  recorder_config:
+    output_path: /home/$USER/experiments/vlams/control/$SESSION_NAME/robolab_composition_gpt_policy_fable52/$CKPT_NAME/$ENV_NAME
