@@ -216,9 +216,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!pts.length) return '';
     var paid = pts.filter(function (s) { return s.cost_ep > 0; }).map(function (s) { return s.cost_ep; });
     if (!paid.length) return '';
-    var W = size.W || 1100, H = size.H || 440, L = size.L || 72, R = 30, T = 16, B = 48, Z = size.Z || 200, x0 = L + Z;
+    var W = size.W || 1100, H = size.H || 580, L = size.L || 72, R = 30, T = 16, B = 48, Z = size.Z || 110, x0 = L + Z;
     var phone = !!size.phone;
-    var lo = Math.log10(Math.min.apply(null, paid) / 1.8), hi = Math.log10(Math.max.apply(null, paid) * 1.8);
+    var lo = Math.log10(Math.min.apply(null, paid) / 1.8), hi = Math.log10(Math.max.apply(null, paid) * 4);
     var top = Math.ceil((Math.max.apply(null, pts.map(function (s) { return s.mean.v; })) + 8) / 10) * 10;
     var x = function (c) { return c <= 0 ? L + 14 : x0 + (W - R - x0) * (Math.log10(c) - lo) / (hi - lo); };
     var y = function (v) { return T + (H - T - B) * (1 - v / top); };
@@ -236,33 +236,39 @@ document.addEventListener('DOMContentLoaded', function () {
     var best = -1, line = [];
     front.forEach(function (s) { if (s.mean.v > best) { best = s.mean.v; line.push(s); } });
     svg += '<polyline class="lb-pareto" points="' + line.map(function (s) { return x(s.cost_ep) + ',' + y(s.mean.v); }).join(' ') + '"/>';
-    // labels: spread those that would overlap
-    var placed = [];
-    // each label sits beside its own mark: to the right when it fits, else to the left. Overlap is checked on the
-    // span the label actually covers, and a clashing label moves down until it clears
+    // labels: the model name only (the diamond marks LADDER-Lite, the tooltip has the rest). Each label sits beside its
+    // own mark, right if it fits there, else left, and clears both the other labels and the other marks; a label that
+    // still clashes moves up or down, whichever is nearer, and keeps a thin leader line back to its mark
+    var placed = pts.map(function (s) { var px = x(s.cost_ep), py = y(s.mean.v); return [px - 10, px + 10, py + 4, s]; });
+    var clash = function (a, b, ty, self) { return placed.some(function (p) { return p[3] !== self && a < p[1] && p[0] < b && Math.abs(p[2] - ty) < 15; }); };
     pts.slice().sort(function (a, b) { return b.mean.v - a.mean.v; }).forEach(function (s) {
-      var cx = x(s.cost_ep), cy = y(s.mean.v), ty = cy + 4;
-      var w2 = who(s), sub = !phone && w2.sub.indexOf('via ') === 0 ? ' ' + w2.sub : '';
-      var w = (w2.main + (s.liteOnly ? ' · LADDER-Lite' : '') + sub).length * 7.4 + 14;
-      var right = cx + w < W - 8;
-      var x1 = right ? cx + 11 : cx - 11 - w, x2 = x1 + w, moved = true;
-      while (moved) {
-        moved = false;
-        placed.forEach(function (p) { if (x1 < p[1] && p[0] < x2 && Math.abs(p[2] - ty) < 16) { ty = p[2] + 16; moved = true; } });
+      var cx = x(s.cost_ep), cy = y(s.mean.v), ty = cy + 5;
+      var w2 = who(s), sub = !phone && w2.sub.indexOf('via ') === 0 && w2.sub.indexOf('GPT-Policy') < 0 ? ' ' + w2.sub : '';
+      var w = (w2.main + sub).length * (phone ? 10 : 8.2) + 6;
+      var sides = [true, false].filter(function (r) { return r ? cx + 12 + w < W - 4 : cx - 12 - w > L + 4; });
+      if (!sides.length) sides = [cx + 12 + w < W - 4];
+      var span = function (r) { return r ? [cx + 12, cx + 12 + w] : [cx - 12 - w, cx - 12]; };
+      var right = sides[0], x1, x2;
+      // try the mark's own height first, then alternately 16 px above and below it, nearest first
+      for (var k = 0; k < 60; k++) {
+        var dy = (k % 2 ? 1 : -1) * Math.ceil(k / 2) * 16, at = cy + 5 + dy;
+        if (at < T + 12 || at > H - B - 4) continue;
+        var free = sides.filter(function (r) { var sp = span(r); return !clash(sp[0], sp[1], at, s); });
+        if (free.length) { right = free[0]; ty = at; break; }
       }
-      placed.push([x1, x2, ty]);
+      x1 = span(right)[0]; x2 = span(right)[1];
+      placed.push([x1, x2, ty, null]);
       var mark = s.liteOnly
         ? '<path d="M' + cx + ' ' + (cy - 9) + 'L' + (cx + 9) + ' ' + cy + 'L' + cx + ' ' + (cy + 9) + 'L' + (cx - 9) + ' ' + cy + 'Z" class="lite-mark"/>'
         : '<circle cx="' + cx + '" cy="' + cy + '" r="7" style="fill:' + color(s) + '"/>';
       // a label pushed away from its mark keeps a thin leader line back to it
-      var lead = Math.abs(ty - 4 - cy) > 6 ? '<line class="pt-lead" x1="' + cx + '" y1="' + cy + '" x2="' + (right ? x1 - 2 : x2 + 2) + '" y2="' + (ty - 4) + '"/>' : '';
+      var lead = Math.abs(ty - 5 - cy) > 6 ? '<line class="pt-lead" x1="' + cx + '" y1="' + cy + '" x2="' + (right ? x1 - 2 : x2 + 2) + '" y2="' + (ty - 5) + '"/>' : '';
       var tipd = { h: w2.main + (w2.sub ? ' ' + w2.sub.replace(/<sub>(.*?)<\/sub>/g, '$1').replace(/&pi;/g, '\u03c0').replace(/<[^>]+>/g, '') : '') + (s.liteOnly ? ' (LADDER-Lite)' : ''), r: [
         ['', 'Tasks completed', s.mean.v.toFixed(1) + '%'], ['', 'Cost per attempt', s.cost_ep ? '$' + s.cost_ep.toFixed(s.cost_ep < 0.1 ? 3 : 2) : 'no API cost'],
         ['', 'Cost per completed task', s.cost_succ ? '$' + s.cost_succ.toFixed(2) : 'no API cost']] };
       svg += '<g class="lb-pt tip-target' + (s.group === 'ref' ? ' is-ref' : '') + (s.liteOnly ? ' is-lite' : '') + '" tabindex="0" data-tip="' +
         JSON.stringify(tipd).replace(/&/g, '&amp;').replace(/"/g, '&quot;') + '">' + lead + mark +
-        '<text x="' + (right ? x1 : x2) + '" y="' + ty + '" text-anchor="' + (right ? 'start' : 'end') + '"><tspan class="pt-main">' + w2.main +
-        (s.liteOnly ? '<tspan class="pt-lite"> &middot; LADDER-Lite</tspan>' : '') + '</tspan>' +
+        '<text x="' + (right ? x1 : x2) + '" y="' + ty + '" text-anchor="' + (right ? 'start' : 'end') + '"><tspan class="pt-main" style="fill:var(--ink)">' + w2.main + '</tspan>' +
         (sub ? '<tspan class="pt-sub">' + sub + '</tspan>' : '') + '</text></g>';
     });
     var key = '<div class="lb-typekey front-key"><i style="background:' + COLORS.tool + '"></i>AI agent <i style="background:' + COLORS.orch +
