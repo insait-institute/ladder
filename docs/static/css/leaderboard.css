@@ -573,7 +573,7 @@ details.more > summary { cursor: pointer; text-align: center; color: var(--accen
 .publication-authors a { color: var(--accent-text) !important; }
 /* space for what leaderboard.js draws, so the page does not jump while it loads */
 .lb-view:empty { min-height: 745px; }
-#cost-chart:empty { aspect-ratio: 1100 / 466; }
+#cost-chart:empty { aspect-ratio: 1100 / 606; }
 @media (max-width: 768px) { .lb-view:empty { min-height: 870px; } #cost-chart:empty { aspect-ratio: auto; min-height: 450px; } }
 /* suite cards: one picture height for all three */
 .suite-card video { width: 100%; aspect-ratio: 16 / 10 !important; object-fit: cover; display: block; background: #000; }
