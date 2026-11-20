@@ -1,0 +1,23 @@
+name: PoliAct1-Preview
+authors: 刘卫涛、胡欣硕、苏鑫、张驰、钱凯
+organization: QJ-Robots (千诀科技)
+contact: liu_wei_tao@mail.ustc.edu.cn
+paper_url: ''
+results_url: 'https://github.com/Liu-weitao/PoliAct1-Preview/tree/main/public'
+kind: agent
+benchmark: lite
+code_url: ''
+low_level_policy: Proprietary robot controller
+vlm: qwen3.8-max
+inputs: Public instruction, RGB, depth, camera calibration and proprioception
+ladder_commit: d645441a716595cce2ef9fb96abf2a324dc25b21
+date: '2026-11-20'
+privileged: false
+tuned_on_ladder: true
+verified: false
+description: A proprietary robotic system uses Qwen3.8-Max to autonomously select
+  appropriate skills from a fixed skill library based on public instructions and
+  robot embodiment, without per-task tuning. The system was adapted to LADDER during
+  development. Each episode starts with fresh memory. No hidden simulator object
+  poses, evaluator labels or scores enter the policy. This is a closed-source, results-only
+  LADDER-Lite submission.
