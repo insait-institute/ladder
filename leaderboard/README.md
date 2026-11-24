@@ -48,10 +48,11 @@ Check the entry locally, then open a pull request that adds only your directory:
 scripts/leaderboard.py check leaderboard/submissions/my_policy
 ```
 
-CI runs the same check. Once the pull request is merged, the entry appears on the leaderboard as
-**external**. The maintainers mark it **verified** once they have re-run the system with the
-same code and seen the same scores within their intervals. That needs a public implementation
-(`code_url`) or access to it.
+CI runs the same check. Once the pull request is merged, the entry appears in the leaderboard's
+**Community submissions** table, ranked separately from the main table. The maintainers mark it
+**verified** and move it into the main ranking once they have re-run the system with the same code
+and seen the same scores within their intervals. That needs a public implementation (`code_url`)
+or access to it.
 
 ## Rules
 

@@ -34,6 +34,8 @@ document.addEventListener('DOMContentLoaded', function () {
   // where the frontier model is the system (GPT-Policy, PSP-Agent and submissions built the same way), it leads and the
   // harness follows; for every other system the method leads and its VLM is a detail
   var MODEL_FIRST = ['GPT-Policy', 'PSP-Agent'];
+  // a submission the LADDER team has not re-run is ranked in its own table, under the main one
+  var external = function (s) { return s.group === 'sub' && !s.verified; };
   function who(s) {
     if (s.group === 'ref') return { main: 'Privileged verifier', sub: 'reference, not ranked' };
     if (s.group === 'e2e') return { main: 'Robotics-only model', sub: '&pi;<sub>0.5</sub> / Bridge policy' };
@@ -49,10 +51,8 @@ document.addEventListener('DOMContentLoaded', function () {
     return '<span class="lb-name"><i style="background:' + color(s) + '"></i><span class="lb-who"><span class="lb-main">' + w.main +
       (s.liteOnly || state.bench === 'lite' ? ' <span class="lb-badge is-lite" title="' + (s.liteOnly ? LITE_TIP : LITE_ALL_TIP) + '">Lite</span>' : '') +
       (s.partial ? ' <span class="lb-badge" title="Scored on ' + s.partial + ' of LADDER-Lite; the last one is still running">' + s.partial + '</span>' : '') +
-      (s.submission && s.submission !== 'Placeholder' ? ' <span class="lb-badge ' + (s.verified ? 'is-verified' : 'is-external') + '" title="' +
-        (s.verified ? 'Submitted by its authors and re-run by the LADDER team' :
-          'Submitted by its authors. Scored by LADDER from their episode logs; not re-run by the LADDER team') + '">' +
-        (s.verified ? 'verified' : 'external') + '</span>' : '') +
+      (s.submission && s.submission !== 'Placeholder' && s.verified ?
+        ' <span class="lb-badge is-verified" title="Submitted by its authors and re-run by the LADDER team">verified</span>' : '') +
       '</span>' + (w.sub || s.only ? '<span class="lb-sub">' + (s.only ? '<span class="lb-badge" title="' + ONLY_TIP(s) + '">' + s.only + ' only</span> ' : '') +
       w.sub + '</span>' : '') + '</span></span>';
   }
@@ -135,61 +135,82 @@ document.addEventListener('DOMContentLoaded', function () {
     var counts = function (s) {
       return s.group !== 'ref' && (s.ranked !== false || (bySuite && sc.get(s) != null) || (byMean && !!s.only));
     };
-    var full = shown.filter(function (s) { return s.group !== 'ref' && s.ranked !== false; });
-    var slotOf = function (s) {
-      if (!(byMean && s.only)) return s.slot;
-      var mine = onlyScore(s);
-      return 1 + full.filter(function (t) { return onlyScore(s, t) > mine; }).length;
-    };
-    var ranked = shown.filter(counts)
-      .sort(function (a, b) { return up ? key(a) - key(b) : key(b) - key(a); });
-    if (byMean) {
-      var slotted = ranked.filter(function (s) { return slotOf(s); }).sort(function (a, b) { return slotOf(a) - slotOf(b); });
-      ranked = ranked.filter(function (s) { return !slotOf(s); });
-      slotted.forEach(function (s) { ranked.splice(Math.min(slotOf(s) - 1, ranked.length), 0, s); });
-    }
-    var rows = ranked.concat(shown.filter(function (s) { return !counts(s); }));
-    var TIP = { mean: 'Share of tasks the robot finished completely, with every object in the right place',
-      progress: 'Share of all individual moves done, including those in unfinished tasks',
-      cost: 'What the AI model charges for one try at a task',
-      succ: 'What the AI model charges per finished task',
-      date: 'The days on which the system was tested',
-      scale: 'How many different tasks the system was tested on, and how many attempts it made in total' };
-    var head = function (k, label, cls) {
-      return '<th class="lb-num lb-sort' + (state.sort === k ? ' is-on is-' + dir : '') + (cls ? ' ' + cls : '') + '" data-k="' + k + '"' + (TIP[k] ? ' title="' + TIP[k] + '"' : '') + '>' + label + '</th>';
-    };
     var suites = state.view === 'suites', simple = state.view === 'overall';
-    var html = '<table class="lb-table' + (simple ? ' lb-simple' : '') + '"><thead><tr><th class="lb-rank">#</th><th class="lb-left">AI model</th>' +
-      head('mean', simple ? 'Tasks completed' : 'Success (%)', 'lb-score') +
-      (simple ? head('succ', 'Cost per<br>completed task', 'lb-money') :
-       suites ? SUITES.map(function (s) { return head(s.id, s.name.replace(/-/g, '&#8209;').replace('&#8209;Long', '<br>&#8209;Long')); }).join('') :
-        head('progress', 'Subgoals done (%)') + head('cost', 'Cost per<br>attempt', 'lb-money') + head('succ', 'Cost per<br>completed task', 'lb-suite')) +
-      (simple ? '' : head('scale', 'Tasks &middot; attempts', 'lb-scale') + head('date', 'Date tested', 'lb-date') + '<th class="lb-files">Videos &amp; logs</th>') + '</tr></thead><tbody>';
-    var rank = 0, last = null, n = 0;
-    rows.forEach(function (s) {
-      var ref = !counts(s), v = sc.get(s), m = s.mean.v, pm = s.mean.pm, slot = slotOf(s);
-      // a system on fewer suites shows its score on those (and its margin, when it has one suite)
-      var part = m == null && s.only ? onlyScore(s) : null;
-      if (part != null) {
-        var one = SUITES.filter(function (x) { return s.suites[x.id].v != null; });
-        m = part; pm = one.length === 1 ? s.suites[one[0].id].pm : null;
+    function build(shown, ext) {
+      var full = shown.filter(function (s) { return s.group !== 'ref' && s.ranked !== false; });
+      var slotOf = function (s) {
+        if (!(byMean && s.only)) return s.slot;
+        var mine = onlyScore(s);
+        return 1 + full.filter(function (t) { return onlyScore(s, t) > mine; }).length;
+      };
+      var ranked = shown.filter(counts)
+        .sort(function (a, b) { return up ? key(a) - key(b) : key(b) - key(a); });
+      if (byMean) {
+        var slotted = ranked.filter(function (s) { return slotOf(s); }).sort(function (a, b) { return slotOf(a) - slotOf(b); });
+        ranked = ranked.filter(function (s) { return !slotOf(s); });
+        slotted.forEach(function (s) { ranked.splice(Math.min(slotOf(s) - 1, ranked.length), 0, s); });
       }
-      if (!ref) { n += 1; if (slot && state.sort === 'mean') { rank = n; last = null; } else if (v !== last) rank = n; last = slot ? null : v; }
-      var on = function (k) { return state.sort === k ? ' is-on' : ''; };
-      html += '<tr class="' + (ref ? 'lb-ref' : '') + (!ref && rank <= 3 && state.sort === 'mean' ? ' lb-top' : '') + '">' +
-        '<td class="lb-rank">' + (ref || state.sort === 'date' || state.sort === 'scale' || (v == null && !(slot && state.sort === 'mean')) ? '' : rank) + '</td><td class="lb-left">' + name(s) + (simple ? '' : '<span class="lb-when">' + (s.scale ? s.scale.tasks + ' tasks &middot; ' + s.scale.episodes.toLocaleString('en-US') + ' attempts<br>' : '') +
-          'Tested ' + when(s) + ' &middot; ' + files(s) + '</span>') + '</td>' +
-        '<td class="lb-score' + on('mean') + '"><div class="lb-scorebox"><div class="lb-meter"><span style="width:' + (m || 0) + '%"></span></div><b>' + (simple && m != null ? fmt(m) + '%' : fmt(m)) + '</b>' +
-        '<small>' + (pm != null && !simple ? '&plusmn;' + fmt(pm) : '') + '</small></div></td>' +
-        (simple ? '<td class="lb-num lb-money' + on('succ') + '">' + (s.cost_succ ? money(s.cost_succ) : '&ndash;') + '</td>' :
-         suites ? SUITES.map(function (x) { return '<td class="lb-num' + on(x.id) + '">' + fmt(s.suites[x.id].v) + '<small class="lb-pm">' + (s.suites[x.id].pm != null ? '&plusmn;' + fmt(s.suites[x.id].pm) : '') + '</small></td>'; }).join('') :
-          '<td class="lb-num' + on('progress') + '">' + fmt(s.progress.mean != null || !s.only ? s.progress.mean :
-            avg(SUITES.map(function (x) { return s.progress[x.id]; }))) + '</td>' +
-          '<td class="lb-num lb-money' + on('cost') + '">' + money(s.cost_ep) + '</td>' +
-          '<td class="lb-num lb-money lb-suite' + on('succ') + '">' + money(s.cost_succ) + '</td>') +
-        (simple ? '' : '<td class="lb-num lb-scale' + on('scale') + '">' + scale(s) + '</td><td class="lb-num lb-date' + on('date') + '">' + when(s) + '</td><td class="lb-files">' + files(s) + '</td>') + '</tr>';
-    });
-    view.innerHTML = '<div class="lb-wrap">' + html + '</tbody></table></div>';
+      var rows = ranked.concat(shown.filter(function (s) { return !counts(s); }));
+      var TIP = { mean: 'Share of tasks the robot finished completely, with every object in the right place',
+        progress: 'Share of all individual moves done, including those in unfinished tasks',
+        cost: 'What the AI model charges for one try at a task',
+        succ: 'What the AI model charges per finished task',
+        date: 'The days on which the system was tested',
+        scale: 'How many different tasks the system was tested on, and how many attempts it made in total' };
+      var head = function (k, label, cls) {
+        return '<th class="lb-num lb-sort' + (state.sort === k ? ' is-on is-' + dir : '') + (cls ? ' ' + cls : '') + '" data-k="' + k + '"' + (TIP[k] ? ' title="' + TIP[k] + '"' : '') + '>' + label + '</th>';
+      };
+      var html = '<table class="lb-table' + (simple ? ' lb-simple' : '') + '"><thead><tr><th class="lb-rank">#</th><th class="lb-left">AI model</th>' +
+        head('mean', simple ? 'Tasks completed' : 'Success (%)', 'lb-score') +
+        (simple ? head('succ', 'Cost per<br>completed task', 'lb-money') :
+         suites ? SUITES.map(function (s) { return head(s.id, s.name.replace(/-/g, '&#8209;').replace('&#8209;Long', '<br>&#8209;Long')); }).join('') :
+          head('progress', 'Subgoals done (%)') + head('cost', 'Cost per<br>attempt', 'lb-money') + head('succ', 'Cost per<br>completed task', 'lb-suite')) +
+        (simple ? '' : head('scale', 'Tasks &middot; attempts', 'lb-scale') + head('date', 'Date tested', 'lb-date') + '<th class="lb-files">Videos &amp; logs</th>') + '</tr></thead><tbody>';
+      if (ext) html = '<table class="lb-table' + (simple ? ' lb-simple' : '') + ' lb-community"><tbody>';
+      var rank = 0, last = null, n = 0;
+      rows.forEach(function (s) {
+        var ref = !counts(s), v = sc.get(s), m = s.mean.v, pm = s.mean.pm, slot = slotOf(s);
+        // a system on fewer suites shows its score on those (and its margin, when it has one suite)
+        var part = m == null && s.only ? onlyScore(s) : null;
+        if (part != null) {
+          var one = SUITES.filter(function (x) { return s.suites[x.id].v != null; });
+          m = part; pm = one.length === 1 ? s.suites[one[0].id].pm : null;
+        }
+        if (!ref) { n += 1; if (slot && state.sort === 'mean') { rank = n; last = null; } else if (v !== last) rank = n; last = slot ? null : v; }
+        var on = function (k) { return state.sort === k ? ' is-on' : ''; };
+        html += '<tr class="' + (ref ? 'lb-ref' : '') + (!ref && !ext && rank <= 3 && state.sort === 'mean' ? ' lb-top' : '') + '">' +
+          '<td class="lb-rank">' + (ext || ref || state.sort === 'date' || state.sort === 'scale' || (v == null && !(slot && state.sort === 'mean')) ? '' : rank) + '</td><td class="lb-left">' + name(s) + (simple ? '' : '<span class="lb-when">' + (s.scale ? s.scale.tasks + ' tasks &middot; ' + s.scale.episodes.toLocaleString('en-US') + ' attempts<br>' : '') +
+            'Tested ' + when(s) + ' &middot; ' + files(s) + '</span>') + '</td>' +
+          '<td class="lb-score' + on('mean') + '"><div class="lb-scorebox"><div class="lb-meter"><span style="width:' + (m || 0) + '%"></span></div><b>' + (simple && m != null ? fmt(m) + '%' : fmt(m)) + '</b>' +
+          '<small>' + (pm != null && !simple ? '&plusmn;' + fmt(pm) : '') + '</small></div></td>' +
+          (simple ? '<td class="lb-num lb-money' + on('succ') + '">' + (s.cost_succ ? money(s.cost_succ) : '&ndash;') + '</td>' :
+           suites ? SUITES.map(function (x) { return '<td class="lb-num' + on(x.id) + '">' + fmt(s.suites[x.id].v) + '<small class="lb-pm">' + (s.suites[x.id].pm != null ? '&plusmn;' + fmt(s.suites[x.id].pm) : '') + '</small></td>'; }).join('') :
+            '<td class="lb-num' + on('progress') + '">' + fmt(s.progress.mean != null || !s.only ? s.progress.mean :
+              avg(SUITES.map(function (x) { return s.progress[x.id]; }))) + '</td>' +
+            '<td class="lb-num lb-money' + on('cost') + '">' + money(s.cost_ep) + '</td>' +
+            '<td class="lb-num lb-money lb-suite' + on('succ') + '">' + money(s.cost_succ) + '</td>') +
+          (simple ? '' : '<td class="lb-num lb-scale' + on('scale') + '">' + scale(s) + '</td><td class="lb-num lb-date' + on('date') + '">' + when(s) + '</td><td class="lb-files">' + files(s) + '</td>') + '</tr>';
+      });
+      return '<div class="lb-wrap">' + html + '</tbody></table></div>';
+    }
+    var tables = [build(shown.filter(function (s) { return !external(s); }), false)];
+    var ext = shown.filter(external);
+    var why = 'Community submissions are results sent in by the authors of each system. They are not open source, so they ' +
+      'are listed separately from the main ranking, which only includes systems anyone can reproduce from public code.';
+    // the page's tooltip (site.js) reads a title and rows as JSON
+    var whyTip = JSON.stringify({ h: 'Community submissions', r: [['', why, '']] }).replace(/"/g, '&quot;');
+    if (ext.length) tables.push('<div class="lb-community-head"><h3 class="lb-subhead">Community submissions ' +
+      '<span class="lb-info tip-target" tabindex="0" data-tip="' + whyTip + '" aria-label="' + why + '">i</span></h3>' +
+      '<p class="lb-subnote">Results reported by their authors.</p></div>' + build(ext, true));
+    view.innerHTML = tables.join('');
+    // the second table keeps the main table's column widths, so the two read as one leaderboard
+    var t = view.querySelectorAll('table');
+    if (t.length > 1) {
+      var w = [].map.call(t[0].querySelectorAll('thead th'), function (th) { return th.getBoundingClientRect().width; });
+      t[1].style.tableLayout = 'fixed'; t[1].classList.add('lb-fixed'); t[1].style.width = t[0].getBoundingClientRect().width + 'px';
+      var first = t[1].querySelector('tr');
+      if (first) [].forEach.call(first.children, function (td, i) { td.style.width = w[i] + 'px'; });
+    }
     view.querySelectorAll('.lb-sort').forEach(function (th) {
       th.onclick = function () {
         // first click: best first; second: reversed; third: back to the default ranking (by success)
@@ -465,10 +486,6 @@ document.addEventListener('DOMContentLoaded', function () {
     more.onclick = function () { state.view = state.view === 'details' ? 'overall' : 'details'; state.bench = 'full'; state.sort = 'mean'; state.dir = null; draw(); };
     views.appendChild(more);
     var note = VIEWS.filter(function (v) { return v[0] === state.view; })[0][2](view, controls);
-    var only = D.systems.filter(function (s) { return s.only; }).map(function (s) {
-      return s.name + ' was tested on ' + s.only + ' only, so its row shows its ' + s.only + ' score, placed where it ranks among the other systems\' ' + s.only + ' scores.';
-    }).join(' ');
-    if (only) note = only + (note ? '<br>' + note : '');
     if (D.lite && ranked && !lite) note = '<span class="lb-badge is-lite">Lite</span> <b>LADDER-Lite</b> is a ' + liteCounts().tasks +
       '-task version of LADDER for testing new models quickly. ' + LITE_FIT + ' ' +
       'Rows marked Lite were scored on LADDER-Lite only.' + partialNote() + (note ? '<br>' + note : '');
@@ -543,6 +560,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   // draw at once, so nothing below moves when the page loads; redraw only if submitted systems arrive
   draw(); drawCost();
+  var resized; window.addEventListener('resize', function () { clearTimeout(resized); resized = setTimeout(draw, 150); });
   fetch('./static/data/submissions.json').then(function (r) { return r.ok ? r.json() : []; })
     .then(function (entries) { if (entries && entries.length) { merge(entries); draw(); drawCost(); } })
     .catch(function (e) { console.warn('submissions not shown:', e); });
