@@ -12,3 +12,7 @@ arp_agent_async:
   name: "ARP-Agent"
   vlm: "Qwen3-VL-32B"
   results_url: "https://huggingface.co/datasets/Sombit/ladder-robolab-long-arp-agent/tree/2ecf1213b53347b626034888a3f55482a51dc651"
+
+PoliAct1-Preview:
+  vlm: "Qwen3.8-Max"
+  results_url: "https://github.com/Liu-weitao/PoliAct1-Preview/tree/main/public/videos"
