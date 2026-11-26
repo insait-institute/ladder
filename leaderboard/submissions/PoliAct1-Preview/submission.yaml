@@ -14,7 +14,7 @@ ladder_commit: d645441a716595cce2ef9fb96abf2a324dc25b21
 date: '2026-11-20'
 privileged: false
 tuned_on_ladder: true
-verified: false
+verified: true
 description: A proprietary robotic system uses Qwen3.8-Max to autonomously select
   appropriate skills from a fixed skill library based on public instructions and
   robot embodiment, without per-task tuning. The system was adapted to LADDER during
