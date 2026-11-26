@@ -6,7 +6,7 @@ paper_url: ''
 results_url: 'https://github.com/Liu-weitao/PoliAct1-Preview/tree/main/public'
 kind: agent
 benchmark: lite
-code_url: ''
+code_url: 'https://github.com/Liu-weitao/PoliAct1-Preview'
 low_level_policy: Proprietary robot controller
 vlm: qwen3.8-max
 inputs: Public instruction, RGB, depth, camera calibration and proprioception
@@ -14,10 +14,13 @@ ladder_commit: d645441a716595cce2ef9fb96abf2a324dc25b21
 date: '2026-11-20'
 privileged: false
 tuned_on_ladder: true
-verified: false
+verified: true
 description: A proprietary robotic system uses Qwen3.8-Max to autonomously select
   appropriate skills from a fixed skill library based on public instructions and
   robot embodiment, without per-task tuning. The system was adapted to LADDER during
   development. Each episode starts with fresh memory. No hidden simulator object
-  poses, evaluator labels or scores enter the policy. This is a closed-source, results-only
-  LADDER-Lite submission.
+  poses, evaluator labels or scores enter the policy. The policy implementation remains
+  proprietary. A public HTTP evaluation client and hosted API provide access for
+  independent verification. The client is pinned to commit
+  47908c307b152e7e5c4d67794a0359a365d6d7b6 and connects to
+  https://uat-open.qj-robots.com/ladder.
